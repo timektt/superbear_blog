@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String?
+  content     Json     // Tiptap JSON content
+  image       String?  // Cloudinary URL
+  status      Status   @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  author      Author   @relation(fields: [authorId], references: [id])
+  authorId    String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  tags        Tag[]
+  
+  @@map("articles")
+}
+
+model Author {
+  id       String    @id @default(cuid())
+  name     String
+  bio      String?
+  avatar   String?   // Cloudinary URL
+  articles Article[]
+  
+  @@map("authors")
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  articles Article[]
+  
+  @@map("categories")
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  articles Article[]
+  
+  @@map("tags")
+}
+
+model AdminUser {
+  id       String @id @default(cuid())
+  email    String @unique
+  name     String
+  password String // Hashed
+  
+  @@map("admin_users")
+}
+
+enum Status {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}

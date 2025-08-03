@@ -27,6 +27,11 @@ A CMS-based tech news platform focused on delivering filtered, in-depth content 
 ---
 
 ## 🧠 Tone & Style
+
+
+
+
+
 - Modern and Real
 - Tech-Heavy
 - No-fluff, Insight-driven
@@ -65,4 +70,15 @@ A CMS-based tech news platform focused on delivering filtered, in-depth content 
 - `Tasks.md` 🟡 WIP
 - `First Commit` ⏳ soon...
 
+## 📊 Core Success Metrics (future tracking)
+- Weekly Active Readers
+- Avg. Read Time per Article
+- Admin Content Publishing Frequency
+- Search → Click Conversion Rate
+- Popular Tag Heatmap
+
+## 💸 Future Revenue Path (optional phase)
+- Developer-focused sponsorship
+- Newsletter opt-in with AI/Dev updates
+- Premium insights & paid content sections
 

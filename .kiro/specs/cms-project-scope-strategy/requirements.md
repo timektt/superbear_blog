@@ -71,3 +71,18 @@ This feature focuses on building a CMS-based tech news platform (superbear_blog)
 2. WHEN an article is shared THEN the system SHALL display the cover image, title, and summary as preview
 3. WHEN search engines crawl the site THEN the system SHALL provide proper meta tags and structured data
 4. IF an article lacks a cover image THEN the system SHALL use a default image for social sharing
+
+## Non-Functional Requirements (NFR)
+
+- The system SHALL render all public pages in under 500ms (TTFB)
+- The admin panel SHALL be mobile responsive
+- The editor SHALL support keyboard-only navigation (accessibility)
+- All APIs SHALL respond within 1s for 95th percentile requests
+
+## Requirement Mapping
+
+| Requirement | Design Reference      | Tasks Reference        |
+|-------------|------------------------|-------------------------|
+| R1 (CMS CRUD) | `ArticleForm.tsx`, `api/articles` | `admin-article-crud` |
+| R2 (Rich Editor) | `Editor.tsx`, `cloudinary.ts` | `rich-text-support`  |
+| R3 (Public View) | `ArticleCard.tsx`, `news/[slug]` | `build-news-feed`    |

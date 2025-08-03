@@ -87,3 +87,14 @@ npm run start         # Start production server
 - Optional: Sentry for error tracking
 - Optional: Logtail / LogRocket for session recording
 
+## Version Compatibility
+- Next.js: ^13.5+
+- Prisma: ^5.0+
+- Node.js: >=18
+- PostgreSQL: >=14
+- Tiptap: ^2.x
+
+# In package.json scripts
+"lint": "next lint",
+"format": "prettier --write .",
+"test": "jest"

@@ -78,3 +78,12 @@ Tip:
 - GitHub → Vercel auto-deploy on `main` push
 - Run `prisma migrate deploy` during build
 - Keep `DATABASE_URL` synced across envs
+
+## Event Trigger Mapping (future automation)
+
+| Trigger Event               | Action                         |
+|----------------------------|--------------------------------|
+| Push to `main`             | Vercel build & deploy          |
+| Schema updated (Prisma)    | Run `prisma migrate deploy`    |
+| Admin uploads image        | Upload to Cloudinary → store DB |
+| Publish article            | Rebuild sitemap                |
