@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -12,6 +12,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await signOut({ redirect: false });
@@ -44,13 +45,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <nav className="flex space-x-8">
               <Link
                 href="/admin"
-                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  pathname === '/admin'
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-500 hover:text-gray-900'
+                }`}
               >
                 Dashboard
               </Link>
               <Link
                 href="/admin/articles"
-                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                  pathname === '/admin/articles'
+                    ? 'text-indigo-600 bg-indigo-50'
+                    : 'text-gray-500 hover:text-gray-900'
+                }`}
               >
                 Articles
               </Link>
@@ -78,7 +87,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <li>
                   <Link
                     href="/admin"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                    className={`block px-4 py-2 text-sm rounded-md ${
+                      pathname === '/admin'
+                        ? 'text-indigo-600 bg-indigo-50'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
                     Dashboard
                   </Link>
@@ -86,7 +99,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 <li>
                   <Link
                     href="/admin/articles"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                    className={`block px-4 py-2 text-sm rounded-md ${
+                      pathname === '/admin/articles'
+                        ? 'text-indigo-600 bg-indigo-50'
+                        : 'text-gray-700 hover:bg-gray-100'
+                    }`}
                   >
                     Articles
                   </Link>

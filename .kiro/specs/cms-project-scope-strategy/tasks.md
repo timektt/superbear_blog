@@ -1,21 +1,12 @@
 # Implementation Plan
 
 ## Overview
+
 This implementation plan converts the tech news platform design into actionable coding tasks. Each task builds incrementally on previous work, focusing on test-driven development and early validation of core functionality.
 
 ## Tasks
 
 - [x] 1. Initialize Next.js project and basic structure
-
-
-
-
-
-
-
-
-
-
   - Create Next.js 13+ app with TypeScript and Tailwind CSS
   - Set up project directory structure following the design document
   - Configure ESLint, Prettier, and basic development tooling
@@ -23,11 +14,6 @@ This implementation plan converts the tech news platform design into actionable 
   - _Requirements: 1.1, 1.2_
 
 - [x] 2. Set up database schema and Prisma configuration
-
-
-
-
-
   - Initialize Prisma with PostgreSQL database connection
   - Create database models for Article, Author, Category, Tag, and AdminUser
   - Define relationships between models (many-to-many for tags, one-to-many for categories)
@@ -36,11 +22,6 @@ This implementation plan converts the tech news platform design into actionable 
   - _Requirements: 1.3, 1.4_
 
 - [x] 3. Implement authentication system with NextAuth
-
-
-
-
-
   - Install and configure NextAuth for admin authentication
   - Create AdminUser model and authentication provider
   - Set up protected middleware for /admin routes
@@ -49,11 +30,6 @@ This implementation plan converts the tech news platform design into actionable 
   - _Requirements: 1.1_
 
 - [x] 4. Build core API routes for article management
-
-
-
-
-
   - Create GET /api/articles endpoint for public article listing
   - Create GET /api/articles/[slug] endpoint for individual articles
   - Create POST /api/admin/articles endpoint for article creation
@@ -62,24 +38,29 @@ This implementation plan converts the tech news platform design into actionable 
   - Implement proper error handling and validation for all endpoints
   - _Requirements: 1.1, 1.3_
 
-- [ ] 5. Create admin dashboard interface
-  - Build admin layout with navigation and authentication checks
-  - Create article listing table with status, category, and date columns
+- [x] 5. Create admin dashboard interface
+
+
+
+
+
+  - Build admin articles listing page at /admin/articles
+  - Create article table component with status, category, and date columns
   - Implement filtering by status, category, and author
   - Add action buttons for edit, delete, and view operations
   - Create confirmation modals for destructive actions
   - _Requirements: 1.1_
 
-- [ ] 6. Implement rich text editor with Tiptap
-  - Install and configure Tiptap editor with essential extensions
-  - Create Editor component with toolbar for formatting options
+- [ ] 6. Install and configure Tiptap rich text editor
+  - Install Tiptap packages and required dependencies
+  - Create basic Editor component with toolbar for formatting options
   - Add support for headings, lists, links, and basic text formatting
   - Implement content serialization to/from JSON for database storage
   - Add editor validation and error handling
   - _Requirements: 2.1, 2.4_
 
 - [ ] 7. Build article creation and editing forms
-  - Create ArticleForm component with all required fields
+  - Create ArticleForm component with all required fields (title, slug, summary, content, category, tags, status)
   - Implement form validation using Zod schemas
   - Add slug generation from title with uniqueness checking
   - Create tag and category selection interfaces
@@ -88,7 +69,7 @@ This implementation plan converts the tech news platform design into actionable 
   - _Requirements: 1.1, 1.2, 1.4_
 
 - [ ] 8. Set up Cloudinary integration for image uploads
-  - Configure Cloudinary account and API credentials
+  - Install Cloudinary SDK and configure API credentials
   - Create image upload API route with security validation
   - Build ImageUploader component with drag-and-drop functionality
   - Implement image preview and replacement capabilities
@@ -103,11 +84,11 @@ This implementation plan converts the tech news platform design into actionable 
   - Add responsive styling for images and code blocks
   - _Requirements: 2.1, 2.4_
 
-- [ ] 10. Build public homepage and article listing
-  - Create homepage with featured articles and category sections
-  - Implement responsive article grid layout
-  - Add ArticleCard component with image, title, summary, and metadata
-  - Create category-based article filtering
+- [ ] 10. Create public news pages and article listing
+  - Build /news page with article grid layout
+  - Create ArticleCard component with image, title, summary, and metadata
+  - Implement responsive design for article listings
+  - Add category-based article filtering
   - Implement pagination for article listings
   - _Requirements: 3.1, 3.3_
 
