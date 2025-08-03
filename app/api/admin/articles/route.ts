@@ -5,7 +5,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
 } from '@/lib/auth-utils';
-import { Status } from '@prisma/client';
+import type { Status } from '@/types/database';
 import { z } from 'zod';
 
 const createArticleSchema = z.object({
@@ -14,7 +14,7 @@ const createArticleSchema = z.object({
   summary: z.string().optional(),
   content: z.any(), // Tiptap JSON content
   image: z.string().optional(),
-  status: z.nativeEnum(Status).default(Status.DRAFT),
+  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
   authorId: z.string().min(1, 'Author is required'),
   categoryId: z.string().min(1, 'Category is required'),
   tagIds: z.array(z.string()).optional().default([]),
@@ -162,8 +162,7 @@ export async function POST(request: NextRequest) {
         status: validatedData.status,
         authorId: validatedData.authorId,
         categoryId: validatedData.categoryId,
-        publishedAt:
-          validatedData.status === Status.PUBLISHED ? new Date() : null,
+        publishedAt: validatedData.status === 'PUBLISHED' ? new Date() : null,
         tags: {
           connect: validatedData.tagIds.map((id) => ({ id })),
         },

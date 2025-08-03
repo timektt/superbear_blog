@@ -113,7 +113,7 @@ export default function ArticleTable({
   };
 
   const getStatusBadge = (status: Status) => {
-    const statusStyles = {
+    const statusStyles: Record<Status, string> = {
       DRAFT: 'bg-yellow-100 text-yellow-800',
       PUBLISHED: 'bg-green-100 text-green-800',
       ARCHIVED: 'bg-gray-100 text-gray-800',

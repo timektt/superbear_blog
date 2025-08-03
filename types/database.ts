@@ -1,14 +1,12 @@
-import {
-  Article,
-  Author,
-  Category,
-  Tag,
-  AdminUser,
-  Status,
-} from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 
 // Base types from Prisma
-export type { Article, Author, Category, Tag, AdminUser, Status };
+export type Article = Prisma.ArticleGetPayload<{}>;
+export type Author = Prisma.AuthorGetPayload<{}>;
+export type Category = Prisma.CategoryGetPayload<{}>;
+export type Tag = Prisma.TagGetPayload<{}>;
+export type AdminUser = Prisma.AdminUserGetPayload<object>;
+export type Status = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
 // Extended types with relations
 export type ArticleWithRelations = Article & {
@@ -44,3 +42,29 @@ export type UpdateTagData = Partial<CreateTagData>;
 
 export type CreateAdminUserData = Omit<AdminUser, 'id'>;
 export type UpdateAdminUserData = Partial<CreateAdminUserData>;
+// Cloudinary types
+export interface CloudinaryUploadResult {
+  public_id: string;
+  secure_url: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+}
+
+export interface CloudinaryError {
+  message: string;
+  http_code?: number;
+}
+
+export interface ImageUploadResponse {
+  success: boolean;
+  data?: {
+    url: string;
+    publicId: string;
+    width: number;
+    height: number;
+    format: string;
+  };
+  error?: string;
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import AdminLayout from '@/components/layout/AdminLayout';
 import ArticleTable from '@/components/admin/ArticleTable';
 import { Status } from '@/types/database';
@@ -124,12 +125,12 @@ export default function ArticlesPage() {
               Manage your blog articles
             </p>
           </div>
-          <button
-            type="button"
+          <Link
+            href="/admin/articles/create"
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
           >
             Create Article
-          </button>
+          </Link>
         </div>
 
         {error && (

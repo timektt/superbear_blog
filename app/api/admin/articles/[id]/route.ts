@@ -5,7 +5,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
 } from '@/lib/auth-utils';
-import { Status, Prisma } from '@prisma/client';
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 const updateArticleSchema = z.object({
@@ -14,7 +14,7 @@ const updateArticleSchema = z.object({
   summary: z.string().optional(),
   content: z.any().optional(), // Tiptap JSON content
   image: z.string().optional(),
-  status: z.nativeEnum(Status).optional(),
+  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
   authorId: z.string().optional(),
   categoryId: z.string().optional(),
   tagIds: z.array(z.string()).optional(),
@@ -83,8 +83,8 @@ export async function PATCH(
 
     // Handle status change to published
     if (
-      validatedData.status === Status.PUBLISHED &&
-      existingArticle.status !== Status.PUBLISHED
+      validatedData.status === 'PUBLISHED' &&
+      existingArticle.status !== 'PUBLISHED'
     ) {
       updateData.publishedAt = new Date();
     }

@@ -51,7 +51,12 @@ This implementation plan converts the tech news platform design into actionable 
   - Create confirmation modals for destructive actions
   - _Requirements: 1.1_
 
-- [ ] 6. Install and configure Tiptap rich text editor
+- [x] 6. Install and configure Tiptap rich text editor
+
+
+
+
+
   - Install Tiptap packages and required dependencies
   - Create basic Editor component with toolbar for formatting options
   - Add support for headings, lists, links, and basic text formatting
@@ -59,7 +64,12 @@ This implementation plan converts the tech news platform design into actionable 
   - Add editor validation and error handling
   - _Requirements: 2.1, 2.4_
 
-- [ ] 7. Build article creation and editing forms
+- [x] 7. Build article creation and editing forms
+
+
+
+
+
   - Create ArticleForm component with all required fields (title, slug, summary, content, category, tags, status)
   - Implement form validation using Zod schemas
   - Add slug generation from title with uniqueness checking
@@ -68,7 +78,12 @@ This implementation plan converts the tech news platform design into actionable 
   - Connect form to API endpoints for create and update operations
   - _Requirements: 1.1, 1.2, 1.4_
 
-- [ ] 8. Set up Cloudinary integration for image uploads
+- [x] 8. Set up Cloudinary integration for image uploads
+
+
+
+
+
   - Install Cloudinary SDK and configure API credentials
   - Create image upload API route with security validation
   - Build ImageUploader component with drag-and-drop functionality
@@ -77,6 +92,10 @@ This implementation plan converts the tech news platform design into actionable 
   - _Requirements: 2.2_
 
 - [ ] 9. Extend Tiptap editor with image and code block support
+
+
+
+
   - Add image upload extension to Tiptap editor
   - Implement code block extension with syntax highlighting
   - Create language selector for code blocks

@@ -14,21 +14,20 @@ export async function GET() {
       return session; // Return error response
     }
 
-    const authors = await prisma.author.findMany({
+    const tags = await prisma.tag.findMany({
       select: {
         id: true,
         name: true,
-        bio: true,
-        avatar: true,
+        slug: true,
       },
       orderBy: {
         name: 'asc',
       },
     });
 
-    return createSuccessResponse({ authors });
+    return createSuccessResponse({ tags });
   } catch (error) {
-    console.error('Error fetching authors:', error);
-    return createErrorResponse('Failed to fetch authors', 500);
+    console.error('Error fetching tags:', error);
+    return createErrorResponse('Failed to fetch tags', 500);
   }
 }
