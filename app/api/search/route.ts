@@ -5,58 +5,60 @@ import { Status } from '@prisma/client';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const query = searchParams.get('q');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '10');
     const category = searchParams.get('category');
     const tags = searchParams.get('tags')?.split(',').filter(Boolean) || [];
-    const search = searchParams.get('search');
 
-    const skip = (page - 1) * limit;
-
-    // Build where clause for filtering
-    const where: unknown = {
-      status: Status.PUBLISHED,
-    };
-
-    if (category) {
-      where.category = {
-        slug: category,
-      };
+    if (!query || query.trim().length === 0) {
+      return NextResponse.json({
+        results: [],
+        pagination: {
+          page: 1,
+          limit,
+          total: 0,
+          pages: 0,
+        },
+        query: '',
+      });
     }
 
-    // Support multiple tag filtering (AND logic - article must have all selected tags)
+    const skip = (page - 1) * limit;
+    const searchTerm = query.trim();
+
+    // Build where clause for advanced search
+    const where: any = {
+      status: Status.PUBLISHED,
+      OR: [
+        { title: { contains: searchTerm, mode: 'insensitive' } },
+        { summary: { contains: searchTerm, mode: 'insensitive' } },
+        // Note: Full-text search on content would require database-specific implementation
+        // For now, we'll search in title and summary
+      ],
+    };
+
+    // Apply additional filters
+    if (category) {
+      where.category = { slug: category };
+    }
+
     if (tags.length > 0) {
       if (tags.length === 1) {
         where.tags = {
-          some: {
-            slug: tags[0],
-          },
+          some: { slug: tags[0] },
         };
       } else {
-        // For multiple tags, we need to ensure the article has ALL selected tags
         where.AND = tags.map(tagSlug => ({
           tags: {
-            some: {
-              slug: tagSlug,
-            },
+            some: { slug: tagSlug },
           },
         }));
       }
     }
 
-    // Enhanced search with case-insensitive matching
-    if (search) {
-      const searchTerm = search.trim();
-      where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { summary: { contains: searchTerm, mode: 'insensitive' } },
-        // Note: Full-text search on JSON content would require database-specific implementation
-        // For PostgreSQL, we could use to_tsvector, but for now we'll search in title and summary
-      ];
-    }
-
-    // Get articles with related data
-    const [articles, total] = await Promise.all([
+    // Get search results with related data
+    const [results, total] = await Promise.all([
       prisma.article.findMany({
         where,
         include: {
@@ -92,18 +94,19 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      articles,
+      results,
       pagination: {
         page,
         limit,
         total,
         pages: Math.ceil(total / limit),
       },
+      query: searchTerm,
     });
   } catch (error) {
-    console.error('Error fetching articles:', error);
+    console.error('Error performing search:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch articles' },
+      { error: 'Search failed' },
       { status: 500 }
     );
   }

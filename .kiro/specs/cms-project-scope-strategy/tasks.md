@@ -122,7 +122,6 @@ This implementation plan converts the tech news platform design into actionable 
 
 
 
-
   - Build /news page with article grid layout
   - Create ArticleCard component with image, title, summary, and metadata
   - Implement responsive design for article listings
@@ -130,7 +129,12 @@ This implementation plan converts the tech news platform design into actionable 
   - Implement pagination for article listings
   - _Requirements: 3.1, 3.3_
 
-- [ ] 11. Create individual article pages with SEO
+- [x] 11. Create individual article pages with SEO
+
+
+
+
+
   - Build dynamic article page at /news/[slug] route
   - Implement article content rendering from Tiptap JSON
   - Add author information and related articles section
@@ -138,7 +142,22 @@ This implementation plan converts the tech news platform design into actionable 
   - Implement SEO metadata generation with Open Graph tags
   - _Requirements: 3.1, 3.3, 6.1, 6.2_
 
-- [ ] 12. Implement article filtering and search functionality
+- [x] 12. Implement article filtering and search functionality
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   - Create filter interface for categories and tags
   - Build search bar component with debounced input
   - Implement full-text search API endpoint

@@ -48,6 +48,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
     <div className="mb-6">
       <div className="flex flex-wrap gap-2">
         <button
+          type="button"
           onClick={() => handleCategoryChange('')}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             selectedCategory === ''
@@ -61,6 +62,7 @@ export default function CategoryFilter({ categories }: CategoryFilterProps) {
         {categories.map((category) => (
           <button
             key={category.id}
+            type="button"
             onClick={() => handleCategoryChange(category.slug)}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               selectedCategory === category.slug

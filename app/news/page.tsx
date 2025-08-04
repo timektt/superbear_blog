@@ -38,8 +38,17 @@ function NewsContentSkeleton() {
         {Array.from({ length: 5 }).map((_, index) => (
           <div
             key={index}
-            className="h-10 bg-gray-200 rounded-full animate-pulse"
-            style={{ width: `${80 + Math.random() * 40}px` }}
+            className={`h-10 bg-gray-200 rounded-full animate-pulse ${
+              index === 0
+                ? 'w-20'
+                : index === 1
+                  ? 'w-24'
+                  : index === 2
+                    ? 'w-28'
+                    : index === 3
+                      ? 'w-32'
+                      : 'w-36'
+            }`}
           ></div>
         ))}
       </div>
