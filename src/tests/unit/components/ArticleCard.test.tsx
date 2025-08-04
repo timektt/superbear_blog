@@ -1,28 +1,39 @@
 import { render, screen } from '@testing-library/react'
-import { ArticleCard } from '@/components/ui/ArticleCard'
+import ArticleCard from '@/components/ui/ArticleCard'
+
+// Mock Next.js components
+jest.mock('next/link', () => {
+  return function MockLink({ children, href, ...props }: any) {
+    return <a href={href} {...props}>{children}</a>
+  }
+})
+
+jest.mock('@/components/ui/OptimizedImage', () => {
+  return function MockOptimizedImage({ src, alt, ...props }: unknown) {
+    return <img src={src} alt={alt} {...props} />
+  }
+})
 
 const mockArticle = {
   id: '1',
   title: 'Test Article',
   slug: 'test-article',
   summary: 'This is a test article summary',
-  content: { type: 'doc', content: [] },
   image: 'https://res.cloudinary.com/test/image/upload/v1/test.jpg',
-  status: 'PUBLISHED' as const,
   publishedAt: new Date('2024-01-01T10:00:00Z'),
-  createdAt: new Date('2024-01-01T10:00:00Z'),
-  updatedAt: new Date('2024-01-01T10:00:00Z'),
   author: {
+    id: '1',
     name: 'John Doe',
     avatar: 'https://res.cloudinary.com/test/image/upload/v1/author.jpg',
   },
   category: {
+    id: '1',
     name: 'Development',
     slug: 'development',
   },
   tags: [
-    { name: 'React', slug: 'react' },
-    { name: 'Testing', slug: 'testing' },
+    { id: '1', name: 'React', slug: 'react' },
+    { id: '2', name: 'Testing', slug: 'testing' },
   ],
 }
 

@@ -7,47 +7,73 @@ import { useDebounce } from '@/lib/hooks/useDebounce';
 interface SearchBarProps {
   placeholder?: string;
   className?: string;
+  onSearch?: (query: string) => void;
+  onClear?: () => void;
+  value?: string;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
-export default function SearchBar({
+function SearchBar({
   placeholder = 'Search articles...',
   className = '',
+  onSearch,
+  onClear,
+  value: controlledValue,
+  disabled = false,
+  loading = false,
 }: SearchBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(controlledValue || '');
+  const [isSearching, setIsSearching] = useState(loading);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
-  // Initialize search term from URL
+  // Initialize search term from URL or controlled value
   useEffect(() => {
-    const currentSearch = searchParams.get('search') || '';
-    setSearchTerm(currentSearch);
-  }, [searchParams]);
+    if (controlledValue !== undefined) {
+      setSearchTerm(controlledValue);
+    } else {
+      const currentSearch = searchParams.get('search') || '';
+      setSearchTerm(currentSearch);
+    }
+  }, [searchParams, controlledValue]);
+
+  // Update loading state
+  useEffect(() => {
+    setIsSearching(loading);
+  }, [loading]);
 
   const handleSearch = useCallback(
     (term: string) => {
       setIsSearching(true);
-      const params = new URLSearchParams(searchParams.toString());
-
-      if (term.trim()) {
-        params.set('search', term.trim());
+      
+      // Call external onSearch handler if provided
+      if (onSearch) {
+        onSearch(term);
       } else {
-        params.delete('search');
+        // Default behavior: update URL
+        const params = new URLSearchParams(searchParams.toString());
+
+        if (term.trim()) {
+          params.set('search', term.trim());
+        } else {
+          params.delete('search');
+        }
+
+        // Reset to first page when searching
+        params.delete('page');
+
+        const queryString = params.toString();
+        const newUrl = queryString ? `/news?${queryString}` : '/news';
+
+        router.push(newUrl);
       }
-
-      // Reset to first page when searching
-      params.delete('page');
-
-      const queryString = params.toString();
-      const newUrl = queryString ? `/news?${queryString}` : '/news';
-
-      router.push(newUrl);
       
       // Reset searching state after a short delay
       setTimeout(() => setIsSearching(false), 500);
     },
-    [router, searchParams]
+    [router, searchParams, onSearch]
   );
 
   // Handle debounced search
@@ -59,12 +85,24 @@ export default function SearchBar({
 
   const handleClear = () => {
     setSearchTerm('');
-    handleSearch('');
+    if (onClear) {
+      onClear();
+    } else {
+      handleSearch('');
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       handleClear();
+    } else if (e.key === 'Enter') {
+      handleSearch(searchTerm);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!disabled) {
+      setSearchTerm(e.target.value);
     }
   };
 
@@ -113,16 +151,18 @@ export default function SearchBar({
           id="search-input"
           type="search"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
-          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-200"
+          disabled={disabled}
+          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
           placeholder={placeholder}
           aria-label="Search articles"
+          role="searchbox"
           aria-describedby={searchTerm ? "search-clear-button" : undefined}
           autoComplete="off"
           spellCheck="false"
         />
-        {searchTerm && (
+        {searchTerm && !disabled && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
             <button
               id="search-clear-button"
@@ -155,6 +195,15 @@ export default function SearchBar({
           {isSearching ? 'Searching...' : `Search results for "${searchTerm}"`}
         </div>
       )}
+      {loading && (
+        <div role="status" className="sr-only">
+          Searching...
+        </div>
+      )}
     </div>
   );
 }
+
+// Export both as default and named export
+export default SearchBar;
+export { SearchBar };

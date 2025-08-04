@@ -12,22 +12,22 @@ const customJestConfig = {
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
-    '<rootDir>/tests/e2e/',
+    '<rootDir>/src/tests/e2e/',
   ],
   moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: [
-    'app/**/*.{js,jsx,ts,tsx}',
-    'components/**/*.{js,jsx,ts,tsx}',
-    'lib/**/*.{js,jsx,ts,tsx}',
+    'src/app/**/*.{js,jsx,ts,tsx}',
+    'src/components/**/*.{js,jsx,ts,tsx}',
+    'src/lib/**/*.{js,jsx,ts,tsx}',
     '!**/*.d.ts',
     '!**/node_modules/**',
     '!**/.next/**',
   ],
   testMatch: [
-    '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',
-    '<rootDir>/tests/integration/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/src/tests/unit/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/src/tests/integration/**/*.test.{js,jsx,ts,tsx}',
   ],
 };
 
