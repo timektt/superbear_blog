@@ -91,7 +91,21 @@ This implementation plan converts the tech news platform design into actionable 
   - Add Cloudinary optimization for responsive image delivery
   - _Requirements: 2.2_
 
-- [ ] 9. Extend Tiptap editor with image and code block support
+- [x] 9. Extend Tiptap editor with image and code block support
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -103,7 +117,12 @@ This implementation plan converts the tech news platform design into actionable 
   - Add responsive styling for images and code blocks
   - _Requirements: 2.1, 2.4_
 
-- [ ] 10. Create public news pages and article listing
+- [x] 10. Create public news pages and article listing
+
+
+
+
+
   - Build /news page with article grid layout
   - Create ArticleCard component with image, title, summary, and metadata
   - Implement responsive design for article listings

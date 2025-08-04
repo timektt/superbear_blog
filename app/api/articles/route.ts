@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
       category?: { slug: string };
       tags?: { some: { slug: string } };
       OR?: Array<
-        | { title?: { contains: string; mode: 'insensitive' } }
-        | { summary?: { contains: string; mode: 'insensitive' } }
+        { title?: { contains: string } } | { summary?: { contains: string } }
       >;
     } = {
       status: Status.PUBLISHED,
@@ -42,8 +41,8 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { summary: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
+        { summary: { contains: search } },
       ];
     }
 

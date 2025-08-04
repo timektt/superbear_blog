@@ -41,14 +41,18 @@ export function EditorToolbar({
   // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowLanguageDropdown(false);
       }
     }
 
     if (showLanguageDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      return () =>
+        document.removeEventListener('mousedown', handleClickOutside);
     }
   }, [showLanguageDropdown]);
 
@@ -218,10 +222,7 @@ export function EditorToolbar({
       <div className="w-px h-6 bg-gray-300 mx-1" />
 
       {/* Media */}
-      <ToolbarButton
-        onClick={onAddImage}
-        title="Add Image"
-      >
+      <ToolbarButton onClick={onAddImage} title="Add Image">
         <Image size={16} />
       </ToolbarButton>
 

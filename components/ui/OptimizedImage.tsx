@@ -1,7 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { getOptimizedImageUrl } from '@/lib/cloudinary';
+import {
+  getOptimizedImageUrl,
+  getPublicIdFromUrl,
+} from '@/lib/cloudinary-client';
 
 interface OptimizedImageProps {
   src: string;
@@ -26,13 +29,6 @@ export default function OptimizedImage({
 }: OptimizedImageProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-
-  // Extract public ID from Cloudinary URL if it's a Cloudinary image
-  const getPublicIdFromUrl = (url: string): string | null => {
-    const cloudinaryPattern = /\/v\d+\/(.+)\.[a-zA-Z]+$/;
-    const match = url.match(cloudinaryPattern);
-    return match ? match[1] : null;
-  };
 
   const publicId = getPublicIdFromUrl(src);
 

@@ -55,7 +55,7 @@ export function Editor({
       }),
       Image.configure({
         HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg shadow-sm',
+          class: 'max-w-full h-auto rounded-lg shadow-sm mx-auto block',
         },
         allowBase64: false,
         inline: false,
@@ -64,7 +64,8 @@ export function Editor({
         lowlight,
         defaultLanguage: 'plaintext',
         HTMLAttributes: {
-          class: 'bg-gray-100 rounded-lg p-4 font-mono text-sm overflow-x-auto',
+          class:
+            'bg-gray-100 rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto whitespace-pre-wrap break-words',
         },
       }),
       Placeholder.configure({
@@ -84,7 +85,7 @@ export function Editor({
     },
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4 ${
+        class: `prose prose-sm sm:prose-base lg:prose-lg max-w-none focus:outline-none min-h-[200px] p-3 sm:p-4 ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`,
       },
@@ -151,7 +152,7 @@ export function Editor({
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    
+
     input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
       if (!file) return;
@@ -182,7 +183,7 @@ export function Editor({
         }
 
         const data = await response.json();
-        
+
         if (data.url) {
           editor.chain().focus().setImage({ src: data.url }).run();
         } else {
@@ -213,11 +214,11 @@ export function Editor({
     <div
       className={`border ${borderColor} rounded-lg overflow-hidden ${className}`}
     >
-      <EditorToolbar 
-        editor={editor} 
-        onSetLink={setLink} 
+      <EditorToolbar
+        editor={editor}
+        onSetLink={setLink}
         onAddImage={addImage}
-        disabled={disabled} 
+        disabled={disabled}
       />
       <EditorContent editor={editor} />
       {error && (

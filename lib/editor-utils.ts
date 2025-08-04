@@ -141,9 +141,27 @@ function sanitizeNode(node: JSONContent): JSONContent {
     if (node.type === 'codeBlock' && node.attrs.language) {
       // Allow common programming languages
       const allowedLanguages = [
-        'plaintext', 'javascript', 'typescript', 'python', 'java', 'cpp', 'c',
-        'csharp', 'php', 'ruby', 'go', 'rust', 'html', 'css', 'scss', 'json',
-        'xml', 'yaml', 'markdown', 'bash', 'sql'
+        'plaintext',
+        'javascript',
+        'typescript',
+        'python',
+        'java',
+        'cpp',
+        'c',
+        'csharp',
+        'php',
+        'ruby',
+        'go',
+        'rust',
+        'html',
+        'css',
+        'scss',
+        'json',
+        'xml',
+        'yaml',
+        'markdown',
+        'bash',
+        'sql',
       ];
       if (allowedLanguages.includes(node.attrs.language)) {
         sanitized.attrs.language = node.attrs.language;
@@ -154,7 +172,11 @@ function sanitizeNode(node: JSONContent): JSONContent {
       try {
         const url = new URL(node.attrs.src);
         // Only allow https URLs and Cloudinary URLs
-        if (url.protocol === 'https:' && (url.hostname.includes('cloudinary.com') || url.hostname.includes('res.cloudinary.com'))) {
+        if (
+          url.protocol === 'https:' &&
+          (url.hostname.includes('cloudinary.com') ||
+            url.hostname.includes('res.cloudinary.com'))
+        ) {
           sanitized.attrs.src = node.attrs.src;
           if (node.attrs.alt) {
             sanitized.attrs.alt = node.attrs.alt;

@@ -9,7 +9,10 @@ interface RichContentRendererProps {
   className?: string;
 }
 
-export function RichContentRenderer({ content, className = '' }: RichContentRendererProps) {
+export function RichContentRenderer({
+  content,
+  className = '',
+}: RichContentRendererProps) {
   let jsonContent: JSONContent;
 
   try {
@@ -23,7 +26,9 @@ export function RichContentRenderer({ content, className = '' }: RichContentRend
   }
 
   return (
-    <div className={`prose prose-lg max-w-none ${className}`}>
+    <div
+      className={`prose prose-sm sm:prose-base lg:prose-lg max-w-none ${className}`}
+    >
       {renderNode(jsonContent)}
     </div>
   );
@@ -44,7 +49,7 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
 
     case 'paragraph':
       return (
-        <p key={nodeKey} className="mb-4">
+        <p key={nodeKey} className="mb-4 leading-relaxed">
           {node.content?.map((child, index) => renderNode(child, index))}
         </p>
       );
@@ -52,18 +57,18 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
     case 'heading':
       const level = node.attrs?.level || 1;
       const headingClasses = {
-        1: 'text-3xl font-bold mb-6 mt-8',
-        2: 'text-2xl font-bold mb-4 mt-6',
-        3: 'text-xl font-bold mb-3 mt-5',
-        4: 'text-lg font-bold mb-2 mt-4',
-        5: 'text-base font-bold mb-2 mt-3',
-        6: 'text-sm font-bold mb-2 mt-2',
+        1: 'text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 mt-6 sm:mt-8 leading-tight',
+        2: 'text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 mt-5 sm:mt-6 leading-tight',
+        3: 'text-lg sm:text-xl lg:text-2xl font-bold mb-2 sm:mb-3 mt-4 sm:mt-5 leading-tight',
+        4: 'text-base sm:text-lg lg:text-xl font-bold mb-2 mt-3 sm:mt-4 leading-tight',
+        5: 'text-sm sm:text-base lg:text-lg font-bold mb-2 mt-2 sm:mt-3 leading-tight',
+        6: 'text-xs sm:text-sm lg:text-base font-bold mb-2 mt-2 leading-tight',
       };
 
       const headingProps = {
         key: nodeKey,
         className: headingClasses[level as keyof typeof headingClasses],
-        children: node.content?.map((child, index) => renderNode(child, index))
+        children: node.content?.map((child, index) => renderNode(child, index)),
       };
 
       switch (level) {
@@ -85,14 +90,20 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
 
     case 'bulletList':
       return (
-        <ul key={nodeKey} className="list-disc list-inside mb-4 space-y-2">
+        <ul
+          key={nodeKey}
+          className="list-disc list-inside mb-4 space-y-1 sm:space-y-2 pl-2 sm:pl-0"
+        >
           {node.content?.map((child, index) => renderNode(child, index))}
         </ul>
       );
 
     case 'orderedList':
       return (
-        <ol key={nodeKey} className="list-decimal list-inside mb-4 space-y-2">
+        <ol
+          key={nodeKey}
+          className="list-decimal list-inside mb-4 space-y-1 sm:space-y-2 pl-2 sm:pl-0"
+        >
           {node.content?.map((child, index) => renderNode(child, index))}
         </ol>
       );
@@ -106,7 +117,10 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
 
     case 'blockquote':
       return (
-        <blockquote key={nodeKey} className="border-l-4 border-gray-300 pl-4 italic mb-4 text-gray-700">
+        <blockquote
+          key={nodeKey}
+          className="border-l-4 border-gray-300 pl-3 sm:pl-4 italic mb-4 sm:mb-6 text-gray-700 -mx-2 sm:mx-0"
+        >
           {node.content?.map((child, index) => renderNode(child, index))}
         </blockquote>
       );
@@ -114,12 +128,12 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
     case 'codeBlock':
       const language = node.attrs?.language || 'plaintext';
       return (
-        <div key={nodeKey} className="mb-4">
-          <div className="bg-gray-100 rounded-t-lg px-4 py-2 text-sm text-gray-600 font-mono border-b">
+        <div key={nodeKey} className="mb-6 -mx-4 sm:mx-0">
+          <div className="bg-gray-100 rounded-t-lg px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-600 font-mono border-b">
             {language}
           </div>
-          <pre className="bg-gray-50 rounded-b-lg p-4 overflow-x-auto">
-            <code className="font-mono text-sm">
+          <pre className="bg-gray-50 rounded-b-lg p-3 sm:p-4 overflow-x-auto">
+            <code className="font-mono text-xs sm:text-sm leading-relaxed">
               {node.content?.map((child, index) => renderNode(child, index))}
             </code>
           </pre>
@@ -134,23 +148,27 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
       if (!src) return null;
 
       return (
-        <div key={nodeKey} className="mb-6">
+        <figure key={nodeKey} className="mb-8 -mx-4 sm:mx-0">
           <OptimizedImage
             src={src}
             alt={alt}
-            title={title}
-            className="rounded-lg shadow-sm max-w-full h-auto"
+            className="rounded-lg shadow-sm max-w-full h-auto mx-auto block"
             width={800}
             height={600}
           />
-        </div>
+          {(alt || title) && (
+            <figcaption className="text-center text-sm text-gray-600 mt-2 px-4">
+              {title || alt}
+            </figcaption>
+          )}
+        </figure>
       );
 
     case 'hardBreak':
       return <br key={nodeKey} />;
 
     case 'text':
-      let textContent = node.text || '';
+      const textContent = node.text || '';
       let element: React.ReactNode = textContent;
 
       // Apply marks (formatting)
@@ -168,7 +186,10 @@ function renderNode(node: JSONContent, key?: string | number): React.ReactNode {
               break;
             case 'code':
               element = (
-                <code key={`${nodeKey}-code`} className="bg-gray-100 px-1 py-0.5 rounded text-sm font-mono">
+                <code
+                  key={`${nodeKey}-code`}
+                  className="bg-gray-100 px-1.5 py-0.5 rounded text-xs sm:text-sm font-mono break-words"
+                >
                   {element}
                 </code>
               );

@@ -64,8 +64,8 @@ export const dbUtils = {
           { status: Status.PUBLISHED },
           {
             OR: [
-              { title: { contains: query, mode: 'insensitive' } },
-              { summary: { contains: query, mode: 'insensitive' } },
+              { title: { contains: query } },
+              { summary: { contains: query } },
             ],
           },
         ],
