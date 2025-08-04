@@ -35,6 +35,11 @@ export async function generateMetadata({
           name: true,
         },
       },
+      tags: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
 
@@ -44,18 +49,28 @@ export async function generateMetadata({
     };
   }
 
-  const title = `${article.title} - SuperBear Blog`;
+  const title = `${article.title}`;
   const description =
     article.summary || `Read ${article.title} by ${article.author.name}`;
   const publishedTime = article.publishedAt?.toISOString();
   const modifiedTime = article.updatedAt.toISOString();
+  const imageUrl = article.image || '/og-default.svg';
+  const articleUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/news/${slug}`;
 
   return {
     title,
     description,
     authors: [{ name: article.author.name }],
     category: article.category.name,
-    keywords: `tech news, ${article.category.name}, ${article.author.name}`,
+    keywords: [
+      'tech news',
+      article.category.name,
+      article.author.name,
+      ...(article.tags?.map((tag) => tag.name) || []),
+    ],
+    alternates: {
+      canonical: articleUrl,
+    },
     openGraph: {
       title,
       description,
@@ -64,29 +79,45 @@ export async function generateMetadata({
       modifiedTime,
       authors: [article.author.name],
       section: article.category.name,
-      images: article.image
-        ? [
-            {
-              url: article.image,
-              width: 1200,
-              height: 630,
-              alt: article.title,
-            },
-          ]
-        : [
-            {
-              url: '/og-default.svg',
-              width: 1200,
-              height: 630,
-              alt: 'SuperBear Blog',
-            },
-          ],
+      tags: article.tags?.map((tag) => tag.name) || [],
+      url: articleUrl,
+      siteName: 'SuperBear Blog',
+      locale: 'en_US',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+          type: 'image/png',
+        },
+      ],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: article.image ? [article.image] : ['/og-default.svg'],
+      images: [
+        {
+          url: imageUrl,
+          alt: article.title,
+        },
+      ],
+      creator: '@superbear_blog', // Update with actual Twitter handle
+      site: '@superbear_blog', // Update with actual Twitter handle
+    },
+    robots: {
+      index: true,
+      follow: true,
+      nocache: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: false,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
   };
 }

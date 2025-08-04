@@ -45,6 +45,7 @@ export default function SocialShareButtons({
 
       {/* Twitter */}
       <button
+        type="button"
         onClick={() => handleShare('twitter')}
         className="p-2 text-gray-600 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
         title="Share on Twitter"
@@ -56,6 +57,7 @@ export default function SocialShareButtons({
 
       {/* LinkedIn */}
       <button
+        type="button"
         onClick={() => handleShare('linkedin')}
         className="p-2 text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-colors"
         title="Share on LinkedIn"
@@ -67,6 +69,7 @@ export default function SocialShareButtons({
 
       {/* Facebook */}
       <button
+        type="button"
         onClick={() => handleShare('facebook')}
         className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
         title="Share on Facebook"
@@ -78,6 +81,7 @@ export default function SocialShareButtons({
 
       {/* Reddit */}
       <button
+        type="button"
         onClick={() => handleShare('reddit')}
         className="p-2 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-colors"
         title="Share on Reddit"
@@ -89,6 +93,7 @@ export default function SocialShareButtons({
 
       {/* Hacker News */}
       <button
+        type="button"
         onClick={() => handleShare('hackernews')}
         className="p-2 text-gray-600 hover:text-orange-500 hover:bg-orange-50 rounded-full transition-colors"
         title="Share on Hacker News"
@@ -100,6 +105,7 @@ export default function SocialShareButtons({
 
       {/* Copy Link */}
       <button
+        type="button"
         onClick={handleCopyLink}
         className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors"
         title="Copy link"

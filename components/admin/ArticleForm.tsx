@@ -222,18 +222,47 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
   const isFormValid = validateForm();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">
-            {mode === 'create' ? 'Create Article' : 'Edit Article'}
-          </h2>
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+          <h1 className="text-lg sm:text-xl font-medium text-gray-900">
+            {mode === 'create' ? 'Create New Article' : 'Edit Article'}
+          </h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="p-4 sm:p-6 space-y-6"
+          noValidate
+        >
           {error && (
-            <div className="rounded-md bg-red-50 p-4">
-              <div className="text-sm text-red-700">{error}</div>
+            <div
+              className="rounded-md bg-red-50 p-4"
+              role="alert"
+              aria-live="polite"
+            >
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-red-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">Error</h3>
+                  <div className="mt-1 text-sm text-red-700">{error}</div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -380,24 +409,30 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           </div>
 
           {/* Tags */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+          <fieldset>
+            <legend className="block text-sm font-medium text-gray-700 mb-2">
               Tags
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            </legend>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
               {tags.map((tag) => (
-                <label key={tag.id} className="flex items-center">
+                <label key={tag.id} className="flex items-center touch-target">
                   <input
                     type="checkbox"
                     checked={formData.tagIds.includes(tag.id)}
                     onChange={() => handleTagToggle(tag.id)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-indigo-600 focus:ring-2 focus:ring-indigo-500 border-gray-300 rounded"
+                    aria-describedby={`tag-${tag.id}-description`}
                   />
-                  <span className="ml-2 text-sm text-gray-700">{tag.name}</span>
+                  <span
+                    id={`tag-${tag.id}-description`}
+                    className="ml-2 text-sm text-gray-700 select-none"
+                  >
+                    {tag.name}
+                  </span>
                 </label>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Status */}
           <div>
@@ -427,28 +462,52 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-6 border-t border-gray-200">
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !isFormValid}
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              aria-describedby={
+                !isFormValid ? 'form-validation-error' : undefined
+              }
             >
-              {loading
-                ? mode === 'create'
-                  ? 'Creating...'
-                  : 'Updating...'
-                : mode === 'create'
-                  ? 'Create Article'
-                  : 'Update Article'}
+              {loading ? (
+                <span className="flex items-center justify-center">
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                  {mode === 'create' ? 'Creating...' : 'Updating...'}
+                </span>
+              ) : mode === 'create' ? (
+                'Create Article'
+              ) : (
+                'Update Article'
+              )}
             </button>
           </div>
+          {!isFormValid && (
+            <div id="form-validation-error" className="sr-only">
+              Please fix all validation errors before submitting the form.
+            </div>
+          )}
         </form>
       </div>
     </div>

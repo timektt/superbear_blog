@@ -1,12 +1,15 @@
 import { Suspense } from 'react';
+import { Metadata } from 'next';
 import PublicLayout from '@/components/layout/PublicLayout';
 import NewsContent from './NewsContent';
+import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 
-export const metadata = {
-  title: 'Tech News - SuperBear Blog',
+export const metadata: Metadata = createMetadata({
+  title: 'Tech News',
   description:
-    'Latest tech news, AI developments, and developer insights for builders and entrepreneurs.',
-};
+    'Latest tech news, AI developments, and developer insights for builders and entrepreneurs. Discover curated content on machine learning, developer tools, and startup ecosystem.',
+  url: '/news',
+});
 
 export default function NewsPage() {
   return (

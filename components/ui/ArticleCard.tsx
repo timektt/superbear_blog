@@ -39,19 +39,32 @@ export default function ArticleCard({ article }: ArticleCardProps) {
     }).format(new Date(date));
   };
 
+  const formatDateForScreenReader = (date: Date | null) => {
+    if (!date) return '';
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(new Date(date));
+  };
+
   return (
-    <article className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
-      <Link href={`/news/${article.slug}`} className="block">
+    <article className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 group">
+      <Link 
+        href={`/news/${article.slug}`} 
+        className="block focus:outline-none"
+        aria-label={`Read article: ${article.title}`}
+      >
         {/* Article Image */}
-        <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100">
+        <div className="aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 relative">
           {article.image ? (
             <OptimizedImage
               src={article.image}
-              alt={article.title}
+              alt={`Cover image for ${article.title}`}
               width={400}
               height={225}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
@@ -62,6 +75,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -71,72 +85,91 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                     />
                   </svg>
                 </div>
-                <p className="text-xs text-indigo-600 font-medium">Article</p>
+                <p className="text-xs text-indigo-600 font-medium" aria-hidden="true">Article</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Article Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Category and Date */}
-          <div className="flex items-center justify-between mb-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+            <span 
+              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 w-fit"
+              role="text"
+              aria-label={`Category: ${article.category.name}`}
+            >
               {article.category.name}
             </span>
-            <time className="text-sm text-gray-500">
+            <time 
+              className="text-sm text-gray-500"
+              dateTime={article.publishedAt?.toISOString()}
+              aria-label={`Published on ${formatDateForScreenReader(article.publishedAt)}`}
+            >
               {formatDate(article.publishedAt)}
             </time>
           </div>
 
           {/* Title */}
-          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 hover:text-indigo-600 transition-colors">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors leading-tight">
             {article.title}
           </h3>
 
           {/* Summary */}
           {article.summary && (
-            <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+            <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
               {article.summary}
             </p>
           )}
 
           {/* Author and Tags */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center min-w-0">
               {article.author.avatar ? (
                 <OptimizedImage
                   src={article.author.avatar}
-                  alt={article.author.name}
+                  alt={`${article.author.name}'s avatar`}
                   width={24}
                   height={24}
-                  className="w-6 h-6 rounded-full mr-2"
+                  className="w-6 h-6 rounded-full mr-2 flex-shrink-0"
                 />
               ) : (
-                <div className="w-6 h-6 bg-gray-300 rounded-full mr-2 flex items-center justify-center">
+                <div 
+                  className="w-6 h-6 bg-gray-300 rounded-full mr-2 flex items-center justify-center flex-shrink-0"
+                  aria-hidden="true"
+                >
                   <span className="text-xs text-gray-600 font-medium">
                     {article.author.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
-              <span className="text-sm text-gray-700 font-medium">
+              <span 
+                className="text-sm text-gray-700 font-medium truncate"
+                title={`By ${article.author.name}`}
+              >
                 {article.author.name}
               </span>
             </div>
 
             {/* Tags */}
             {article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1" role="list" aria-label="Article tags">
                 {article.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag.id}
                     className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                    role="listitem"
                   >
                     {tag.name}
                   </span>
                 ))}
                 {article.tags.length > 2 && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                  <span 
+                    className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                    role="listitem"
+                    aria-label={`${article.tags.length - 2} more tags`}
+                  >
                     +{article.tags.length - 2}
                   </span>
                 )}

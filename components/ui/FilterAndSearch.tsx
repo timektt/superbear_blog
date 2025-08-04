@@ -72,17 +72,22 @@ export default function FilterAndSearch({
     return (
       <div className={`space-y-6 ${className}`}>
         {/* Search Bar Skeleton */}
-        <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+        <div className="h-12 bg-gray-200 rounded-lg animate-pulse" aria-hidden="true"></div>
 
         {/* Category Filter Skeleton */}
         <div className="space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" aria-hidden="true"></div>
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 5 }).map((_, index) => (
               <div
                 key={index}
-                className="h-10 bg-gray-200 rounded-full animate-pulse"
-                style={{ width: `${80 + Math.random() * 40}px` }}
+                className={`h-10 bg-gray-200 rounded-full animate-pulse ${
+                  index === 0 ? 'w-20' : 
+                  index === 1 ? 'w-24' : 
+                  index === 2 ? 'w-28' : 
+                  index === 3 ? 'w-16' : 'w-32'
+                }`}
+                aria-hidden="true"
               ></div>
             ))}
           </div>
@@ -90,13 +95,17 @@ export default function FilterAndSearch({
 
         {/* Tag Filter Skeleton */}
         <div className="space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+          <div className="h-4 bg-gray-200 rounded w-32 animate-pulse" aria-hidden="true"></div>
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: 8 }).map((_, index) => (
               <div
                 key={index}
-                className="h-8 bg-gray-200 rounded-full animate-pulse"
-                style={{ width: `${60 + Math.random() * 30}px` }}
+                className={`h-8 bg-gray-200 rounded-full animate-pulse ${
+                  index % 4 === 0 ? 'w-16' : 
+                  index % 4 === 1 ? 'w-20' : 
+                  index % 4 === 2 ? 'w-24' : 'w-18'
+                }`}
+                aria-hidden="true"
               ></div>
             ))}
           </div>
@@ -112,14 +121,15 @@ export default function FilterAndSearch({
 
       {/* Active Filters Summary */}
       {hasActiveFilters && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" role="status" aria-live="polite">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center">
               <svg
-                className="h-5 w-5 text-blue-500 mr-2"
+                className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -134,7 +144,8 @@ export default function FilterAndSearch({
             </div>
             <Link
               href="/news"
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-md px-2 py-1 transition-colors duration-200"
+              aria-label="Clear all active filters"
             >
               Clear all filters
             </Link>

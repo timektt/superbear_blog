@@ -12,16 +12,18 @@ const testUrls = [
 
 async function testEndpoints() {
   console.log('Testing search and filter endpoints...\n');
-  
+
   for (const url of testUrls) {
     try {
       console.log(`Testing: ${url}`);
       const response = await fetch(url);
       const status = response.status;
-      
+
       if (status === 200) {
         const data = await response.json();
-        console.log(`✅ Status: ${status} - Response: ${JSON.stringify(data).substring(0, 100)}...`);
+        console.log(
+          `✅ Status: ${status} - Response: ${JSON.stringify(data).substring(0, 100)}...`
+        );
       } else {
         console.log(`❌ Status: ${status}`);
       }

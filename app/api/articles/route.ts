@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Status } from '@prisma/client';
+import { Status, Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build where clause for filtering
-    const where: unknown = {
+    const where: Prisma.ArticleWhereInput = {
       status: Status.PUBLISHED,
     };
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         };
       } else {
         // For multiple tags, we need to ensure the article has ALL selected tags
-        where.AND = tags.map(tagSlug => ({
+        where.AND = tags.map((tagSlug) => ({
           tags: {
             some: {
               slug: tagSlug,
@@ -44,14 +44,14 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Enhanced search with case-insensitive matching
+    // Enhanced search (case-sensitive for SQLite)
     if (search) {
       const searchTerm = search.trim();
       where.OR = [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { summary: { contains: searchTerm, mode: 'insensitive' } },
+        { title: { contains: searchTerm } },
+        { summary: { contains: searchTerm } },
         // Note: Full-text search on JSON content would require database-specific implementation
-        // For PostgreSQL, we could use to_tsvector, but for now we'll search in title and summary
+        // For PostgreSQL, we could use to_tsvector and mode: 'insensitive'
       ];
     }
 

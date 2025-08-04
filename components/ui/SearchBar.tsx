@@ -16,6 +16,7 @@ export default function SearchBar({
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
   // Initialize search term from URL
@@ -26,6 +27,7 @@ export default function SearchBar({
 
   const handleSearch = useCallback(
     (term: string) => {
+      setIsSearching(true);
       const params = new URLSearchParams(searchParams.toString());
 
       if (term.trim()) {
@@ -41,6 +43,9 @@ export default function SearchBar({
       const newUrl = queryString ? `/news?${queryString}` : '/news';
 
       router.push(newUrl);
+      
+      // Reset searching state after a short delay
+      setTimeout(() => setIsSearching(false), 500);
     },
     [router, searchParams]
   );
@@ -57,45 +62,82 @@ export default function SearchBar({
     handleSearch('');
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      handleClear();
+    }
+  };
+
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative ${className}`} role="search">
+      <label htmlFor="search-input" className="sr-only">
+        Search articles
+      </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg
-            className="h-5 w-5 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
-        </div>
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-          placeholder={placeholder}
-          aria-label="Search articles"
-        />
-        {searchTerm && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <button
-              type="button"
-              onClick={handleClear}
-              className="text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600"
-              aria-label="Clear search"
-            >
+          {isSearching ? (
+            <div className="animate-spin h-5 w-5 text-gray-400">
               <svg
                 className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </div>
+          ) : (
+            <svg
+              className="h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          )}
+        </div>
+        <input
+          id="search-input"
+          type="search"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-200"
+          placeholder={placeholder}
+          aria-label="Search articles"
+          aria-describedby={searchTerm ? "search-clear-button" : undefined}
+          autoComplete="off"
+          spellCheck="false"
+        />
+        {searchTerm && (
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <button
+              id="search-clear-button"
+              type="button"
+              onClick={handleClear}
+              className="text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md p-1 transition-colors duration-200"
+              aria-label={`Clear search term: ${searchTerm}`}
+              title="Clear search (Esc)"
+            >
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -108,6 +150,11 @@ export default function SearchBar({
           </div>
         )}
       </div>
+      {searchTerm && (
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          {isSearching ? 'Searching...' : `Search results for "${searchTerm}"`}
+        </div>
+      )}
     </div>
   );
 }

@@ -49,21 +49,31 @@ export function createSearchExcerpt(
   return excerpt;
 }
 
-export function extractTextFromTiptapContent(content: any): string {
+export function extractTextFromTiptapContent(content: unknown): string {
   if (!content || typeof content !== 'object') return '';
 
   let text = '';
 
-  function traverse(node: any) {
-    if (node.type === 'text') {
-      text += node.text || '';
-    } else if (node.content && Array.isArray(node.content)) {
-      node.content.forEach(traverse);
+  function traverse(node: unknown) {
+    if (typeof node === 'object' && node !== null) {
+      const nodeObj = node as {
+        type?: string;
+        text?: string;
+        content?: unknown[];
+      };
+      if (nodeObj.type === 'text') {
+        text += nodeObj.text || '';
+      } else if (nodeObj.content && Array.isArray(nodeObj.content)) {
+        nodeObj.content.forEach(traverse);
+      }
     }
   }
 
-  if (content.content && Array.isArray(content.content)) {
-    content.content.forEach(traverse);
+  if (typeof content === 'object' && content !== null) {
+    const contentObj = content as { content?: unknown[] };
+    if (contentObj.content && Array.isArray(contentObj.content)) {
+      contentObj.content.forEach(traverse);
+    }
   }
 
   return text;

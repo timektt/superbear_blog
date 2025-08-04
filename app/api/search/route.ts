@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { Status } from '@prisma/client';
+import { Status, Prisma } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,11 +28,11 @@ export async function GET(request: NextRequest) {
     const searchTerm = query.trim();
 
     // Build where clause for advanced search
-    const where: any = {
+    const where: Prisma.ArticleWhereInput = {
       status: Status.PUBLISHED,
       OR: [
-        { title: { contains: searchTerm, mode: 'insensitive' } },
-        { summary: { contains: searchTerm, mode: 'insensitive' } },
+        { title: { contains: searchTerm } },
+        { summary: { contains: searchTerm } },
         // Note: Full-text search on content would require database-specific implementation
         // For now, we'll search in title and summary
       ],
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
           some: { slug: tags[0] },
         };
       } else {
-        where.AND = tags.map(tagSlug => ({
+        where.AND = tags.map((tagSlug) => ({
           tags: {
             some: { slug: tagSlug },
           },
@@ -105,9 +105,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error performing search:', error);
-    return NextResponse.json(
-      { error: 'Search failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
   }
 }

@@ -38,8 +38,11 @@ export default function SearchResultCard({ article }: SearchResultCardProps) {
   const searchTerm = searchParams.get('search') || '';
 
   const highlightedTitle = highlightSearchTerm(article.title, searchTerm);
-  const highlightedSummary = article.summary 
-    ? highlightSearchTerm(createSearchExcerpt(article.summary, searchTerm, 150), searchTerm)
+  const highlightedSummary = article.summary
+    ? highlightSearchTerm(
+        createSearchExcerpt(article.summary, searchTerm, 150),
+        searchTerm
+      )
     : '';
 
   const formatDate = (date: Date | null) => {
@@ -109,7 +112,9 @@ export default function SearchResultCard({ article }: SearchResultCardProps) {
                   className="w-6 h-6 rounded-full mr-2"
                 />
               )}
-              <span className="text-sm text-gray-700">{article.author.name}</span>
+              <span className="text-sm text-gray-700">
+                {article.author.name}
+              </span>
             </div>
 
             {article.tags.length > 0 && (

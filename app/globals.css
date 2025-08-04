@@ -180,3 +180,156 @@ body {
     0 10px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+
+/* Accessibility improvements */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .border-gray-300 {
+    border-color: #000;
+  }
+  
+  .text-gray-500 {
+    color: #000;
+  }
+  
+  .bg-gray-50 {
+    background-color: #fff;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .animate-spin {
+    animation: none;
+  }
+  
+  .article-card-hover:hover {
+    transform: none;
+  }
+  
+  .ProseMirror img:hover {
+    transform: none;
+  }
+}
+
+/* Focus visible improvements */
+.focus-visible\:ring-2:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Better button and interactive element styling */
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Improved form styling */
+input:invalid {
+  border-color: #ef4444;
+}
+
+input:invalid:focus {
+  ring-color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Better responsive typography */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+  
+  .text-xl {
+    font-size: 1.125rem;
+  }
+  
+  .text-lg {
+    font-size: 1rem;
+  }
+}
+
+/* Improved mobile touch targets */
+@media (max-width: 768px) {
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Dark mode improvements */
+@media (prefers-color-scheme: dark) {
+  .ProseMirror pre {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+  
+  .hljs-comment,
+  .hljs-quote {
+    color: #9ca3af;
+  }
+  
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-subst {
+    color: #f87171;
+  }
+  
+  .hljs-number,
+  .hljs-literal,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-tag .hljs-attr {
+    color: #60a5fa;
+  }
+  
+  .hljs-string,
+  .hljs-doctag {
+    color: #34d399;
+  }
+}

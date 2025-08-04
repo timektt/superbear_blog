@@ -1,4 +1,13 @@
+import { Metadata } from 'next';
 import PublicLayout from '@/components/layout/PublicLayout';
+import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
+
+export const metadata: Metadata = createMetadata({
+  title: 'SuperBear Blog - Tech News for Developers',
+  description:
+    'Filtered, in-depth tech content for developers, AI builders, and tech entrepreneurs. Discover AI & LLM news, developer tools, and startup insights.',
+  url: '/',
+});
 
 export default function Home() {
   return (
