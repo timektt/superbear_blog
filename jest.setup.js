@@ -58,7 +58,7 @@ global.Request = class Request {
     this.headers = new Map(Object.entries(init?.headers || {}));
     this.body = init?.body;
   }
-  
+
   json() {
     return Promise.resolve(JSON.parse(this.body || '{}'));
   }
@@ -70,11 +70,11 @@ global.Response = class Response {
     this.status = init?.status || 200;
     this.headers = new Map(Object.entries(init?.headers || {}));
   }
-  
+
   json() {
     return Promise.resolve(JSON.parse(this.body || '{}'));
   }
-  
+
   static json(data, init) {
     return new Response(JSON.stringify(data), {
       ...init,

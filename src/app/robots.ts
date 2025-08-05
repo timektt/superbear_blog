@@ -7,28 +7,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
-        disallow: ['/admin/', '/api/', '/editor-test/', '/_next/', '/private/'],
+        allow: ['/news/', '/'],
+        disallow: ['/admin/', '/api/', '/_next/', '/private/'],
       },
       {
-        userAgent: 'GPTBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'ChatGPT-User',
-        disallow: '/',
-      },
-      {
-        userAgent: 'CCBot',
-        disallow: '/',
-      },
-      {
-        userAgent: 'anthropic-ai',
-        disallow: '/',
-      },
-      {
-        userAgent: 'Claude-Web',
-        disallow: '/',
+        userAgent: 'Googlebot',
+        allow: ['/news/', '/'],
+        disallow: ['/admin/', '/api/', '/_next/', '/private/'],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

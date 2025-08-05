@@ -58,8 +58,14 @@ describe('/api/admin/articles', () => {
     it('should create article when authenticated', async () => {
       mockGetServerSession.mockResolvedValue(mockSession as any);
       mockPrisma.article.findUnique.mockResolvedValue(null); // No existing article with same slug
-      mockPrisma.author.findUnique.mockResolvedValue({ id: '1', name: 'Admin User' });
-      mockPrisma.category.findUnique.mockResolvedValue({ id: '1', name: 'Development' });
+      mockPrisma.author.findUnique.mockResolvedValue({
+        id: '1',
+        name: 'Admin User',
+      });
+      mockPrisma.category.findUnique.mockResolvedValue({
+        id: '1',
+        name: 'Development',
+      });
       mockPrisma.article.create.mockResolvedValue(mockArticle as unknown);
 
       const requestBody = {

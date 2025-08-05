@@ -1,8 +1,8 @@
-import { 
-  highlightSearchTerm, 
-  escapeRegExp, 
-  createSearchExcerpt, 
-  extractTextFromTiptapContent 
+import {
+  highlightSearchTerm,
+  escapeRegExp,
+  createSearchExcerpt,
+  extractTextFromTiptapContent,
 } from '@/lib/search-utils';
 
 describe('search-utils', () => {
@@ -12,7 +12,9 @@ describe('search-utils', () => {
       const query = 'React';
       const result = highlightSearchTerm(text, query);
 
-      expect(result).toBe('<mark class="bg-yellow-200 px-1 rounded">React</mark> is a JavaScript library');
+      expect(result).toBe(
+        '<mark class="bg-yellow-200 px-1 rounded">React</mark> is a JavaScript library'
+      );
     });
 
     it('should highlight multiple occurrences', () => {
@@ -30,7 +32,9 @@ describe('search-utils', () => {
       const query = 'react';
       const result = highlightSearchTerm(text, query);
 
-      expect(result).toBe('<mark class="bg-yellow-200 px-1 rounded">React</mark> is awesome');
+      expect(result).toBe(
+        '<mark class="bg-yellow-200 px-1 rounded">React</mark> is awesome'
+      );
     });
 
     it('should handle empty query', () => {
@@ -46,7 +50,9 @@ describe('search-utils', () => {
       const query = 'React.js';
       const result = highlightSearchTerm(text, query);
 
-      expect(result).toBe('Use <mark class="bg-yellow-200 px-1 rounded">React.js</mark> for development');
+      expect(result).toBe(
+        'Use <mark class="bg-yellow-200 px-1 rounded">React.js</mark> for development'
+      );
     });
   });
 
@@ -65,7 +71,8 @@ describe('search-utils', () => {
 
   describe('createSearchExcerpt', () => {
     it('should create excerpt with search term centered', () => {
-      const text = 'This is a long text with React in the middle and more content after';
+      const text =
+        'This is a long text with React in the middle and more content after';
       const searchTerm = 'React';
       const result = createSearchExcerpt(text, searchTerm, 30);
 
@@ -99,10 +106,10 @@ describe('search-utils', () => {
             type: 'paragraph',
             content: [
               { type: 'text', text: 'Hello ' },
-              { type: 'text', text: 'world!' }
-            ]
-          }
-        ]
+              { type: 'text', text: 'world!' },
+            ],
+          },
+        ],
       };
 
       const result = extractTextFromTiptapContent(content);
