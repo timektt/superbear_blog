@@ -161,9 +161,10 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
     handleInputChange('tagIds', newTags);
   };
 
-  const handleImageUpload = (imageUrl: string, _publicId: string) => {
+  const handleImageUpload = (imageUrl: string, publicId: string) => {
     setFormData((prev) => ({ ...prev, image: imageUrl }));
-    // setImagePublicId(publicId);
+    // TODO: Store publicId for potential image deletion
+    console.log('Image uploaded with publicId:', publicId);
   };
 
   const handleImageRemove = () => {

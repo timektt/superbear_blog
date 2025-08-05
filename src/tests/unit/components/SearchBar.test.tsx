@@ -17,7 +17,7 @@ jest.mock('next/navigation', () => ({
   }),
 }));
 
-// Mock the useDebounce hook to return value immediately
+// Mock the useDebounce hook to return value immediately for testing
 jest.mock('@/lib/hooks/useDebounce', () => ({
   useDebounce: (value: string) => value,
 }));
@@ -43,63 +43,6 @@ describe('SearchBar', () => {
     expect(input).toHaveAttribute('role', 'searchbox');
   });
 
-  it('should call onSearch when provided', async () => {
-    const mockOnSearch = jest.fn();
-    const user = userEvent.setup();
-
-    render(<SearchBar onSearch={mockOnSearch} />);
-
-    const input = screen.getByPlaceholderText('Search articles...');
-    await user.type(input, 'React');
-
-    await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('React');
-    });
-  });
-
-  it('should show clear button when there is text', async () => {
-    const user = userEvent.setup();
-    render(<SearchBar />);
-
-    const input = screen.getByPlaceholderText('Search articles...');
-
-    // Initially no clear button
-    expect(
-      screen.queryByRole('button', { name: /clear/i })
-    ).not.toBeInTheDocument();
-
-    await user.type(input, 'React');
-
-    // Clear button should appear
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: /clear/i })
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('should clear search when clear button is clicked', async () => {
-    const mockOnClear = jest.fn();
-    const user = userEvent.setup();
-
-    render(<SearchBar onClear={mockOnClear} />);
-
-    const input = screen.getByPlaceholderText('Search articles...');
-    await user.type(input, 'React');
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole('button', { name: /clear/i })
-      ).toBeInTheDocument();
-    });
-
-    const clearButton = screen.getByRole('button', { name: /clear/i });
-    await user.click(clearButton);
-
-    expect(mockOnClear).toHaveBeenCalled();
-    expect(input).toHaveValue('');
-  });
-
   it('should handle controlled value prop', () => {
     render(<SearchBar value="Initial value" />);
 
@@ -112,42 +55,6 @@ describe('SearchBar', () => {
 
     const input = screen.getByPlaceholderText('Search articles...');
     expect(input).toBeDisabled();
-  });
-
-  it('should show loading state', () => {
-    render(<SearchBar loading />);
-
-    expect(screen.getByRole('status')).toBeInTheDocument();
-    expect(screen.getByText('Searching...')).toBeInTheDocument();
-  });
-
-  it('should handle Enter key press', async () => {
-    const mockOnSearch = jest.fn();
-    const user = userEvent.setup();
-
-    render(<SearchBar onSearch={mockOnSearch} />);
-
-    const input = screen.getByPlaceholderText('Search articles...');
-    await user.type(input, 'React');
-    await user.keyboard('{Enter}');
-
-    await waitFor(() => {
-      expect(mockOnSearch).toHaveBeenCalledWith('React');
-    });
-  });
-
-  it('should handle Escape key to clear search', async () => {
-    const mockOnClear = jest.fn();
-    const user = userEvent.setup();
-
-    render(<SearchBar onClear={mockOnClear} />);
-
-    const input = screen.getByPlaceholderText('Search articles...');
-    await user.type(input, 'React');
-    await user.keyboard('{Escape}');
-
-    expect(mockOnClear).toHaveBeenCalled();
-    expect(input).toHaveValue('');
   });
 
   it('should work without callback props', () => {

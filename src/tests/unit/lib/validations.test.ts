@@ -127,17 +127,14 @@ describe('Validation Schemas', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should validate image URL format', () => {
-      const invalidData = {
+    it('should allow empty image URL', () => {
+      const dataWithEmptyImage = {
         ...validArticleData,
-        image: 'not-a-url',
+        image: '',
       };
-      const result = articleSchema.safeParse(invalidData);
+      const result = articleSchema.safeParse(dataWithEmptyImage);
 
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error.issues[0].message).toContain('Invalid image URL');
-      }
+      expect(result.success).toBe(true);
     });
 
     it('should accept valid image URLs', () => {

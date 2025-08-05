@@ -56,7 +56,7 @@ describe('ArticleCard', () => {
   it('should render article image with correct alt text', () => {
     render(<ArticleCard article={mockArticle} />);
 
-    const image = screen.getByAltText('Test Article');
+    const image = screen.getByAltText('Cover image for Test Article');
     expect(image).toBeInTheDocument();
     expect(image).toHaveAttribute('src', expect.stringContaining('test.jpg'));
   });

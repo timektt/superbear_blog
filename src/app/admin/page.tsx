@@ -1,4 +1,6 @@
 import AdminLayout from '@/components/layout/AdminLayout';
+import DashboardStats from '@/components/admin/DashboardStats';
+import Link from 'next/link';
 
 export default function AdminDashboard() {
   return (
@@ -11,67 +13,7 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">A</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Total Articles
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">P</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Published
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">D</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Drafts
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">0</dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DashboardStats />
 
         <div className="bg-white shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -92,12 +34,12 @@ export default function AdminDashboard() {
                     </div>
                     <div className="mt-4">
                       <div className="-mx-2 -my-1.5 flex">
-                        <button
-                          type="button"
+                        <Link
+                          href="/admin/articles/new"
                           className="bg-blue-50 px-2 py-1.5 rounded-md text-sm font-medium text-blue-800 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-50 focus:ring-blue-600"
                         >
                           Create Article
-                        </button>
+                        </Link>
                       </div>
                     </div>
                   </div>

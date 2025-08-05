@@ -130,7 +130,19 @@ This implementation plan converts the tech news platform design into actionable 
 
 ## Remaining Tasks
 
-- [-] 16. Create admin article management pages
+- [x] 16. Create admin article management pages
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -140,14 +152,22 @@ This implementation plan converts the tech news platform design into actionable 
   - Add success/error notifications for CRUD operations
   - _Requirements: 1.1, 1.2_
 
-- [ ] 17. Fix test configuration and implementation
+- [x] 17. Fix test configuration and implementation
+
+
+
+
+
   - Fix Jest configuration for @testing-library/jest-dom matchers
   - Update test files to properly mock Next.js components
   - Fix TypeScript errors in test files
   - Ensure all tests pass in CI/CD pipeline
   - _Requirements: All requirements for validation_
 
-- [ ] 18. Add API endpoints for admin dashboard statistics
+- [-] 18. Add API endpoints for admin dashboard statistics
+
+
+
   - Create endpoint for article count by status
   - Add endpoint for recent activity metrics
   - Implement dashboard data fetching in admin page

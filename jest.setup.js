@@ -31,6 +31,10 @@ jest.mock('next-auth/react', () => ({
   SessionProvider: ({ children }) => children,
 }));
 
+jest.mock('next-auth', () => ({
+  getServerSession: jest.fn(),
+}));
+
 // Mock Cloudinary
 jest.mock('cloudinary', () => ({
   v2: {
@@ -45,6 +49,59 @@ jest.mock('cloudinary', () => ({
 
 // Global test utilities
 global.fetch = jest.fn();
+
+// Mock Next.js Request and Response
+global.Request = class Request {
+  constructor(input, init) {
+    this.url = input;
+    this.method = init?.method || 'GET';
+    this.headers = new Map(Object.entries(init?.headers || {}));
+    this.body = init?.body;
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body || '{}'));
+  }
+};
+
+global.Response = class Response {
+  constructor(body, init) {
+    this.body = body;
+    this.status = init?.status || 200;
+    this.headers = new Map(Object.entries(init?.headers || {}));
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body || '{}'));
+  }
+  
+  static json(data, init) {
+    return new Response(JSON.stringify(data), {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...init?.headers,
+      },
+    });
+  }
+};
+
+// Mock NextResponse
+global.NextResponse = {
+  json: (data, init) => Response.json(data, init),
+};
+
+// Mock URL constructor for Next.js
+global.URL = class URL {
+  constructor(url, base) {
+    if (base) {
+      this.href = new URL(url, base).href;
+    } else {
+      this.href = url;
+    }
+    this.searchParams = new URLSearchParams(url.split('?')[1] || '');
+  }
+};
 
 // Suppress console errors in tests unless explicitly testing them
 const originalError = console.error;

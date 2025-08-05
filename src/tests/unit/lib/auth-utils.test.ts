@@ -1,9 +1,10 @@
 import { hashPassword, verifyPassword } from '@/lib/auth-utils';
-import bcrypt from 'bcryptjs';
 
 // Mock bcryptjs
-jest.mock('bcryptjs');
-const mockBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+jest.mock('bcryptjs', () => ({
+  hash: jest.fn(),
+  compare: jest.fn(),
+}));
 
 describe('auth-utils', () => {
   beforeEach(() => {
@@ -15,11 +16,12 @@ describe('auth-utils', () => {
       const password = 'testpassword123';
       const hashedPassword = 'hashed_password_123';
 
-      mockBcrypt.hash.mockResolvedValue(hashedPassword);
+      const bcrypt = require('bcryptjs');
+      bcrypt.hash.mockResolvedValue(hashedPassword);
 
       const result = await hashPassword(password);
 
-      expect(mockBcrypt.hash).toHaveBeenCalledWith(password, 12);
+      expect(bcrypt.hash).toHaveBeenCalledWith(password, 12);
       expect(result).toBe(hashedPassword);
     });
 
@@ -27,7 +29,8 @@ describe('auth-utils', () => {
       const password = 'testpassword123';
       const error = new Error('Hashing failed');
 
-      mockBcrypt.hash.mockRejectedValue(error);
+      const bcrypt = require('bcryptjs');
+      bcrypt.hash.mockRejectedValue(error);
 
       await expect(hashPassword(password)).rejects.toThrow('Hashing failed');
     });
@@ -38,11 +41,12 @@ describe('auth-utils', () => {
       const password = 'testpassword123';
       const hashedPassword = 'hashed_password_123';
 
-      mockBcrypt.compare.mockResolvedValue(true);
+      const bcrypt = require('bcryptjs');
+      bcrypt.compare.mockResolvedValue(true);
 
       const result = await verifyPassword(password, hashedPassword);
 
-      expect(mockBcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+      expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(result).toBe(true);
     });
 
@@ -50,11 +54,12 @@ describe('auth-utils', () => {
       const password = 'wrongpassword';
       const hashedPassword = 'hashed_password_123';
 
-      mockBcrypt.compare.mockResolvedValue(false);
+      const bcrypt = require('bcryptjs');
+      bcrypt.compare.mockResolvedValue(false);
 
       const result = await verifyPassword(password, hashedPassword);
 
-      expect(mockBcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
+      expect(bcrypt.compare).toHaveBeenCalledWith(password, hashedPassword);
       expect(result).toBe(false);
     });
 
@@ -63,7 +68,8 @@ describe('auth-utils', () => {
       const hashedPassword = 'hashed_password_123';
       const error = new Error('Verification failed');
 
-      mockBcrypt.compare.mockRejectedValue(error);
+      const bcrypt = require('bcryptjs');
+      bcrypt.compare.mockRejectedValue(error);
 
       await expect(verifyPassword(password, hashedPassword)).rejects.toThrow(
         'Verification failed'

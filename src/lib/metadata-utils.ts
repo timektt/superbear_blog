@@ -137,7 +137,16 @@ export const DEFAULT_METADATA = {
 /**
  * Generates metadata for individual articles
  */
-export function generateArticleMetadata(article: any): Metadata {
+export function generateArticleMetadata(article: {
+  slug: string;
+  title: string;
+  summary?: string;
+  image?: string;
+  tags?: Array<{ name: string }>;
+  category?: { name: string };
+  author?: { name: string };
+  publishedAt?: Date;
+}): Metadata {
   const baseUrl = 'https://superbear.blog';
   const articleUrl = `${baseUrl}/news/${article.slug}`;
   const defaultDescription =
@@ -147,7 +156,7 @@ export function generateArticleMetadata(article: any): Metadata {
   const image = article.image || `${baseUrl}/og-default.svg`;
 
   // Generate keywords from tags and category
-  const tagNames = article.tags?.map((tag: any) => tag.name) || [];
+  const tagNames = article.tags?.map((tag) => tag.name) || [];
   const categoryName = article.category?.name || '';
   const keywords = [
     ...tagNames,
@@ -192,7 +201,9 @@ export function generateArticleMetadata(article: any): Metadata {
 /**
  * Generates site-wide metadata
  */
-export function generateSiteMetadata(overrides: any = {}): Metadata {
+export function generateSiteMetadata(
+  overrides: Record<string, unknown> = {}
+): Metadata {
   const baseUrl = 'https://superbear.blog';
   const defaultTitle = 'SuperBear Blog | Tech News & Insights';
   const defaultDescription =

@@ -1,11 +1,11 @@
 import type { Prisma } from '@prisma/client';
 
 // Base types from Prisma
-export type Article = Prisma.ArticleGetPayload<{}>;
-export type Author = Prisma.AuthorGetPayload<{}>;
-export type Category = Prisma.CategoryGetPayload<{}>;
-export type Tag = Prisma.TagGetPayload<{}>;
-export type AdminUser = Prisma.AdminUserGetPayload<object>;
+export type Article = Prisma.ArticleGetPayload<Record<string, never>>;
+export type Author = Prisma.AuthorGetPayload<Record<string, never>>;
+export type Category = Prisma.CategoryGetPayload<Record<string, never>>;
+export type Tag = Prisma.TagGetPayload<Record<string, never>>;
+export type AdminUser = Prisma.AdminUserGetPayload<Record<string, never>>;
 export type Status = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
 // Extended types with relations

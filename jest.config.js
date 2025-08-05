@@ -14,7 +14,7 @@ const customJestConfig = {
     '<rootDir>/node_modules/',
     '<rootDir>/src/tests/e2e/',
   ],
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: [
@@ -28,6 +28,9 @@ const customJestConfig = {
   testMatch: [
     '<rootDir>/src/tests/unit/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/src/tests/integration/**/*.test.{js,jsx,ts,tsx}',
+  ],
+  transformIgnorePatterns: [
+    'node_modules/(?!(jose|openid-client|oauth|@panva)/)',
   ],
 };
 
