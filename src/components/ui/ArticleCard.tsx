@@ -50,8 +50,8 @@ export default function ArticleCard({ article }: ArticleCardProps) {
 
   return (
     <article className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 group">
-      <Link 
-        href={`/news/${article.slug}`} 
+      <Link
+        href={`/news/${article.slug}`}
         className="block focus:outline-none"
         aria-label={`Read article: ${article.title}`}
       >
@@ -85,7 +85,12 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                     />
                   </svg>
                 </div>
-                <p className="text-xs text-indigo-600 font-medium" aria-hidden="true">Article</p>
+                <p
+                  className="text-xs text-indigo-600 font-medium"
+                  aria-hidden="true"
+                >
+                  Article
+                </p>
               </div>
             </div>
           )}
@@ -95,14 +100,14 @@ export default function ArticleCard({ article }: ArticleCardProps) {
         <div className="p-4 sm:p-6">
           {/* Category and Date */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-            <span 
+            <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 w-fit"
               role="text"
               aria-label={`Category: ${article.category.name}`}
             >
               {article.category.name}
             </span>
-            <time 
+            <time
               className="text-sm text-gray-500"
               dateTime={article.publishedAt?.toISOString()}
               aria-label={`Published on ${formatDateForScreenReader(article.publishedAt)}`}
@@ -135,7 +140,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                   className="w-6 h-6 rounded-full mr-2 flex-shrink-0"
                 />
               ) : (
-                <div 
+                <div
                   className="w-6 h-6 bg-gray-300 rounded-full mr-2 flex items-center justify-center flex-shrink-0"
                   aria-hidden="true"
                 >
@@ -144,7 +149,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                   </span>
                 </div>
               )}
-              <span 
+              <span
                 className="text-sm text-gray-700 font-medium truncate"
                 title={`By ${article.author.name}`}
               >
@@ -154,7 +159,11 @@ export default function ArticleCard({ article }: ArticleCardProps) {
 
             {/* Tags */}
             {article.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1" role="list" aria-label="Article tags">
+              <div
+                className="flex flex-wrap gap-1"
+                role="list"
+                aria-label="Article tags"
+              >
                 {article.tags.slice(0, 2).map((tag) => (
                   <span
                     key={tag.id}
@@ -165,7 +174,7 @@ export default function ArticleCard({ article }: ArticleCardProps) {
                   </span>
                 ))}
                 {article.tags.length > 2 && (
-                  <span 
+                  <span
                     className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
                     role="listitem"
                     aria-label={`${article.tags.length - 2} more tags`}

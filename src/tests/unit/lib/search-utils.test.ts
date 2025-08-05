@@ -1,5 +1,5 @@
-import { searchArticles, highlightSearchTerms } from '@/lib/search-utils'
-import { prisma } from '@/lib/prisma'
+import { searchArticles, highlightSearchTerms } from '@/lib/search-utils';
+import { prisma } from '@/lib/prisma';
 
 // Mock Prisma
 jest.mock('@/lib/prisma', () => ({
@@ -8,14 +8,14 @@ jest.mock('@/lib/prisma', () => ({
       findMany: jest.fn(),
     },
   },
-}))
+}));
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe('search-utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   describe('searchArticles', () => {
     const mockArticles = [
@@ -34,12 +34,12 @@ describe('search-utils', () => {
         category: { name: 'Development', slug: 'development' },
         tags: [{ name: 'React', slug: 'react' }],
       },
-    ]
+    ];
 
     it('should search articles by title', async () => {
-      mockPrisma.article.findMany.mockResolvedValue(mockArticles)
+      mockPrisma.article.findMany.mockResolvedValue(mockArticles);
 
-      const result = await searchArticles('React')
+      const result = await searchArticles('React');
 
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith({
         where: {
@@ -59,63 +59,67 @@ describe('search-utils', () => {
           tags: { select: { name: true, slug: true } },
         },
         orderBy: { publishedAt: 'desc' },
-      })
+      });
 
-      expect(result).toEqual(mockArticles)
-    })
+      expect(result).toEqual(mockArticles);
+    });
 
     it('should return empty array for empty query', async () => {
-      const result = await searchArticles('')
-      expect(result).toEqual([])
-      expect(mockPrisma.article.findMany).not.toHaveBeenCalled()
-    })
+      const result = await searchArticles('');
+      expect(result).toEqual([]);
+      expect(mockPrisma.article.findMany).not.toHaveBeenCalled();
+    });
 
     it('should handle database errors', async () => {
-      mockPrisma.article.findMany.mockRejectedValue(new Error('Database error'))
+      mockPrisma.article.findMany.mockRejectedValue(
+        new Error('Database error')
+      );
 
-      await expect(searchArticles('React')).rejects.toThrow('Database error')
-    })
-  })
+      await expect(searchArticles('React')).rejects.toThrow('Database error');
+    });
+  });
 
   describe('highlightSearchTerms', () => {
     it('should highlight single search term', () => {
-      const text = 'React is a JavaScript library'
-      const query = 'React'
-      const result = highlightSearchTerms(text, query)
+      const text = 'React is a JavaScript library';
+      const query = 'React';
+      const result = highlightSearchTerms(text, query);
 
-      expect(result).toBe('<mark>React</mark> is a JavaScript library')
-    })
+      expect(result).toBe('<mark>React</mark> is a JavaScript library');
+    });
 
     it('should highlight multiple occurrences', () => {
-      const text = 'React components make React development easier'
-      const query = 'React'
-      const result = highlightSearchTerms(text, query)
+      const text = 'React components make React development easier';
+      const query = 'React';
+      const result = highlightSearchTerms(text, query);
 
-      expect(result).toBe('<mark>React</mark> components make <mark>React</mark> development easier')
-    })
+      expect(result).toBe(
+        '<mark>React</mark> components make <mark>React</mark> development easier'
+      );
+    });
 
     it('should be case insensitive', () => {
-      const text = 'React is awesome'
-      const query = 'react'
-      const result = highlightSearchTerms(text, query)
+      const text = 'React is awesome';
+      const query = 'react';
+      const result = highlightSearchTerms(text, query);
 
-      expect(result).toBe('<mark>React</mark> is awesome')
-    })
+      expect(result).toBe('<mark>React</mark> is awesome');
+    });
 
     it('should handle empty query', () => {
-      const text = 'React is awesome'
-      const query = ''
-      const result = highlightSearchTerms(text, query)
+      const text = 'React is awesome';
+      const query = '';
+      const result = highlightSearchTerms(text, query);
 
-      expect(result).toBe('React is awesome')
-    })
+      expect(result).toBe('React is awesome');
+    });
 
     it('should handle special regex characters', () => {
-      const text = 'Use React.js for development'
-      const query = 'React.js'
-      const result = highlightSearchTerms(text, query)
+      const text = 'Use React.js for development';
+      const query = 'React.js';
+      const result = highlightSearchTerms(text, query);
 
-      expect(result).toBe('Use <mark>React.js</mark> for development')
-    })
-  })
-})
+      expect(result).toBe('Use <mark>React.js</mark> for development');
+    });
+  });
+});

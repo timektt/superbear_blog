@@ -6,21 +6,21 @@ interface LoadingSpinnerProps {
   text?: string;
 }
 
-export default function LoadingSpinner({ 
-  size = 'md', 
+export default function LoadingSpinner({
+  size = 'md',
   className = '',
-  text 
+  text,
 }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'h-4 w-4',
     md: 'h-8 w-8',
-    lg: 'h-12 w-12'
+    lg: 'h-12 w-12',
   };
 
   const textSizeClasses = {
     sm: 'text-sm',
     md: 'text-base',
-    lg: 'text-lg'
+    lg: 'text-lg',
   };
 
   return (
@@ -33,7 +33,10 @@ export default function LoadingSpinner({
         <span className="sr-only">{text || 'Loading...'}</span>
       </div>
       {text && (
-        <p className={`mt-2 text-gray-600 ${textSizeClasses[size]}`} aria-live="polite">
+        <p
+          className={`mt-2 text-gray-600 ${textSizeClasses[size]}`}
+          aria-live="polite"
+        >
           {text}
         </p>
       )}

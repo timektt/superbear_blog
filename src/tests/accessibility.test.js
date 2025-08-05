@@ -1,6 +1,6 @@
 /**
  * Accessibility and Responsive Design Test Suite
- * 
+ *
  * This test suite verifies that the implemented accessibility and responsive design
  * features are working correctly across the application.
  */
@@ -53,7 +53,7 @@ const accessibilityTests = {
   testResponsiveBreakpoints: () => {
     console.log('✓ Testing responsive breakpoints...');
     // Mobile: 320px - 640px
-    // Tablet: 641px - 1024px  
+    // Tablet: 641px - 1024px
     // Desktop: 1025px+
     return true;
   },
@@ -88,7 +88,7 @@ const accessibilityTests = {
     // Verify animations respect prefers-reduced-motion
     // Check transitions are disabled when requested
     return true;
-  }
+  },
 };
 
 const responsiveTests = {
@@ -136,7 +136,7 @@ const responsiveTests = {
     // Line height maintains readability
     // Text doesn't overflow containers
     return true;
-  }
+  },
 };
 
 // Component-specific tests
@@ -150,7 +150,7 @@ const componentTests = {
     return true;
   },
 
-  // Test AdminLayout accessibility  
+  // Test AdminLayout accessibility
   testAdminLayout: () => {
     console.log('✓ Testing AdminLayout accessibility...');
     // Sidebar navigation keyboard accessible
@@ -184,22 +184,22 @@ const componentTests = {
     // Required field indicators
     // Error state handling
     return true;
-  }
+  },
 };
 
 // Run all tests
 function runAccessibilityTests() {
   console.log('🚀 Running Accessibility and Responsive Design Tests...\n');
-  
+
   console.log('📋 Accessibility Tests:');
-  Object.values(accessibilityTests).forEach(test => test());
-  
+  Object.values(accessibilityTests).forEach((test) => test());
+
   console.log('\n📱 Responsive Design Tests:');
-  Object.values(responsiveTests).forEach(test => test());
-  
+  Object.values(responsiveTests).forEach((test) => test());
+
   console.log('\n🧩 Component Tests:');
-  Object.values(componentTests).forEach(test => test());
-  
+  Object.values(componentTests).forEach((test) => test());
+
   console.log('\n✅ All tests completed successfully!');
   console.log('\n📊 Summary:');
   console.log('- Semantic HTML structure implemented');
@@ -218,7 +218,7 @@ if (typeof module !== 'undefined' && module.exports) {
     accessibilityTests,
     responsiveTests,
     componentTests,
-    runAccessibilityTests
+    runAccessibilityTests,
   };
 } else {
   // Run tests if called directly

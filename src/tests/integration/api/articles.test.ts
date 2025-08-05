@@ -1,6 +1,6 @@
-import { createMocks } from 'node-mocks-http'
-import { GET } from '@/app/api/articles/route'
-import { prisma } from '@/lib/prisma'
+import { createMocks } from 'node-mocks-http';
+import { GET } from '@/app/api/articles/route';
+import { prisma } from '@/lib/prisma';
 
 // Mock Prisma
 jest.mock('@/lib/prisma', () => ({
@@ -10,14 +10,14 @@ jest.mock('@/lib/prisma', () => ({
       count: jest.fn(),
     },
   },
-}))
+}));
 
-const mockPrisma = prisma as jest.Mocked<typeof prisma>
+const mockPrisma = prisma as jest.Mocked<typeof prisma>;
 
 describe('/api/articles', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-  })
+    jest.clearAllMocks();
+  });
 
   const mockArticles = [
     {
@@ -50,26 +50,26 @@ describe('/api/articles', () => {
       category: { name: 'AI', slug: 'ai' },
       tags: [{ name: 'Machine Learning', slug: 'machine-learning' }],
     },
-  ]
+  ];
 
   describe('GET /api/articles', () => {
     it('should return published articles', async () => {
-      mockPrisma.article.findMany.mockResolvedValue(mockArticles)
-      mockPrisma.article.count.mockResolvedValue(2)
+      mockPrisma.article.findMany.mockResolvedValue(mockArticles);
+      mockPrisma.article.count.mockResolvedValue(2);
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles',
-      })
+      });
 
-      const response = await GET(req)
-      const data = await response.json()
+      const response = await GET(req);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.articles).toEqual(mockArticles)
-      expect(data.total).toBe(2)
-      expect(data.page).toBe(1)
-      expect(data.limit).toBe(10)
+      expect(response.status).toBe(200);
+      expect(data.articles).toEqual(mockArticles);
+      expect(data.total).toBe(2);
+      expect(data.page).toBe(1);
+      expect(data.limit).toBe(10);
 
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith({
         where: { status: 'PUBLISHED' },
@@ -81,24 +81,24 @@ describe('/api/articles', () => {
         orderBy: { publishedAt: 'desc' },
         skip: 0,
         take: 10,
-      })
-    })
+      });
+    });
 
     it('should handle pagination', async () => {
-      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]])
-      mockPrisma.article.count.mockResolvedValue(2)
+      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]]);
+      mockPrisma.article.count.mockResolvedValue(2);
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles?page=2&limit=1',
-      })
+      });
 
-      const response = await GET(req)
-      const data = await response.json()
+      const response = await GET(req);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.page).toBe(2)
-      expect(data.limit).toBe(1)
+      expect(response.status).toBe(200);
+      expect(data.page).toBe(2);
+      expect(data.limit).toBe(1);
 
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith({
         where: { status: 'PUBLISHED' },
@@ -110,22 +110,22 @@ describe('/api/articles', () => {
         orderBy: { publishedAt: 'desc' },
         skip: 1,
         take: 1,
-      })
-    })
+      });
+    });
 
     it('should filter by category', async () => {
-      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]])
-      mockPrisma.article.count.mockResolvedValue(1)
+      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]]);
+      mockPrisma.article.count.mockResolvedValue(1);
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles?category=development',
-      })
+      });
 
-      const response = await GET(req)
-      const data = await response.json()
+      const response = await GET(req);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(200);
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith({
         where: {
           status: 'PUBLISHED',
@@ -139,21 +139,21 @@ describe('/api/articles', () => {
         orderBy: { publishedAt: 'desc' },
         skip: 0,
         take: 10,
-      })
-    })
+      });
+    });
 
     it('should filter by tags', async () => {
-      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]])
-      mockPrisma.article.count.mockResolvedValue(1)
+      mockPrisma.article.findMany.mockResolvedValue([mockArticles[0]]);
+      mockPrisma.article.count.mockResolvedValue(1);
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles?tags=react,testing',
-      })
+      });
 
-      const response = await GET(req)
+      const response = await GET(req);
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(200);
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith({
         where: {
           status: 'PUBLISHED',
@@ -171,57 +171,59 @@ describe('/api/articles', () => {
         orderBy: { publishedAt: 'desc' },
         skip: 0,
         take: 10,
-      })
-    })
+      });
+    });
 
     it('should handle database errors', async () => {
-      mockPrisma.article.findMany.mockRejectedValue(new Error('Database error'))
+      mockPrisma.article.findMany.mockRejectedValue(
+        new Error('Database error')
+      );
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles',
-      })
+      });
 
-      const response = await GET(req)
+      const response = await GET(req);
 
-      expect(response.status).toBe(500)
-      const data = await response.json()
-      expect(data.error).toBe('Failed to fetch articles')
-    })
+      expect(response.status).toBe(500);
+      const data = await response.json();
+      expect(data.error).toBe('Failed to fetch articles');
+    });
 
     it('should validate pagination parameters', async () => {
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles?page=-1&limit=0',
-      })
+      });
 
-      const response = await GET(req)
+      const response = await GET(req);
 
-      expect(response.status).toBe(400)
-      const data = await response.json()
-      expect(data.error).toBe('Invalid pagination parameters')
-    })
+      expect(response.status).toBe(400);
+      const data = await response.json();
+      expect(data.error).toBe('Invalid pagination parameters');
+    });
 
     it('should limit maximum page size', async () => {
-      mockPrisma.article.findMany.mockResolvedValue(mockArticles)
-      mockPrisma.article.count.mockResolvedValue(2)
+      mockPrisma.article.findMany.mockResolvedValue(mockArticles);
+      mockPrisma.article.count.mockResolvedValue(2);
 
       const { req } = createMocks({
         method: 'GET',
         url: '/api/articles?limit=1000',
-      })
+      });
 
-      const response = await GET(req)
-      const data = await response.json()
+      const response = await GET(req);
+      const data = await response.json();
 
-      expect(response.status).toBe(200)
-      expect(data.limit).toBe(50) // Should be capped at maximum
+      expect(response.status).toBe(200);
+      expect(data.limit).toBe(50); // Should be capped at maximum
 
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           take: 50,
         })
-      )
-    })
-  })
-})
+      );
+    });
+  });
+});

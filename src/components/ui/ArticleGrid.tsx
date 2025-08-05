@@ -37,7 +37,7 @@ export default function ArticleGrid({
 }: ArticleGridProps) {
   if (isLoading) {
     return (
-      <div 
+      <div
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
         aria-label="Loading articles"
         role="status"
@@ -104,14 +104,15 @@ export default function ArticleGrid({
           No articles found
         </h3>
         <p className="text-gray-500 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
-          There are no published articles matching your criteria. Try adjusting your search or filters, or check back later for new content!
+          There are no published articles matching your criteria. Try adjusting
+          your search or filters, or check back later for new content!
         </p>
       </div>
     );
   }
 
   return (
-    <div 
+    <div
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
       role="list"
       aria-label={`${articles.length} article${articles.length === 1 ? '' : 's'} found`}

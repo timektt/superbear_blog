@@ -210,11 +210,11 @@ body {
   .border-gray-300 {
     border-color: #000;
   }
-  
+
   .text-gray-500 {
     color: #000;
   }
-  
+
   .bg-gray-50 {
     background-color: #fff;
   }
@@ -230,15 +230,15 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  
+
   .animate-spin {
     animation: none;
   }
-  
+
   .article-card-hover:hover {
     transform: none;
   }
-  
+
   .ProseMirror img:hover {
     transform: none;
   }
@@ -272,11 +272,11 @@ input:invalid:focus {
   html {
     font-size: 14px;
   }
-  
+
   .text-xl {
     font-size: 1.125rem;
   }
-  
+
   .text-lg {
     font-size: 1rem;
   }
@@ -285,14 +285,14 @@ input:invalid:focus {
 /* Improved mobile touch targets */
 @media (max-width: 768px) {
   button,
-  [role="button"],
-  input[type="button"],
-  input[type="submit"],
+  [role='button'],
+  input[type='button'],
+  input[type='submit'],
   a {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   .touch-target {
     min-height: 44px;
     min-width: 44px;
@@ -308,18 +308,18 @@ input:invalid:focus {
     background: #1f2937;
     color: #f9fafb;
   }
-  
+
   .hljs-comment,
   .hljs-quote {
     color: #9ca3af;
   }
-  
+
   .hljs-keyword,
   .hljs-selector-tag,
   .hljs-subst {
     color: #f87171;
   }
-  
+
   .hljs-number,
   .hljs-literal,
   .hljs-variable,
@@ -327,7 +327,7 @@ input:invalid:focus {
   .hljs-tag .hljs-attr {
     color: #60a5fa;
   }
-  
+
   .hljs-string,
   .hljs-doctag {
     color: #34d399;

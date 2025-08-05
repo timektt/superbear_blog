@@ -133,3 +133,121 @@ export const DEFAULT_METADATA = {
     'software development',
   ],
 };
+
+/**
+ * Generates metadata for individual articles
+ */
+export function generateArticleMetadata(article: any): Metadata {
+  const baseUrl = 'https://superbear.blog';
+  const articleUrl = `${baseUrl}/news/${article.slug}`;
+  const defaultDescription =
+    'Read the latest tech news and insights on SuperBear Blog';
+
+  const description = article.summary || defaultDescription;
+  const image = article.image || `${baseUrl}/og-default.svg`;
+
+  // Generate keywords from tags and category
+  const tagNames = article.tags?.map((tag: any) => tag.name) || [];
+  const categoryName = article.category?.name || '';
+  const keywords = [
+    ...tagNames,
+    ...(categoryName ? [categoryName] : []),
+    'tech news',
+    'AI',
+    'development tools',
+  ].join(', ');
+
+  return {
+    title: `${article.title} | SuperBear Blog`,
+    description,
+    keywords,
+    authors: [{ name: article.author?.name || 'SuperBear Blog' }],
+    openGraph: {
+      title: article.title,
+      description,
+      type: 'article',
+      url: articleUrl,
+      images: [
+        {
+          url: image,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      publishedTime: article.publishedAt?.toISOString(),
+      authors: [article.author?.name || 'SuperBear Blog'],
+      tags: tagNames,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description,
+      images: [image],
+      creator: '@superbear_blog',
+    },
+  };
+}
+
+/**
+ * Generates site-wide metadata
+ */
+export function generateSiteMetadata(overrides: any = {}): Metadata {
+  const baseUrl = 'https://superbear.blog';
+  const defaultTitle = 'SuperBear Blog | Tech News & Insights';
+  const defaultDescription =
+    'Curated tech news, AI insights, and development tools for developers, AI builders, and tech entrepreneurs.';
+
+  const title = overrides.title || defaultTitle;
+  const description = overrides.description || defaultDescription;
+
+  return {
+    title: {
+      default: title,
+      template: '%s | SuperBear Blog',
+    },
+    description,
+    keywords:
+      'tech news, AI, development tools, startup news, programming, software development',
+    authors: [{ name: 'SuperBear Blog', url: baseUrl }],
+    creator: 'SuperBear Blog',
+    publisher: 'SuperBear Blog',
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      type: 'website',
+      locale: 'en_US',
+      url: baseUrl,
+      siteName: 'SuperBear Blog',
+      title,
+      description,
+      images: [
+        {
+          url: `${baseUrl}/og-default.svg`,
+          width: 1200,
+          height: 630,
+          alt: 'SuperBear Blog',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${baseUrl}/og-default.svg`],
+      creator: '@superbear_blog',
+    },
+    verification: {
+      google: 'your-google-verification-code',
+    },
+  };
+}

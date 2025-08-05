@@ -46,7 +46,7 @@ describe('SearchBar', () => {
   it('should call onSearch when provided', async () => {
     const mockOnSearch = jest.fn();
     const user = userEvent.setup();
-    
+
     render(<SearchBar onSearch={mockOnSearch} />);
 
     const input = screen.getByPlaceholderText('Search articles...');
@@ -62,7 +62,7 @@ describe('SearchBar', () => {
     render(<SearchBar />);
 
     const input = screen.getByPlaceholderText('Search articles...');
-    
+
     // Initially no clear button
     expect(
       screen.queryByRole('button', { name: /clear/i })
@@ -81,7 +81,7 @@ describe('SearchBar', () => {
   it('should clear search when clear button is clicked', async () => {
     const mockOnClear = jest.fn();
     const user = userEvent.setup();
-    
+
     render(<SearchBar onClear={mockOnClear} />);
 
     const input = screen.getByPlaceholderText('Search articles...');
@@ -124,7 +124,7 @@ describe('SearchBar', () => {
   it('should handle Enter key press', async () => {
     const mockOnSearch = jest.fn();
     const user = userEvent.setup();
-    
+
     render(<SearchBar onSearch={mockOnSearch} />);
 
     const input = screen.getByPlaceholderText('Search articles...');
@@ -139,7 +139,7 @@ describe('SearchBar', () => {
   it('should handle Escape key to clear search', async () => {
     const mockOnClear = jest.fn();
     const user = userEvent.setup();
-    
+
     render(<SearchBar onClear={mockOnClear} />);
 
     const input = screen.getByPlaceholderText('Search articles...');

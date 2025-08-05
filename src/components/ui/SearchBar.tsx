@@ -47,7 +47,7 @@ function SearchBar({
   const handleSearch = useCallback(
     (term: string) => {
       setIsSearching(true);
-      
+
       // Call external onSearch handler if provided
       if (onSearch) {
         onSearch(term);
@@ -69,7 +69,7 @@ function SearchBar({
 
         router.push(newUrl);
       }
-      
+
       // Reset searching state after a short delay
       setTimeout(() => setIsSearching(false), 500);
     },
@@ -158,7 +158,7 @@ function SearchBar({
           placeholder={placeholder}
           aria-label="Search articles"
           role="searchbox"
-          aria-describedby={searchTerm ? "search-clear-button" : undefined}
+          aria-describedby={searchTerm ? 'search-clear-button' : undefined}
           autoComplete="off"
           spellCheck="false"
         />
