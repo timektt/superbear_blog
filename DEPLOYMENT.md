@@ -8,6 +8,24 @@ This guide covers deploying the SuperBear Blog CMS to production environments.
 - PostgreSQL database (Render, Supabase, or similar)
 - Cloudinary account for image storage
 - Vercel account for hosting (recommended)
+- Docker (optional, for containerized deployment)
+
+## Pre-Deployment Validation
+
+Before deploying to production, run the pre-deployment check:
+
+```bash
+# Windows
+npm run deploy:validate
+
+# This will check:
+# - Environment variables
+# - Code quality (TypeScript, ESLint, Prettier)
+# - Build success
+# - Database connectivity
+# - Test suite
+# - Security audit
+```
 
 ## Environment Setup
 
@@ -91,53 +109,35 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ### Option 2: Docker Deployment
 
-1. **Create Dockerfile:**
-   ```dockerfile
-   FROM node:18-alpine AS base
+1. **Using Docker Compose (Recommended):**
+   ```bash
+   # Copy environment file
+   cp .env.production.example .env.production
+   # Edit .env.production with your values
    
-   # Install dependencies only when needed
-   FROM base AS deps
-   RUN apk add --no-cache libc6-compat
-   WORKDIR /app
+   # Deploy with Docker Compose
+   npm run deploy:docker:build
    
-   COPY package.json package-lock.json* ./
-   RUN npm ci --only=production
-   
-   # Rebuild the source code only when needed
-   FROM base AS builder
-   WORKDIR /app
-   COPY --from=deps /app/node_modules ./node_modules
-   COPY . .
-   
-   RUN npm run build
-   
-   # Production image
-   FROM base AS runner
-   WORKDIR /app
-   
-   ENV NODE_ENV production
-   
-   RUN addgroup --system --gid 1001 nodejs
-   RUN adduser --system --uid 1001 nextjs
-   
-   COPY --from=builder /app/public ./public
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-   COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-   
-   USER nextjs
-   
-   EXPOSE 3000
-   
-   ENV PORT 3000
-   
-   CMD ["node", "server.js"]
+   # Or manually:
+   docker-compose -f docker-compose.production.yml up --build -d
    ```
 
-2. **Build and Deploy:**
+2. **Manual Docker Build:**
    ```bash
-   docker build -t superbear-blog .
+   # Build production image
+   docker build -f Dockerfile.production -t superbear-blog .
+   
+   # Run container
    docker run -p 3000:3000 --env-file .env.production superbear-blog
    ```
+
+3. **With Nginx Reverse Proxy:**
+   The docker-compose setup includes Nginx with:
+   - SSL termination
+   - Rate limiting
+   - Gzip compression
+   - Security headers
+   - Static file caching
 
 ## Database Migration
 

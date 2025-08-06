@@ -3,11 +3,15 @@
 
 generator client {
   provider = "prisma-client-js"
+  // Enable query engine optimization for production
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Enable connection pooling and SSL for production
+  directUrl = env("DIRECT_URL")
 }
 
 model Article {

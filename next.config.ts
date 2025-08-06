@@ -93,7 +93,17 @@ const nextConfig: NextConfig = {
     swcMinify: true,
     compiler: {
       removeConsole: {
-        exclude: ['error'],
+        exclude: ['error', 'warn'],
+      },
+    },
+    // Enable static optimization
+    trailingSlash: false,
+    generateEtags: true,
+    
+    // Optimize bundle
+    modularizeImports: {
+      'lucide-react': {
+        transform: 'lucide-react/dist/esm/icons/{{member}}',
       },
     },
   }),

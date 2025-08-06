@@ -33,6 +33,28 @@ jest.mock('next-auth/react', () => ({
 
 jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
+  default: jest.fn(),
+}));
+
+// Mock jose (JWT library used by NextAuth)
+jest.mock('jose', () => ({
+  jwtVerify: jest.fn(),
+  SignJWT: jest.fn(),
+  importSPKI: jest.fn(),
+  importPKCS8: jest.fn(),
+}));
+
+// Mock openid-client (used by NextAuth providers)
+jest.mock('openid-client', () => ({
+  Issuer: {
+    discover: jest.fn(),
+  },
+  generators: {
+    codeVerifier: jest.fn(),
+    codeChallenge: jest.fn(),
+    state: jest.fn(),
+    nonce: jest.fn(),
+  },
 }));
 
 // Mock Cloudinary

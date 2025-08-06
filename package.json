@@ -31,9 +31,18 @@
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "build:analyze": "ANALYZE=true npm run build",
     "build:prod": "NODE_ENV=production npm run build",
+    "build:standalone": "NODE_ENV=production npm run build && npm run db:generate",
     "postbuild": "npm run db:generate",
     "start:prod": "bash scripts/production-start.sh",
-    "start:prod:windows": "powershell -ExecutionPolicy Bypass -File scripts/production-start.ps1"
+    "start:prod:windows": "powershell -ExecutionPolicy Bypass -File scripts/production-start.ps1",
+    "deploy:vercel": "vercel --prod",
+    "deploy:check": "npm run type-check && npm run lint && npm run test && npm run build:prod",
+    "deploy:validate": "powershell -ExecutionPolicy Bypass -File scripts/pre-deployment-check.ps1",
+    "deploy:docker": "docker-compose -f docker-compose.production.yml up -d",
+    "deploy:docker:build": "docker-compose -f docker-compose.production.yml up --build -d",
+    "health:check": "curl -f http://localhost:3000/api/health || exit 1",
+    "logs:prod": "vercel logs --follow",
+    "monitor:metrics": "node -e \"fetch('http://localhost:3000/api/health').then(r=>r.json()).then(console.log)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

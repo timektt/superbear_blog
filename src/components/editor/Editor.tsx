@@ -169,6 +169,15 @@ export function Editor({
         return;
       }
 
+      // Insert loading placeholder
+      const loadingId = `loading-${Date.now()}`;
+      editor.chain().focus().insertContent(`
+        <div id="${loadingId}" style="text-align: center; padding: 20px; border: 2px dashed #ccc; border-radius: 8px; margin: 10px 0;">
+          <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <p style="margin: 10px 0 0 0; color: #666;">Uploading image...</p>
+        </div>
+      `).run();
+
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -179,19 +188,42 @@ export function Editor({
         });
 
         if (!response.ok) {
-          throw new Error('Upload failed');
+          throw new Error(`Upload failed: ${response.status}`);
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        if (data.url) {
-          editor.chain().focus().setImage({ src: data.url }).run();
+        // Remove loading placeholder
+        const loadingElement = editor.view.dom.querySelector(`#${loadingId}`);
+        if (loadingElement) {
+          loadingElement.remove();
+        }
+
+        // Fix: Handle the nested response structure from API
+        if (result.success && result.data?.url) {
+          editor.chain().focus().setImage({ 
+            src: result.data.url,
+            alt: file.name,
+            title: file.name
+          }).run();
         } else {
-          throw new Error('No URL returned from upload');
+          throw new Error(result.error || 'No URL returned from upload');
         }
       } catch (error) {
+        // Remove loading placeholder on error
+        const loadingElement = editor.view.dom.querySelector(`#${loadingId}`);
+        if (loadingElement) {
+          loadingElement.remove();
+        }
+        
         console.error('Image upload failed:', error);
-        alert('Failed to upload image. Please try again.');
+        
+        // Insert error message
+        editor.chain().focus().insertContent(`
+          <div style="text-align: center; padding: 15px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 10px 0; color: #dc2626;">
+            <p style="margin: 0;">Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}</p>
+          </div>
+        `).run();
       }
     };
 
@@ -214,6 +246,12 @@ export function Editor({
     <div
       className={`border ${borderColor} rounded-lg overflow-hidden ${className}`}
     >
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
       <EditorToolbar
         editor={editor}
         onSetLink={setLink}

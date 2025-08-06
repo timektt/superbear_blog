@@ -322,3 +322,65 @@ export function sanitizeContent(content: JSONContent): JSONContent {
 
   return sanitized;
 }
+
+/**
+ * Extracts all image URLs from Tiptap JSON content
+ */
+export function extractImagesFromContent(content: string | JSONContent): string[] {
+  try {
+    let jsonContent: JSONContent;
+
+    if (typeof content === 'string') {
+      jsonContent = JSON.parse(content);
+    } else {
+      jsonContent = content;
+    }
+
+    const images: string[] = [];
+    
+    function traverse(node: JSONContent) {
+      if (node.type === 'image' && node.attrs?.src) {
+        images.push(node.attrs.src);
+      }
+      if (node.content) {
+        node.content.forEach(traverse);
+      }
+    }
+    
+    traverse(jsonContent);
+    return images;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Extracts public IDs from Cloudinary URLs in editor content
+ */
+export function extractCloudinaryPublicIds(content: string | JSONContent): string[] {
+  const images = extractImagesFromContent(content);
+  const publicIds: string[] = [];
+  
+  images.forEach(url => {
+    const publicId = getPublicIdFromCloudinaryUrl(url);
+    if (publicId) {
+      publicIds.push(publicId);
+    }
+  });
+  
+  return publicIds;
+}
+
+/**
+ * Extracts public ID from a Cloudinary URL
+ */
+function getPublicIdFromCloudinaryUrl(url: string): string | null {
+  try {
+    // Match Cloudinary URL pattern: https://res.cloudinary.com/cloud/image/upload/v123456/folder/image.jpg
+    const cloudinaryPattern = /\/upload\/(?:v\d+\/)?(.+)\.[a-zA-Z]+$/;
+    const match = url.match(cloudinaryPattern);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}

@@ -30,7 +30,7 @@ const customJestConfig = {
     '<rootDir>/src/tests/integration/**/*.test.{js,jsx,ts,tsx}',
   ],
   transformIgnorePatterns: [
-    'node_modules/(?!(jose|openid-client|oauth|@panva)/)',
+    'node_modules/(?!(@babel|next-auth|jose|openid-client|oauth|@panva|@auth|@next-auth)/)',
   ],
 };
 

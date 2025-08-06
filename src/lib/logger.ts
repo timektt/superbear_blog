@@ -3,6 +3,48 @@
  * Provides structured logging for production environments
  */
 
+import { duration } from "node_modules/zod/v4/core/regexes.cjs";
+
+import { url } from "zod";
+
+import { duration } from "node_modules/zod/v4/core/regexes.cjs";
+
+import { url } from "zod";
+
+import { number } from "zod";
+
+import { duration } from "node_modules/zod/v4/core/regexes.cjs";
+
+import { number } from "zod";
+
+import { string } from "zod";
+
+import { url } from "zod";
+
+import { string } from "zod";
+
+import { start } from "repl";
+
+import { start } from "repl";
+
+import { string } from "zod";
+
+import error from "next/error";
+
+import error from "next/error";
+
+import error from "next/error";
+
+import error from "next/error";
+
+import { duration } from "node_modules/zod/v4/core/regexes.cjs";
+
+import { url } from "zod";
+
+import { start } from "repl";
+
+import error from "next/error";
+
 export interface LogContext {
   userId?: string;
   requestId?: string;
@@ -78,10 +120,15 @@ class Logger {
     const entry = this.createLogEntry('error', message, context, error);
     console.error(this.formatLogEntry(entry));
 
-    // In production, you might want to send to external service
-    if (this.isProduction && process.env.SENTRY_DSN) {
-      // Sentry integration would go here
-      // Sentry.captureException(error || new Error(message), { contexts: { custom: context } });
+    // In production, send to external monitoring services
+    if (this.isProduction) {
+      // Send to external logging service
+      this.sendToExternalService(entry);
+      
+      // Sentry integration for error tracking
+      if (process.env.SENTRY_DSN && error) {
+        this.sendToSentry(error, context);
+      }
     }
   }
 
@@ -90,6 +137,76 @@ class Logger {
 
     const entry = this.createLogEntry('debug', message, context);
     console.debug(this.formatLogEntry(entry));
+  }
+}
+
+  private async sendToExternalService(entry: LogEntry): Promise<void> {
+    try {
+      // Example: Send to external logging service
+      if (process.env.LOG_WEBHOOK_URL) {
+        await fetch(process.env.LOG_WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(entry),
+        });
+      }
+    } catch (error) {
+      // Fallback to console if external service fails
+      console.error('Failed to send log to external service:', error);
+    }
+  }
+
+  private sendToSentry(error: Error, context?: LogContext): void {
+    try {
+      // Sentry integration placeholder
+      // In a real implementation, you would:
+      // import * as Sentry from '@sentry/nextjs';
+      // Sentry.captureException(error, { contexts: { custom: context } });
+      
+      // For now, we'll just structure the error for potential Sentry integration
+      const sentryData = {
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        },
+        context,
+        timestamp: new Date().toISOString(),
+      };
+      
+      // Log structured error data that can be picked up by monitoring tools
+      console.error('SENTRY_ERROR:', JSON.stringify(sentryData));
+    } catch (sentryError) {
+      console.error('Failed to send error to Sentry:', sentryError);
+    }
+  }
+
+  // Performance monitoring
+  startTimer(label: string): () => void {
+    const start = Date.now();
+    return () => {
+      const duration = Date.now() - start;
+      this.info(`Performance: ${label} completed in ${duration}ms`, {
+        performance: { label, duration },
+      });
+    };
+  }
+
+  // API request logging
+  logApiRequest(
+    method: string,
+    url: string,
+    statusCode: number,
+    duration: number,
+    context?: LogContext
+  ): void {
+    const level = statusCode >= 400 ? 'error' : statusCode >= 300 ? 'warn' : 'info';
+    this[level](`API ${method} ${url} - ${statusCode} (${duration}ms)`, {
+      ...context,
+      api: { method, url, statusCode, duration },
+    });
   }
 }
 
