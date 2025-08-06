@@ -123,9 +123,10 @@ function sanitizeNode(node: JSONContent): JSONContent {
     return { type: 'paragraph', content: [] };
   }
 
-  // Copy allowed attributes
+  // Copy allowed attributes with strict validation
   if (node.text) {
-    sanitized.text = node.text;
+    // Sanitize text content
+    sanitized.text = sanitizeTextContent(node.text);
   }
 
   if (node.attrs) {
@@ -164,42 +165,51 @@ function sanitizeNode(node: JSONContent): JSONContent {
       }
     }
     if (node.type === 'image' && node.attrs.src) {
-      // Basic URL validation for images
-      try {
-        const url = new URL(node.attrs.src);
-        // Only allow https URLs and Cloudinary URLs
-        if (
-          url.protocol === 'https:' &&
-          (url.hostname.includes('cloudinary.com') ||
-            url.hostname.includes('res.cloudinary.com'))
-        ) {
-          sanitized.attrs.src = node.attrs.src;
-          if (node.attrs.alt) {
-            sanitized.attrs.alt = node.attrs.alt;
-          }
-          if (node.attrs.title) {
-            sanitized.attrs.title = node.attrs.title;
-          }
+      // Enhanced image URL validation
+      const sanitizedImageUrl = sanitizeImageUrl(node.attrs.src);
+      if (sanitizedImageUrl) {
+        sanitized.attrs.src = sanitizedImageUrl;
+        if (node.attrs.alt && typeof node.attrs.alt === 'string') {
+          sanitized.attrs.alt = sanitizeTextContent(node.attrs.alt, 200);
         }
-      } catch {
-        // Invalid URL, skip this image
-        return { type: 'paragraph', content: [] };
+        if (node.attrs.title && typeof node.attrs.title === 'string') {
+          sanitized.attrs.title = sanitizeTextContent(node.attrs.title, 200);
+        }
+      } else {
+        // Invalid image URL, replace with placeholder
+        return {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: '[Image removed for security reasons]',
+            },
+          ],
+        };
       }
     }
   }
 
   if (node.marks) {
-    // Only allow specific marks
+    // Only allow specific marks with enhanced validation
     const allowedMarks = ['bold', 'italic', 'strike', 'code', 'link'];
     sanitized.marks = node.marks
       .filter((mark) => allowedMarks.includes(mark.type))
       .map((mark) => {
         if (mark.type === 'link' && mark.attrs?.href) {
-          // Basic URL validation
-          try {
-            new URL(mark.attrs.href);
-            return mark;
-          } catch {
+          // Enhanced URL validation for links
+          const sanitizedUrl = sanitizeLinkUrl(mark.attrs.href);
+          if (sanitizedUrl) {
+            return {
+              ...mark,
+              attrs: {
+                ...mark.attrs,
+                href: sanitizedUrl,
+                target: '_blank',
+                rel: 'noopener noreferrer',
+              },
+            };
+          } else {
             return null;
           }
         }
@@ -213,6 +223,116 @@ function sanitizeNode(node: JSONContent): JSONContent {
   }
 
   return sanitized;
+}
+
+/**
+ * Sanitize text content to prevent XSS
+ */
+function sanitizeTextContent(text: string, maxLength: number = 10000): string {
+  if (!text || typeof text !== 'string') return '';
+
+  return text
+    .trim()
+    .substring(0, maxLength)
+    .replace(/[<>]/g, '') // Remove angle brackets
+    .replace(/javascript:/gi, '') // Remove javascript: protocol
+    .replace(/data:/gi, '') // Remove data: protocol
+    .replace(/vbscript:/gi, ''); // Remove vbscript: protocol
+}
+
+/**
+ * Sanitize image URL with enhanced security
+ */
+function sanitizeImageUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsedUrl = new URL(url);
+
+    // Only allow HTTPS
+    if (parsedUrl.protocol !== 'https:') return null;
+
+    // Only allow Cloudinary domains
+    const allowedDomains = ['res.cloudinary.com', 'cloudinary.com'];
+
+    const isAllowedDomain = allowedDomains.some(
+      (domain) =>
+        parsedUrl.hostname === domain ||
+        parsedUrl.hostname.endsWith(`.${domain}`)
+    );
+
+    if (!isAllowedDomain) return null;
+
+    // Check for suspicious patterns
+    const suspiciousPatterns = [
+      /javascript:/i,
+      /data:/i,
+      /vbscript:/i,
+      /<script/i,
+      /onload=/i,
+      /onerror=/i,
+      /onclick=/i,
+      /onmouseover=/i,
+    ];
+
+    if (suspiciousPatterns.some((pattern) => pattern.test(url))) return null;
+
+    // Validate file extension
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+    const hasValidExtension = validExtensions.some((ext) =>
+      parsedUrl.pathname.toLowerCase().includes(ext)
+    );
+
+    if (!hasValidExtension) return null;
+
+    return url;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Sanitize link URL with enhanced security
+ */
+function sanitizeLinkUrl(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+
+  try {
+    const parsedUrl = new URL(url);
+
+    // Only allow HTTP and HTTPS
+    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null;
+
+    // Block suspicious patterns
+    const suspiciousPatterns = [
+      /javascript:/i,
+      /data:/i,
+      /vbscript:/i,
+      /file:/i,
+      /ftp:/i,
+    ];
+
+    if (suspiciousPatterns.some((pattern) => pattern.test(url))) return null;
+
+    // Block localhost and private IPs in production
+    if (process.env.NODE_ENV === 'production') {
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const privatePatterns = [
+        /^localhost$/,
+        /^127\./,
+        /^192\.168\./,
+        /^10\./,
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+      ];
+
+      if (privatePatterns.some((pattern) => pattern.test(hostname)))
+        return null;
+    }
+
+    return url;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -326,7 +446,9 @@ export function sanitizeContent(content: JSONContent): JSONContent {
 /**
  * Extracts all image URLs from Tiptap JSON content
  */
-export function extractImagesFromContent(content: string | JSONContent): string[] {
+export function extractImagesFromContent(
+  content: string | JSONContent
+): string[] {
   try {
     let jsonContent: JSONContent;
 
@@ -337,7 +459,7 @@ export function extractImagesFromContent(content: string | JSONContent): string[
     }
 
     const images: string[] = [];
-    
+
     function traverse(node: JSONContent) {
       if (node.type === 'image' && node.attrs?.src) {
         images.push(node.attrs.src);
@@ -346,7 +468,7 @@ export function extractImagesFromContent(content: string | JSONContent): string[
         node.content.forEach(traverse);
       }
     }
-    
+
     traverse(jsonContent);
     return images;
   } catch {
@@ -357,17 +479,19 @@ export function extractImagesFromContent(content: string | JSONContent): string[
 /**
  * Extracts public IDs from Cloudinary URLs in editor content
  */
-export function extractCloudinaryPublicIds(content: string | JSONContent): string[] {
+export function extractCloudinaryPublicIds(
+  content: string | JSONContent
+): string[] {
   const images = extractImagesFromContent(content);
   const publicIds: string[] = [];
-  
-  images.forEach(url => {
+
+  images.forEach((url) => {
     const publicId = getPublicIdFromCloudinaryUrl(url);
     if (publicId) {
       publicIds.push(publicId);
     }
   });
-  
+
   return publicIds;
 }
 

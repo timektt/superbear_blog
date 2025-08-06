@@ -51,7 +51,10 @@ export function Editor({
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-blue-600 underline hover:text-blue-800',
+          target: '_blank',
+          rel: 'noopener noreferrer',
         },
+        validate: href => /^https?:\/\//.test(href),
       }),
       Image.configure({
         HTMLAttributes: {
@@ -76,11 +79,27 @@ export function Editor({
     editable: !disabled,
     onUpdate: ({ editor }) => {
       const json = editor.getJSON();
-      const jsonString = JSON.stringify(json);
+      
+      // Check content size limits
+      const contentString = JSON.stringify(json);
+      const MAX_CONTENT_SIZE = 1024 * 1024; // 1MB
+      const MAX_IMAGES = 20;
+
+      if (contentString.length > MAX_CONTENT_SIZE) {
+        console.warn('Content is too large. Please reduce the amount of text or images.');
+        return;
+      }
+
+      // Count images
+      const imageCount = (contentString.match(/"type":"image"/g) || []).length;
+      if (imageCount > MAX_IMAGES) {
+        console.warn(`Too many images. Maximum allowed: ${MAX_IMAGES}`);
+        return;
+      }
 
       // Validate content before calling onChange
-      if (validateEditorContent(jsonString)) {
-        onChange?.(jsonString);
+      if (validateEditorContent(contentString)) {
+        onChange?.(contentString);
       }
     },
     editorProps: {
@@ -88,6 +107,16 @@ export function Editor({
         class: `prose prose-sm sm:prose-base lg:prose-lg max-w-none focus:outline-none min-h-[200px] p-3 sm:p-4 ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`,
+      },
+      handleDOMEvents: {
+        // Prevent default drag behavior for non-image elements
+        dragstart: (view, event) => {
+          const target = event.target as HTMLElement;
+          if (target.tagName !== 'IMG') {
+            event.preventDefault();
+          }
+          return false;
+        },
       },
     },
   });
@@ -115,6 +144,85 @@ export function Editor({
     }
   }, [editor, disabled]);
 
+  // Clipboard paste support
+  useEffect(() => {
+    if (!editor) return;
+
+    const handlePaste = async (event: ClipboardEvent) => {
+      const items = event.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        if (item.type.startsWith('image/')) {
+          event.preventDefault();
+          const file = item.getAsFile();
+          if (file) {
+            await uploadAndInsertImage(file);
+          }
+          break;
+        }
+      }
+    };
+
+    const editorElement = editor.view.dom;
+    editorElement.addEventListener('paste', handlePaste);
+
+    return () => {
+      editorElement.removeEventListener('paste', handlePaste);
+    };
+  }, [editor, uploadAndInsertImage]);
+
+  // Drag and drop support
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleDrop = async (event: DragEvent) => {
+      event.preventDefault();
+      const files = Array.from(event.dataTransfer?.files || []);
+      const imageFiles = files.filter(file => file.type.startsWith('image/'));
+      
+      if (imageFiles.length === 0) return;
+
+      // Upload and insert each image
+      for (const file of imageFiles) {
+        await uploadAndInsertImage(file);
+      }
+    };
+
+    const handleDragOver = (event: DragEvent) => {
+      event.preventDefault();
+      event.dataTransfer!.dropEffect = 'copy';
+    };
+
+    const handleDragEnter = (event: DragEvent) => {
+      event.preventDefault();
+      const editorElement = editor.view.dom;
+      editorElement.classList.add('drag-over');
+    };
+
+    const handleDragLeave = (event: DragEvent) => {
+      event.preventDefault();
+      const editorElement = editor.view.dom;
+      if (!editorElement.contains(event.relatedTarget as Node)) {
+        editorElement.classList.remove('drag-over');
+      }
+    };
+
+    const editorElement = editor.view.dom;
+    editorElement.addEventListener('drop', handleDrop);
+    editorElement.addEventListener('dragover', handleDragOver);
+    editorElement.addEventListener('dragenter', handleDragEnter);
+    editorElement.addEventListener('dragleave', handleDragLeave);
+
+    return () => {
+      editorElement.removeEventListener('drop', handleDrop);
+      editorElement.removeEventListener('dragover', handleDragOver);
+      editorElement.removeEventListener('dragenter', handleDragEnter);
+      editorElement.removeEventListener('dragleave', handleDragLeave);
+    };
+  }, [editor, uploadAndInsertImage]);
+
   const setLink = useCallback(() => {
     if (!editor || disabled) return;
 
@@ -132,19 +240,106 @@ export function Editor({
       return;
     }
 
-    // Basic URL validation
+    // Enhanced URL validation
     try {
-      new URL(url);
+      const parsedUrl = new URL(url);
+      // Only allow HTTP and HTTPS protocols
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        alert('Please enter a valid HTTP or HTTPS URL');
+        return;
+      }
       editor
         .chain()
         .focus()
         .extendMarkRange('link')
-        .setLink({ href: url })
+        .setLink({ 
+          href: url,
+          target: '_blank',
+          rel: 'noopener noreferrer'
+        })
         .run();
     } catch {
       alert('Please enter a valid URL');
     }
   }, [editor, disabled]);
+
+  // Enhanced image upload function
+  const uploadAndInsertImage = useCallback(async (file: File) => {
+    if (!editor || disabled) return;
+
+    // Validate file
+    if (file.size > 5 * 1024 * 1024) {
+      insertErrorMessage('Image size must be less than 5MB');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      insertErrorMessage('Please select a valid image file');
+      return;
+    }
+
+    // Insert loading placeholder
+    const loadingId = `loading-${Date.now()}`;
+    insertLoadingPlaceholder(loadingId, file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Remove loading placeholder
+      removeElement(loadingId);
+
+      if (result.success && result.data?.url) {
+        editor.chain().focus().setImage({ 
+          src: result.data.url,
+          alt: file.name,
+          title: file.name
+        }).run();
+      } else {
+        throw new Error(result.error || 'No URL returned from upload');
+      }
+    } catch (error) {
+      removeElement(loadingId);
+      console.error('Image upload failed:', error);
+      insertErrorMessage(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }, [editor, disabled, insertLoadingPlaceholder, insertErrorMessage, removeElement]);
+
+  // Helper functions for UI feedback
+  const insertLoadingPlaceholder = useCallback((id: string, fileName: string) => {
+    editor?.chain().focus().insertContent(`
+      <div id="${id}" style="text-align: center; padding: 20px; border: 2px dashed #ccc; border-radius: 8px; margin: 10px 0;">
+        <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+        <p style="margin: 10px 0 0 0; color: #666;">Uploading ${fileName}...</p>
+      </div>
+    `).run();
+  }, [editor]);
+
+  const insertErrorMessage = useCallback((message: string) => {
+    editor?.chain().focus().insertContent(`
+      <div style="text-align: center; padding: 15px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 10px 0; color: #dc2626;">
+        <p style="margin: 0;">${message}</p>
+      </div>
+    `).run();
+  }, [editor]);
+
+  const removeElement = useCallback((id: string) => {
+    const element = editor?.view.dom.querySelector(`#${id}`);
+    if (element) {
+      element.remove();
+    }
+  }, [editor]);
 
   const addImage = useCallback(async () => {
     if (!editor || disabled) return;
@@ -155,80 +350,56 @@ export function Editor({
 
     input.onchange = async (event) => {
       const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size must be less than 5MB');
-        return;
-      }
-
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file');
-        return;
-      }
-
-      // Insert loading placeholder
-      const loadingId = `loading-${Date.now()}`;
-      editor.chain().focus().insertContent(`
-        <div id="${loadingId}" style="text-align: center; padding: 20px; border: 2px dashed #ccc; border-radius: 8px; margin: 10px 0;">
-          <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-          <p style="margin: 10px 0 0 0; color: #666;">Uploading image...</p>
-        </div>
-      `).run();
-
-      try {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch('/api/upload-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status}`);
-        }
-
-        const result = await response.json();
-
-        // Remove loading placeholder
-        const loadingElement = editor.view.dom.querySelector(`#${loadingId}`);
-        if (loadingElement) {
-          loadingElement.remove();
-        }
-
-        // Fix: Handle the nested response structure from API
-        if (result.success && result.data?.url) {
-          editor.chain().focus().setImage({ 
-            src: result.data.url,
-            alt: file.name,
-            title: file.name
-          }).run();
-        } else {
-          throw new Error(result.error || 'No URL returned from upload');
-        }
-      } catch (error) {
-        // Remove loading placeholder on error
-        const loadingElement = editor.view.dom.querySelector(`#${loadingId}`);
-        if (loadingElement) {
-          loadingElement.remove();
-        }
-        
-        console.error('Image upload failed:', error);
-        
-        // Insert error message
-        editor.chain().focus().insertContent(`
-          <div style="text-align: center; padding: 15px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 10px 0; color: #dc2626;">
-            <p style="margin: 0;">Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}</p>
-          </div>
-        `).run();
+      if (file) {
+        await uploadAndInsertImage(file);
       }
     };
 
     input.click();
-  }, [editor, disabled]);
+  }, [editor, disabled, uploadAndInsertImage]);
+
+  // Broken image handling
+  useEffect(() => {
+    if (!editor) return;
+
+    const handleImageError = (event: Event) => {
+      const img = event.target as HTMLImageElement;
+      if (img.tagName === 'IMG') {
+        // Replace broken image with placeholder
+        const placeholder = document.createElement('div');
+        placeholder.className = 'broken-image-placeholder';
+        placeholder.style.cssText = `
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 100px;
+          background: #f3f4f6;
+          border: 2px dashed #d1d5db;
+          border-radius: 8px;
+          color: #6b7280;
+          font-size: 14px;
+          margin: 10px 0;
+        `;
+        placeholder.innerHTML = `
+          <div style="text-align: center;">
+            <div style="font-size: 24px; margin-bottom: 8px;">🖼️</div>
+            <div>Image failed to load</div>
+            <div style="font-size: 12px; margin-top: 4px; color: #9ca3af;">
+              ${img.src.substring(0, 50)}...
+            </div>
+          </div>
+        `;
+        img.parentNode?.replaceChild(placeholder, img);
+      }
+    };
+
+    const editorElement = editor.view.dom;
+    editorElement.addEventListener('error', handleImageError, true);
+
+    return () => {
+      editorElement.removeEventListener('error', handleImageError, true);
+    };
+  }, [editor]);
 
   if (!editor) {
     return (
@@ -250,6 +421,28 @@ export function Editor({
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        .ProseMirror.drag-over {
+          background-color: #f0f9ff;
+          border-color: #3b82f6;
+        }
+        .ProseMirror img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          margin: 10px auto;
+          display: block;
+        }
+        .ProseMirror img:hover {
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          transition: box-shadow 0.2s ease;
+        }
+        .broken-image-placeholder {
+          cursor: pointer;
+        }
+        .broken-image-placeholder:hover {
+          background: #e5e7eb;
         }
       `}</style>
       <EditorToolbar

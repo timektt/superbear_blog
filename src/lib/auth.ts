@@ -37,10 +37,16 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        // Check if user is active
+        if (!adminUser.isActive) {
+          return null;
+        }
+
         return {
           id: adminUser.id,
           email: adminUser.email,
           name: adminUser.name,
+          role: adminUser.role,
         };
       },
     }),
@@ -55,12 +61,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.role = (user as any).role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
+        session.user.role = token.role as string;
       }
       return session;
     },

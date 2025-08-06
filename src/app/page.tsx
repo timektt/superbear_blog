@@ -1,10 +1,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import PublicLayout from '@/components/layout/PublicLayout';
-import ArticleGrid from '@/components/ui/ArticleGrid';
+import MainLayout from '@/components/layout/MainLayout';
+import HeroSection from '@/components/sections/HeroSection';
+import NewsFeedSection from '@/components/sections/NewsFeedSection';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
-import { prisma } from '@/lib/prisma';
-import { Status } from '@prisma/client';
+import {
+  mockFeaturedArticle,
+  mockTopHeadlines,
+  mockNewsArticles,
+  placeholderImages,
+} from '@/lib/mockData';
 
 export const metadata: Metadata = createMetadata({
   title: 'SuperBear Blog - Tech News for Developers',
@@ -13,339 +18,98 @@ export const metadata: Metadata = createMetadata({
   url: '/',
 });
 
-async function getFeaturedArticles() {
-  try {
-    const articles = await prisma.article.findMany({
-      where: {
-        status: Status.PUBLISHED,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
-        },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        tags: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-      orderBy: {
-        publishedAt: 'desc',
-      },
-      take: 3,
-    });
+// Transform mock data to use actual placeholder images
+function transformMockData() {
+  const featuredArticle = {
+    ...mockFeaturedArticle,
+    imageUrl:
+      (placeholderImages as any)[mockFeaturedArticle.imageUrl] ||
+      mockFeaturedArticle.imageUrl,
+  };
 
-    return articles;
-  } catch (error) {
-    console.error('Error fetching featured articles:', error);
-    return [];
-  }
+  const newsArticles = mockNewsArticles.map((article) => ({
+    ...article,
+    imageUrl:
+      (placeholderImages as any)[article.imageUrl] || article.imageUrl,
+  }));
+
+  return { featuredArticle, newsArticles };
 }
 
-async function getRecentArticles() {
-  try {
-    const articles = await prisma.article.findMany({
-      where: {
-        status: Status.PUBLISHED,
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
-        },
-        category: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        tags: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-      },
-      orderBy: {
-        publishedAt: 'desc',
-      },
-      take: 6,
-    });
-
-    return articles;
-  } catch (error) {
-    console.error('Error fetching recent articles:', error);
-    return [];
-  }
-}
-
-async function getCategories() {
-  try {
-    const categories = await prisma.category.findMany({
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        _count: {
-          select: {
-            articles: {
-              where: {
-                status: Status.PUBLISHED,
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        name: 'asc',
-      },
-    });
-
-    // Only return categories that have published articles
-    return categories.filter((category) => category._count.articles > 0);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    return [];
-  }
-}
-
-export default async function Home() {
-  const [featuredArticles, recentArticles, categories] = await Promise.all([
-    getFeaturedArticles(),
-    getRecentArticles(),
-    getCategories(),
-  ]);
+export default function Home() {
+  const { featuredArticle, newsArticles } = transformMockData();
 
   return (
-    <PublicLayout>
-      <div className="space-y-12">
-        {/* Hero Section */}
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to SuperBear Blog
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Filtered, in-depth tech content for developers, AI builders, and
-            tech entrepreneurs. Stay ahead with the latest insights in AI,
-            DevTools, and startup developments.
-          </p>
-          <Link
-            href="/news"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
-          >
-            Explore All Articles
-            <svg
-              className="ml-2 -mr-1 w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </Link>
-        </div>
+    <MainLayout>
+      {/* Hero Section with Featured Article */}
+      <HeroSection
+        featuredArticle={featuredArticle}
+        topHeadlines={mockTopHeadlines}
+      />
 
-        {/* Category Navigation */}
-        {categories.length > 0 && (
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-              Browse by Category
+      {/* Latest News Feed */}
+      <NewsFeedSection articles={newsArticles} title="Latest News" />
+
+      {/* Categories Section */}
+      <section className="bg-white dark:bg-gray-900 py-16 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-center">
+              <div className="w-1 h-8 bg-indigo-600 rounded-full mr-4"></div>
+              Explore by Category
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  href={`/news?category=${category.slug}`}
-                  className="group bg-white p-6 rounded-lg shadow-sm border hover:shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-indigo-600 transition-colors">
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Dive deep into the topics that matter most to developers and tech
+              entrepreneurs
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
+            {[
+              {
+                name: 'AI',
+                href: '/ai',
+                icon: '🤖',
+                color: 'from-purple-500 to-indigo-600',
+              },
+              {
+                name: 'DevTools',
+                href: '/devtools',
+                icon: '⚡',
+                color: 'from-blue-500 to-cyan-600',
+              },
+              {
+                name: 'Open Source',
+                href: '/open-source',
+                icon: '🔓',
+                color: 'from-green-500 to-emerald-600',
+              },
+              {
+                name: 'Startups',
+                href: '/startups',
+                icon: '🚀',
+                color: 'from-orange-500 to-red-600',
+              },
+            ].map((category) => (
+              <Link
+                key={category.name}
+                href={category.href}
+                className="group relative overflow-hidden bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-300"
+              >
+                <div
+                  className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
+                ></div>
+                <div className="relative">
+                  <div className="text-3xl mb-3">{category.icon}</div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                     {category.name}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    {category._count.articles} article
-                    {category._count.articles !== 1 ? 's' : ''}
-                  </p>
-                  <div className="flex items-center text-indigo-600 text-sm font-medium group-hover:text-indigo-700">
-                    View articles
-                    <svg
-                      className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Featured Articles */}
-        {featuredArticles.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Featured Articles
-              </h2>
-              <Link
-                href="/news"
-                className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center group"
-              >
-                View all
-                <svg
-                  className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                </div>
               </Link>
-            </div>
-            <ArticleGrid articles={featuredArticles} />
-          </section>
-        )}
-
-        {/* Recent Articles */}
-        {recentArticles.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Recent Articles
-              </h2>
-              <Link
-                href="/news"
-                className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center group"
-              >
-                View all
-                <svg
-                  className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </Link>
-            </div>
-            <ArticleGrid articles={recentArticles} />
-          </section>
-        )}
-
-        {/* Content Focus Areas */}
-        <section>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            What We Cover
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                AI & LLM News
-              </h3>
-              <p className="text-gray-600">
-                Stay updated with the latest developments in artificial
-                intelligence and large language models.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Dev Tools & Open Source
-              </h3>
-              <p className="text-gray-600">
-                Discover new developer tools and open source projects that can
-                boost your productivity.
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                <svg
-                  className="w-6 h-6 text-indigo-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                  />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Startup & VC Tracking
-              </h3>
-              <p className="text-gray-600">
-                Get insights into the startup ecosystem and venture capital
-                trends.
-              </p>
-            </div>
+            ))}
           </div>
-        </section>
-      </div>
-    </PublicLayout>
+        </div>
+      </section>
+    </MainLayout>
   );
 }
