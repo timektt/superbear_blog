@@ -2,41 +2,88 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { uploadImage } from '@/lib/cloudinary';
+import {
+  rateLimit,
+  validateFileUpload,
+  logSecurityEvent,
+  SECURITY_HEADERS,
+} from '@/lib/security';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+// Rate limiter for file uploads (10 uploads per 15 minutes)
+const uploadRateLimit = rateLimit(10, 15 * 60 * 1000);
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const rateLimitResult = uploadRateLimit(request);
+    if (!rateLimitResult.allowed) {
+      logSecurityEvent(
+        'RATE_LIMIT_EXCEEDED',
+        {
+          endpoint: '/api/upload-image',
+          remaining: rateLimitResult.remaining,
+        },
+        request
+      );
+
+      return NextResponse.json(
+        { error: 'Too many upload requests. Please try again later.' },
+        {
+          status: 429,
+          headers: {
+            ...SECURITY_HEADERS,
+            'Retry-After': '900', // 15 minutes
+          },
+        }
+      );
+    }
+
     // Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      logSecurityEvent('UNAUTHORIZED_UPLOAD_ATTEMPT', {}, request);
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        {
+          status: 401,
+          headers: SECURITY_HEADERS,
+        }
+      );
     }
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    // Validate file type
-    if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
+        { error: 'No file provided' },
         {
-          error:
-            'Invalid file type. Only JPEG, PNG, WebP, and GIF are allowed.',
-        },
-        { status: 400 }
+          status: 400,
+          headers: SECURITY_HEADERS,
+        }
       );
     }
 
-    // Validate file size
-    if (file.size > MAX_FILE_SIZE) {
+    // Enhanced file validation
+    const validation = validateFileUpload(file);
+    if (!validation.valid) {
+      logSecurityEvent(
+        'INVALID_FILE_UPLOAD',
+        {
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          error: validation.error,
+        },
+        request
+      );
+
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 5MB.' },
-        { status: 400 }
+        { error: validation.error },
+        {
+          status: 400,
+          headers: SECURITY_HEADERS,
+        }
       );
     }
 
