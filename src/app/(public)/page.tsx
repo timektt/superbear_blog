@@ -9,10 +9,12 @@ import StartupsBlock from '@/components/sections/StartupsBlock';
 import PodcastsBlock from '@/components/sections/PodcastsBlock';
 import ExploreByCategory from '@/components/sections/ExploreByCategory';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
+import { getPrisma } from '@/lib/prisma';
+import { IS_DB_CONFIGURED } from '@/lib/env';
 import {
-  mockFeaturedArticle,
-  mockTopHeadlines,
-  mockLatestArticles,
+  MOCK_FEATURED,
+  MOCK_TOP_HEADLINES,
+  MOCK_LATEST,
   mockRightRailItems,
   mockStorylinesItems,
   mockStartupsFeatured,
@@ -27,7 +29,89 @@ export const metadata: Metadata = createMetadata({
   url: '/',
 });
 
-export default function Home() {
+export default async function Home() {
+  const prisma = getPrisma();
+
+  // DB-Safe Mode: Use mock data when database is not configured
+  if (!IS_DB_CONFIGURED || !prisma) {
+    return (
+      <>
+        {/* DB-Safe Mode Banner */}
+        <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <p className="text-sm text-amber-800 dark:text-amber-200 text-center">
+              🔧 Running in DB-safe mode with mock data. Configure DATABASE_URL to load real content.
+            </p>
+          </div>
+        </div>
+        <HomeView 
+          featured={MOCK_FEATURED} 
+          headlines={MOCK_TOP_HEADLINES} 
+          latest={MOCK_LATEST} 
+        />
+      </>
+    );
+  }
+
+  // Real DB Mode: Fetch data from database
+  try {
+    const [featuredResults, headlines, latest] = await Promise.all([
+      prisma.article.findMany({
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        include: { author: true, category: true },
+      }),
+      prisma.article.findMany({
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+        select: { title: true, slug: true, createdAt: true },
+      }),
+      prisma.article.findMany({
+        where: { status: 'PUBLISHED' },
+        orderBy: { createdAt: 'desc' },
+        take: 9,
+        include: { author: true, category: true, tags: true },
+      }),
+    ]);
+
+    const featured = featuredResults[0] || MOCK_FEATURED;
+    
+    return (
+      <HomeView 
+        featured={featured} 
+        headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES} 
+        latest={latest.length > 0 ? latest : MOCK_LATEST} 
+      />
+    );
+  } catch (error) {
+    console.warn('Database query failed, falling back to mock data:', error);
+    return (
+      <>
+        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+            <p className="text-sm text-red-800 dark:text-red-200 text-center">
+              ⚠️ Database connection failed. Displaying mock data.
+            </p>
+          </div>
+        </div>
+        <HomeView 
+          featured={MOCK_FEATURED} 
+          headlines={MOCK_TOP_HEADLINES} 
+          latest={MOCK_LATEST} 
+        />
+      </>
+    );
+  }
+}
+
+// Home View Component
+function HomeView({ featured, headlines, latest }: {
+  featured: any;
+  headlines: any[];
+  latest: any[];
+}) {
   return (
     <>
       {/* Hero Band - TechCrunch Structure */}
@@ -36,12 +120,12 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Featured Article - Left 8 cols */}
             <div className="lg:col-span-8">
-              <Hero featuredArticle={mockFeaturedArticle} />
+              <Hero featuredArticle={featured} />
             </div>
 
             {/* Top Headlines - Right 4 cols */}
             <div className="lg:col-span-4">
-              <TopHeadlines headlines={mockTopHeadlines} />
+              <TopHeadlines headlines={headlines} />
             </div>
           </div>
         </div>
@@ -66,7 +150,7 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Latest List - Left 8-9 cols */}
             <div className="lg:col-span-8">
-              <LatestList articles={mockLatestArticles.slice(0, 6)} />
+              <LatestList articles={latest.slice(0, 6)} />
             </div>
 
             {/* Right Rail - Right 3-4 cols */}

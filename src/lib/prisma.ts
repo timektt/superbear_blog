@@ -7,23 +7,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientType;
 };
 
-let prisma: PrismaClientType = null;
-
 export function getPrisma(): PrismaClientType {
   if (!IS_DB_CONFIGURED) return null;
   
   if (globalForPrisma.prisma) return globalForPrisma.prisma;
-  if (prisma) return prisma;
   
   try {
     const { PrismaClient } = require('@prisma/client');
-    prisma = new PrismaClient();
+    const client = new PrismaClient();
     
     if (process.env.NODE_ENV !== 'production') {
-      globalForPrisma.prisma = prisma;
+      globalForPrisma.prisma = client;
     }
     
-    return prisma;
+    return client;
   } catch (error) {
     console.warn('Prisma client initialization failed, falling back to mock data:', error);
     return null;

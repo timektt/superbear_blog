@@ -6,8 +6,9 @@ import OptimizedImage from '@/components/ui/OptimizedImage';
 import ArticleCard from '@/components/ui/ArticleCard';
 import SocialShareButtons from '@/components/ui/SocialShareButtons';
 import StructuredData from '@/components/ui/StructuredData';
-import { prisma } from '@/lib/prisma';
-import { Status } from '@prisma/client';
+import { getPrisma } from '@/lib/prisma';
+import { IS_DB_CONFIGURED } from '@/lib/env';
+import { MOCK_ARTICLE } from '@/lib/mockData';
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -18,36 +19,46 @@ export async function generateMetadata({
   params,
 }: ArticlePageProps): Promise<Metadata> {
   const { slug } = await params;
+  const prisma = getPrisma();
 
-  const article = await prisma.article.findUnique({
-    where: {
-      slug,
-      status: Status.PUBLISHED,
-    },
-    include: {
-      author: {
-        select: {
-          name: true,
-        },
-      },
-      category: {
-        select: {
-          name: true,
-        },
-      },
-      tags: {
-        select: {
-          name: true,
-        },
-      },
-    },
-  });
-
-  if (!article) {
+  // DB-Safe Mode: Use mock data for metadata
+  if (!IS_DB_CONFIGURED || !prisma) {
     return {
-      title: 'Article Not Found - SuperBear Blog',
+      title: `${MOCK_ARTICLE.title} - SuperBear Blog`,
+      description: MOCK_ARTICLE.summary,
     };
   }
+
+  try {
+    const article = await prisma.article.findFirst({
+      where: {
+        slug,
+        status: 'PUBLISHED',
+      },
+      include: {
+        author: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
+        tags: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!article) {
+      return {
+        title: 'Article Not Found - SuperBear Blog',
+      };
+    }
 
   const title = `${article.title}`;
   const description =
@@ -120,86 +131,110 @@ export async function generateMetadata({
       },
     },
   };
+  } catch (error) {
+    return {
+      title: `${MOCK_ARTICLE.title} - SuperBear Blog`,
+      description: MOCK_ARTICLE.summary,
+    };
+  }
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
+  const prisma = getPrisma();
 
-  // Fetch article with all related data
-  const result = await prisma.article.findUnique({
-    where: {
-      slug,
-      status: Status.PUBLISHED,
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          bio: true,
-          avatar: true,
-        },
-      },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      tags: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-    },
-  });
-
-  if (!result) {
-    notFound();
+  // DB-Safe Mode: Use mock data when database is not configured
+  if (!IS_DB_CONFIGURED || !prisma) {
+    return <ArticleView article={MOCK_ARTICLE as any} relatedArticles={[]} />;
   }
 
-  // Get related articles from the same category
-  const relatedArticles = await prisma.article.findMany({
-    where: {
-      categoryId: result.categoryId,
-      status: Status.PUBLISHED,
-      id: {
-        not: result.id,
+  try {
+    // Fetch article with all related data
+    const result = await prisma.article.findFirst({
+      where: {
+        slug,
+        status: 'PUBLISHED',
       },
-    },
-    include: {
-      author: {
-        select: {
-          id: true,
-          name: true,
-          avatar: true,
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            bio: true,
+            avatar: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
         },
       },
-      category: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-      tags: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-      },
-    },
-    orderBy: {
-      publishedAt: 'desc',
-    },
-    take: 3,
-  });
+    });
 
-  const article = result;
+    if (!result) {
+      notFound();
+    }
+
+    // Get related articles from the same category
+    const relatedArticles = await prisma.article.findMany({
+      where: {
+        categoryId: result.categoryId,
+        status: 'PUBLISHED',
+        id: {
+          not: result.id,
+        },
+      },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true,
+            avatar: true,
+          },
+        },
+        category: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        tags: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
+      take: 3,
+    });
+
+    return <ArticleView article={result} relatedArticles={relatedArticles} />;
+  } catch (error) {
+    console.warn('Database query failed, falling back to mock data:', error);
+    return <ArticleView article={MOCK_ARTICLE as any} relatedArticles={[]} />;
+  }
+}
+
+// Article View Component
+function ArticleView({ article, relatedArticles }: {
+  article: any;
+  relatedArticles: any[];
+}) {
   const articleUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/news/${article.slug}`;
 
   return (
