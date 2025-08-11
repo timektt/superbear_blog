@@ -2,39 +2,39 @@
 
 export const mockFeaturedArticle = {
   title: "OpenAI launches GPT-5 with real-time voice + vision",
-  summary: "The next-generation LLM supports multimodal reasoning, memory, and real-time assistant use cases, marking a significant leap in AI capabilities.",
+  summary: "Next-gen LLM adds multimodal reasoning, memory, and real-time assistant capabilities.",
   category: "AI",
-  imageUrl: "/mock/gpt5.jpg",
-  slug: "openai-gpt5-launch",
-  author: "Sarah Chen",
-  date: "Aug 6, 2025"
+  author: "Tech Writer",
+  date: "Aug 6, 2025",
+  imageUrl: "https://images.unsplash.com/photo-1527443224154-9c6c2e3f1f2a?w=1200&h=600&fit=crop",
+  slug: "openai-gpt5-launch"
 };
 
 export const mockTopHeadlines = [
   {
-    title: "DeepMind reveals AlphaFold 3 with protein interaction prediction",
-    slug: "deepmind-alphafold-3",
-    category: "AI"
+    title: "DeepMind unveils AlphaFold 3",
+    timeAgo: "4h ago",
+    slug: "deepmind-alphafold-3"
   },
   {
-    title: "Microsoft open-sources Orca-Mini for edge computing",
-    slug: "microsoft-orca-mini-open-source",
-    category: "Open Source"
+    title: "GitHub Copilot adds Team Sync",
+    timeAgo: "6h ago",
+    slug: "github-copilot-team-sync"
   },
   {
-    title: "Anthropic shows Claude 3.5 Turbo with 200K context window",
-    slug: "anthropic-claude-35-turbo",
-    category: "AI"
+    title: "Anthropic ships Claude 3.5 Turbo",
+    timeAgo: "8h ago",
+    slug: "anthropic-claude-35-turbo"
   },
   {
-    title: "GitHub Copilot gets team sync mode for collaborative coding",
-    slug: "github-copilot-team-sync",
-    category: "DevTools"
+    title: "Vercel introduces Edge Runtimes 2.0",
+    timeAgo: "12h ago",
+    slug: "vercel-edge-runtimes-2"
   },
   {
-    title: "Nvidia hits $4T market cap on AI chip demand surge",
-    slug: "nvidia-4t-market-cap",
-    category: "Startups"
+    title: "Nvidia tops $4T market cap",
+    timeAgo: "1d ago",
+    slug: "nvidia-4t-market-cap"
   }
 ];
 
