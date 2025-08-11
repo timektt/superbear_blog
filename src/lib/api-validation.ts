@@ -12,39 +12,59 @@ export const paginationSchema = z.object({
 });
 
 export const searchSchema = z.object({
-  q: z.string().min(1).max(200).transform(val => sanitizeInput(val, 200)),
-  category: z.string().max(100).optional().transform(val => 
-    val ? sanitizeInput(val, 100) : undefined
-  ),
-  tags: z.string().max(500).optional().transform(val => 
-    val ? val.split(',').map(tag => sanitizeInput(tag.trim(), 50)).filter(Boolean) : []
-  ),
+  q: z
+    .string()
+    .min(1)
+    .max(200)
+    .transform((val) => sanitizeInput(val, 200)),
+  category: z
+    .string()
+    .max(100)
+    .optional()
+    .transform((val) => (val ? sanitizeInput(val, 100) : undefined)),
+  tags: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((val) =>
+      val
+        ? val
+            .split(',')
+            .map((tag) => sanitizeInput(tag.trim(), 50))
+            .filter(Boolean)
+        : []
+    ),
 });
 
 export const slugSchema = z.object({
-  slug: z.string()
+  slug: z
+    .string()
     .min(1, 'Slug is required')
     .max(200, 'Slug too long')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format')
-    .transform(val => sanitizeInput(val, 200)),
+    .transform((val) => sanitizeInput(val, 200)),
 });
 
 // Article validation schemas
 export const createArticleSchema = z.object({
-  title: z.string()
+  title: z
+    .string()
     .min(1, 'Title is required')
     .max(200, 'Title too long')
-    .transform(val => sanitizeInput(val, 200)),
-  slug: z.string()
+    .transform((val) => sanitizeInput(val, 200)),
+  slug: z
+    .string()
     .max(200, 'Slug too long')
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Invalid slug format')
     .optional()
-    .transform(val => val ? sanitizeInput(val, 200) : undefined),
-  summary: z.string()
+    .transform((val) => (val ? sanitizeInput(val, 200) : undefined)),
+  summary: z
+    .string()
     .max(500, 'Summary too long')
     .optional()
-    .transform(val => val ? sanitizeInput(val, 500) : undefined),
-  content: z.string()
+    .transform((val) => (val ? sanitizeInput(val, 500) : undefined)),
+  content: z
+    .string()
     .min(1, 'Content is required')
     .refine((val) => {
       try {
@@ -54,12 +74,15 @@ export const createArticleSchema = z.object({
         return false;
       }
     }, 'Content must be valid Tiptap JSON'),
-  image: z.string()
+  image: z
+    .string()
     .url('Invalid image URL')
     .optional()
     .refine((val) => {
       if (!val) return true;
-      return val.includes('cloudinary.com') || val.includes('res.cloudinary.com');
+      return (
+        val.includes('cloudinary.com') || val.includes('res.cloudinary.com')
+      );
     }, 'Image must be from Cloudinary'),
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
   authorId: z.string().uuid('Invalid author ID'),
@@ -73,15 +96,28 @@ export const updateArticleSchema = createArticleSchema.partial().extend({
 
 // Query parameter validation
 export const articlesQuerySchema = paginationSchema.extend({
-  category: z.string().max(100).optional().transform(val => 
-    val ? sanitizeInput(val, 100) : undefined
-  ),
-  tags: z.string().max(500).optional().transform(val => 
-    val ? val.split(',').map(tag => sanitizeInput(tag.trim(), 50)).filter(Boolean) : []
-  ),
-  search: z.string().max(200).optional().transform(val => 
-    val ? sanitizeInput(val, 200) : undefined
-  ),
+  category: z
+    .string()
+    .max(100)
+    .optional()
+    .transform((val) => (val ? sanitizeInput(val, 100) : undefined)),
+  tags: z
+    .string()
+    .max(500)
+    .optional()
+    .transform((val) =>
+      val
+        ? val
+            .split(',')
+            .map((tag) => sanitizeInput(tag.trim(), 50))
+            .filter(Boolean)
+        : []
+    ),
+  search: z
+    .string()
+    .max(200)
+    .optional()
+    .transform((val) => (val ? sanitizeInput(val, 200) : undefined)),
 });
 
 export const searchQuerySchema = paginationSchema.merge(searchSchema);
@@ -122,7 +158,7 @@ export function validateSlug(slug: string) {
 export function createValidationErrorResponse(error: z.ZodError) {
   return {
     error: 'Validation failed',
-    details: error.issues.map(issue => ({
+    details: error.issues.map((issue) => ({
       field: issue.path.join('.'),
       message: issue.message,
     })),

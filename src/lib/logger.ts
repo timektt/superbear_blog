@@ -3,54 +3,12 @@
  * Provides structured logging for production environments
  */
 
-import { duration } from "node_modules/zod/v4/core/regexes.cjs";
-
-import { url } from "zod";
-
-import { duration } from "node_modules/zod/v4/core/regexes.cjs";
-
-import { url } from "zod";
-
-import { number } from "zod";
-
-import { duration } from "node_modules/zod/v4/core/regexes.cjs";
-
-import { number } from "zod";
-
-import { string } from "zod";
-
-import { url } from "zod";
-
-import { string } from "zod";
-
-import { start } from "repl";
-
-import { start } from "repl";
-
-import { string } from "zod";
-
-import error from "next/error";
-
-import error from "next/error";
-
-import error from "next/error";
-
-import error from "next/error";
-
-import { duration } from "node_modules/zod/v4/core/regexes.cjs";
-
-import { url } from "zod";
-
-import { start } from "repl";
-
-import error from "next/error";
-
 export interface LogContext {
   userId?: string;
   requestId?: string;
   userAgent?: string;
   ip?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface LogEntry {
@@ -124,7 +82,7 @@ class Logger {
     if (this.isProduction) {
       // Send to external logging service
       this.sendToExternalService(entry);
-      
+
       // Sentry integration for error tracking
       if (process.env.SENTRY_DSN && error) {
         this.sendToSentry(error, context);
@@ -138,7 +96,6 @@ class Logger {
     const entry = this.createLogEntry('debug', message, context);
     console.debug(this.formatLogEntry(entry));
   }
-}
 
   private async sendToExternalService(entry: LogEntry): Promise<void> {
     try {
@@ -164,7 +121,7 @@ class Logger {
       // In a real implementation, you would:
       // import * as Sentry from '@sentry/nextjs';
       // Sentry.captureException(error, { contexts: { custom: context } });
-      
+
       // For now, we'll just structure the error for potential Sentry integration
       const sentryData = {
         error: {
@@ -175,7 +132,7 @@ class Logger {
         context,
         timestamp: new Date().toISOString(),
       };
-      
+
       // Log structured error data that can be picked up by monitoring tools
       console.error('SENTRY_ERROR:', JSON.stringify(sentryData));
     } catch (sentryError) {
@@ -202,11 +159,18 @@ class Logger {
     duration: number,
     context?: LogContext
   ): void {
-    const level = statusCode >= 400 ? 'error' : statusCode >= 300 ? 'warn' : 'info';
-    this[level](`API ${method} ${url} - ${statusCode} (${duration}ms)`, {
+    const apiContext = {
       ...context,
       api: { method, url, statusCode, duration },
-    });
+    };
+    
+    if (statusCode >= 400) {
+      this.error(`API ${method} ${url} - ${statusCode} (${duration}ms)`, undefined, apiContext);
+    } else if (statusCode >= 300) {
+      this.warn(`API ${method} ${url} - ${statusCode} (${duration}ms)`, apiContext);
+    } else {
+      this.info(`API ${method} ${url} - ${statusCode} (${duration}ms)`, apiContext);
+    }
   }
 }
 

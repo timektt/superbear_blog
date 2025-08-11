@@ -17,7 +17,10 @@ interface NewsFeedSectionProps {
   title?: string;
 }
 
-export default function NewsFeedSection({ articles, title = "Latest News" }: NewsFeedSectionProps) {
+export default function NewsFeedSection({
+  articles,
+  title = 'Latest News',
+}: NewsFeedSectionProps) {
   return (
     <section className="bg-gray-50 dark:bg-gray-900 py-12 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -27,7 +30,7 @@ export default function NewsFeedSection({ articles, title = "Latest News" }: New
             <div className="w-1 h-8 bg-indigo-600 rounded-full mr-4"></div>
             {title}
           </h2>
-          
+
           <button className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold text-sm flex items-center transition-colors duration-200">
             View All
             <svg

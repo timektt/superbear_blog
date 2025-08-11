@@ -24,7 +24,10 @@ interface HeroSectionProps {
   topHeadlines: TopHeadline[];
 }
 
-export default function HeroSection({ featuredArticle, topHeadlines }: HeroSectionProps) {
+export default function HeroSection({
+  featuredArticle,
+  topHeadlines,
+}: HeroSectionProps) {
   return (
     <section className="relative bg-white dark:bg-gray-900 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -101,7 +104,7 @@ export default function HeroSection({ featuredArticle, topHeadlines }: HeroSecti
                 <div className="w-1 h-6 bg-indigo-600 rounded-full mr-3"></div>
                 Top Headlines
               </h2>
-              
+
               <div className="space-y-4">
                 {topHeadlines.map((headline, index) => (
                   <Link

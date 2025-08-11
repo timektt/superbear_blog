@@ -54,7 +54,7 @@ export function Editor({
           target: '_blank',
           rel: 'noopener noreferrer',
         },
-        validate: href => /^https?:\/\//.test(href),
+        validate: (href) => /^https?:\/\//.test(href),
       }),
       Image.configure({
         HTMLAttributes: {
@@ -79,14 +79,16 @@ export function Editor({
     editable: !disabled,
     onUpdate: ({ editor }) => {
       const json = editor.getJSON();
-      
+
       // Check content size limits
       const contentString = JSON.stringify(json);
       const MAX_CONTENT_SIZE = 1024 * 1024; // 1MB
       const MAX_IMAGES = 20;
 
       if (contentString.length > MAX_CONTENT_SIZE) {
-        console.warn('Content is too large. Please reduce the amount of text or images.');
+        console.warn(
+          'Content is too large. Please reduce the amount of text or images.'
+        );
         return;
       }
 
@@ -137,6 +139,150 @@ export function Editor({
     }
   }, [editor, content]);
 
+  // Helper functions for UI feedback
+  const insertLoadingPlaceholder = useCallback(
+    (id: string, fileName: string) => {
+      if (!editor) return;
+
+      const loadingHtml = `
+      <div id="${id}" class="loading-placeholder" style="
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        background: #f3f4f6;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        margin: 8px 0;
+        color: #6b7280;
+        font-size: 14px;
+      ">
+        <div style="
+          width: 16px;
+          height: 16px;
+          border: 2px solid #d1d5db;
+          border-top: 2px solid #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+        "></div>
+        Uploading ${fileName}...
+      </div>
+      <style>
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      </style>
+    `;
+
+      editor.chain().focus().insertContent(loadingHtml).run();
+    },
+    [editor]
+  );
+
+  const insertErrorMessage = useCallback(
+    (message: string) => {
+      if (!editor) return;
+
+      const errorHtml = `
+      <div class="error-message" style="
+        padding: 12px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 8px;
+        margin: 8px 0;
+        color: #dc2626;
+        font-size: 14px;
+      ">
+        ⚠️ ${message}
+      </div>
+    `;
+
+      editor.chain().focus().insertContent(errorHtml).run();
+    },
+    [editor]
+  );
+
+  const removeElement = useCallback(
+    (id: string) => {
+      if (!editor) return;
+
+      const element = editor.view.dom.querySelector(`#${id}`);
+      if (element) {
+        element.remove();
+      }
+    },
+    [editor]
+  );
+
+  // Enhanced image upload function
+  const uploadAndInsertImage = useCallback(
+    async (file: File) => {
+      if (!editor || disabled) return;
+
+      // Validate file
+      if (file.size > 5 * 1024 * 1024) {
+        insertErrorMessage('Image size must be less than 5MB');
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        insertErrorMessage('Please select a valid image file');
+        return;
+      }
+
+      // Insert loading placeholder
+      const loadingId = `loading-${Date.now()}`;
+      insertLoadingPlaceholder(loadingId, file.name);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch('/api/upload-image', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error(`Upload failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        // Remove loading placeholder
+        removeElement(loadingId);
+
+        if (result.success && result.data?.url) {
+          editor
+            .chain()
+            .focus()
+            .setImage({
+              src: result.data.url,
+              alt: file.name,
+              title: file.name,
+            })
+            .run();
+        } else {
+          throw new Error(result.error || 'No URL returned from upload');
+        }
+      } catch (error) {
+        removeElement(loadingId);
+        console.error('Image upload failed:', error);
+        insertErrorMessage(
+          `Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    },
+    [
+      editor,
+      disabled,
+      insertLoadingPlaceholder,
+      insertErrorMessage,
+      removeElement,
+    ]
+  );
+
   // Update editor editable state
   useEffect(() => {
     if (editor) {
@@ -180,8 +326,8 @@ export function Editor({
     const handleDrop = async (event: DragEvent) => {
       event.preventDefault();
       const files = Array.from(event.dataTransfer?.files || []);
-      const imageFiles = files.filter(file => file.type.startsWith('image/'));
-      
+      const imageFiles = files.filter((file) => file.type.startsWith('image/'));
+
       if (imageFiles.length === 0) return;
 
       // Upload and insert each image
@@ -252,94 +398,16 @@ export function Editor({
         .chain()
         .focus()
         .extendMarkRange('link')
-        .setLink({ 
+        .setLink({
           href: url,
           target: '_blank',
-          rel: 'noopener noreferrer'
+          rel: 'noopener noreferrer',
         })
         .run();
     } catch {
       alert('Please enter a valid URL');
     }
   }, [editor, disabled]);
-
-  // Enhanced image upload function
-  const uploadAndInsertImage = useCallback(async (file: File) => {
-    if (!editor || disabled) return;
-
-    // Validate file
-    if (file.size > 5 * 1024 * 1024) {
-      insertErrorMessage('Image size must be less than 5MB');
-      return;
-    }
-
-    if (!file.type.startsWith('image/')) {
-      insertErrorMessage('Please select a valid image file');
-      return;
-    }
-
-    // Insert loading placeholder
-    const loadingId = `loading-${Date.now()}`;
-    insertLoadingPlaceholder(loadingId, file.name);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/upload-image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Upload failed: ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      // Remove loading placeholder
-      removeElement(loadingId);
-
-      if (result.success && result.data?.url) {
-        editor.chain().focus().setImage({ 
-          src: result.data.url,
-          alt: file.name,
-          title: file.name
-        }).run();
-      } else {
-        throw new Error(result.error || 'No URL returned from upload');
-      }
-    } catch (error) {
-      removeElement(loadingId);
-      console.error('Image upload failed:', error);
-      insertErrorMessage(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    }
-  }, [editor, disabled, insertLoadingPlaceholder, insertErrorMessage, removeElement]);
-
-  // Helper functions for UI feedback
-  const insertLoadingPlaceholder = useCallback((id: string, fileName: string) => {
-    editor?.chain().focus().insertContent(`
-      <div id="${id}" style="text-align: center; padding: 20px; border: 2px dashed #ccc; border-radius: 8px; margin: 10px 0;">
-        <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-        <p style="margin: 10px 0 0 0; color: #666;">Uploading ${fileName}...</p>
-      </div>
-    `).run();
-  }, [editor]);
-
-  const insertErrorMessage = useCallback((message: string) => {
-    editor?.chain().focus().insertContent(`
-      <div style="text-align: center; padding: 15px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 10px 0; color: #dc2626;">
-        <p style="margin: 0;">${message}</p>
-      </div>
-    `).run();
-  }, [editor]);
-
-  const removeElement = useCallback((id: string) => {
-    const element = editor?.view.dom.querySelector(`#${id}`);
-    if (element) {
-      element.remove();
-    }
-  }, [editor]);
 
   const addImage = useCallback(async () => {
     if (!editor || disabled) return;
@@ -419,8 +487,12 @@ export function Editor({
     >
       <style jsx>{`
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
         .ProseMirror.drag-over {
           background-color: #f0f9ff;

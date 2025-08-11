@@ -28,7 +28,7 @@ export default function LatestGrid({ articles }: LatestGridProps) {
             <div className="w-1 h-8 bg-indigo-600 rounded-full mr-4"></div>
             Latest News
           </h2>
-          
+
           <Link
             href="/news"
             className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-semibold text-sm flex items-center transition-colors duration-200"
@@ -57,7 +57,10 @@ export default function LatestGrid({ articles }: LatestGridProps) {
               key={index}
               className="group bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
             >
-              <Link href={`/news/${article.slug || `article-${index + 1}`}`} className="block">
+              <Link
+                href={`/news/${article.slug || `article-${index + 1}`}`}
+                className="block"
+              >
                 {/* Article Image */}
                 <div className="relative aspect-[16/9] overflow-hidden bg-gray-100 dark:bg-gray-700">
                   <Image
@@ -67,7 +70,7 @@ export default function LatestGrid({ articles }: LatestGridProps) {
                     className="object-cover group-hover:scale-110 transition-transform duration-500"
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   />
-                  
+
                   {/* Category Badge */}
                   <div className="absolute top-4 left-4">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-white backdrop-blur-sm">

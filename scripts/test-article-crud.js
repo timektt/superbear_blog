@@ -18,22 +18,22 @@ const testArticle = {
         content: [
           {
             type: 'text',
-            text: 'This is test content for the CRUD operations test.'
-          }
-        ]
-      }
-    ]
+            text: 'This is test content for the CRUD operations test.',
+          },
+        ],
+      },
+    ],
   }),
   status: 'DRAFT',
   authorId: '', // Will be set dynamically
   categoryId: '', // Will be set dynamically
-  tagIds: []
+  tagIds: [],
 };
 
 const testArticleUpdate = {
   title: 'Updated Test Article for CRUD Operations',
   summary: 'This article has been updated to test PATCH operations.',
-  status: 'PUBLISHED'
+  status: 'PUBLISHED',
 };
 
 // Helper function to make API requests
@@ -42,18 +42,18 @@ async function makeRequest(url, options = {}) {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers
+        ...options.headers,
       },
-      ...options
+      ...options,
     });
 
     const data = await response.json();
-    
+
     return {
       ok: response.ok,
       status: response.status,
       data,
-      response
+      response,
     };
   } catch (error) {
     console.error(`Request failed for ${url}:`, error);
@@ -61,7 +61,7 @@ async function makeRequest(url, options = {}) {
       ok: false,
       status: 0,
       data: null,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -69,14 +69,17 @@ async function makeRequest(url, options = {}) {
 // Test functions
 async function testGetFormOptions() {
   console.log('\n🔍 Testing form options (authors, categories, tags)...');
-  
+
   const [authorsResult, categoriesResult, tagsResult] = await Promise.all([
     makeRequest(`${BASE_URL}/api/admin/authors`),
     makeRequest(`${BASE_URL}/api/admin/categories`),
-    makeRequest(`${BASE_URL}/api/admin/tags`)
+    makeRequest(`${BASE_URL}/api/admin/tags`),
   ]);
 
-  console.log('Authors API:', authorsResult.ok ? '✅ Success' : `❌ Failed (${authorsResult.status})`);
+  console.log(
+    'Authors API:',
+    authorsResult.ok ? '✅ Success' : `❌ Failed (${authorsResult.status})`
+  );
   if (authorsResult.ok && authorsResult.data.authors?.length > 0) {
     testArticle.authorId = authorsResult.data.authors[0].id;
     console.log(`  - Using author: ${authorsResult.data.authors[0].name}`);
@@ -84,15 +87,25 @@ async function testGetFormOptions() {
     console.log('  - ⚠️ No authors available');
   }
 
-  console.log('Categories API:', categoriesResult.ok ? '✅ Success' : `❌ Failed (${categoriesResult.status})`);
+  console.log(
+    'Categories API:',
+    categoriesResult.ok
+      ? '✅ Success'
+      : `❌ Failed (${categoriesResult.status})`
+  );
   if (categoriesResult.ok && categoriesResult.data.categories?.length > 0) {
     testArticle.categoryId = categoriesResult.data.categories[0].id;
-    console.log(`  - Using category: ${categoriesResult.data.categories[0].name}`);
+    console.log(
+      `  - Using category: ${categoriesResult.data.categories[0].name}`
+    );
   } else {
     console.log('  - ⚠️ No categories available');
   }
 
-  console.log('Tags API:', tagsResult.ok ? '✅ Success' : `❌ Failed (${tagsResult.status})`);
+  console.log(
+    'Tags API:',
+    tagsResult.ok ? '✅ Success' : `❌ Failed (${tagsResult.status})`
+  );
   if (tagsResult.ok && tagsResult.data.tags?.length > 0) {
     testArticle.tagIds = [tagsResult.data.tags[0].id];
     console.log(`  - Using tag: ${tagsResult.data.tags[0].name}`);
@@ -103,16 +116,16 @@ async function testGetFormOptions() {
   return {
     authors: authorsResult,
     categories: categoriesResult,
-    tags: tagsResult
+    tags: tagsResult,
   };
 }
 
 async function testCreateArticle() {
   console.log('\n📝 Testing article creation (POST /api/admin/articles)...');
-  
+
   const result = await makeRequest(`${BASE_URL}/api/admin/articles`, {
     method: 'POST',
-    body: JSON.stringify(testArticle)
+    body: JSON.stringify(testArticle),
   });
 
   if (result.ok) {
@@ -126,8 +139,10 @@ async function testCreateArticle() {
     console.log(`❌ Article creation failed (${result.status})`);
     console.log(`  - Error: ${result.data?.message || result.error}`);
     if (result.data?.issues) {
-      result.data.issues.forEach(issue => {
-        console.log(`  - Validation: ${issue.path?.join('.')} - ${issue.message}`);
+      result.data.issues.forEach((issue) => {
+        console.log(
+          `  - Validation: ${issue.path?.join('.')} - ${issue.message}`
+        );
       });
     }
     return null;
@@ -136,16 +151,16 @@ async function testCreateArticle() {
 
 async function testCreateDuplicateSlug() {
   console.log('\n🔄 Testing duplicate slug handling...');
-  
+
   const duplicateArticle = {
     ...testArticle,
     title: 'Another Test Article',
-    slug: testArticle.slug // Same slug
+    slug: testArticle.slug, // Same slug
   };
 
   const result = await makeRequest(`${BASE_URL}/api/admin/articles`, {
     method: 'POST',
-    body: JSON.stringify(duplicateArticle)
+    body: JSON.stringify(duplicateArticle),
   });
 
   if (result.ok) {
@@ -162,13 +177,15 @@ async function testCreateDuplicateSlug() {
 
 async function testGetArticles() {
   console.log('\n📋 Testing article listing (GET /api/admin/articles)...');
-  
+
   const result = await makeRequest(`${BASE_URL}/api/admin/articles`);
 
   if (result.ok) {
     console.log('✅ Articles retrieved successfully');
     console.log(`  - Total articles: ${result.data.articles?.length || 0}`);
-    console.log(`  - Pagination: Page ${result.data.pagination?.page} of ${result.data.pagination?.pages}`);
+    console.log(
+      `  - Pagination: Page ${result.data.pagination?.page} of ${result.data.pagination?.pages}`
+    );
     return result.data;
   } else {
     console.log(`❌ Article listing failed (${result.status})`);
@@ -178,12 +195,17 @@ async function testGetArticles() {
 }
 
 async function testUpdateArticle(articleId) {
-  console.log(`\n✏️ Testing article update (PATCH /api/admin/articles/${articleId})...`);
-  
-  const result = await makeRequest(`${BASE_URL}/api/admin/articles/${articleId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(testArticleUpdate)
-  });
+  console.log(
+    `\n✏️ Testing article update (PATCH /api/admin/articles/${articleId})...`
+  );
+
+  const result = await makeRequest(
+    `${BASE_URL}/api/admin/articles/${articleId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(testArticleUpdate),
+    }
+  );
 
   if (result.ok) {
     console.log('✅ Article updated successfully');
@@ -199,11 +221,16 @@ async function testUpdateArticle(articleId) {
 }
 
 async function testDeleteArticle(articleId) {
-  console.log(`\n🗑️ Testing article deletion (DELETE /api/admin/articles/${articleId})...`);
-  
-  const result = await makeRequest(`${BASE_URL}/api/admin/articles/${articleId}`, {
-    method: 'DELETE'
-  });
+  console.log(
+    `\n🗑️ Testing article deletion (DELETE /api/admin/articles/${articleId})...`
+  );
+
+  const result = await makeRequest(
+    `${BASE_URL}/api/admin/articles/${articleId}`,
+    {
+      method: 'DELETE',
+    }
+  );
 
   if (result.ok) {
     console.log('✅ Article deleted successfully');
@@ -217,7 +244,7 @@ async function testDeleteArticle(articleId) {
 
 async function testValidationErrors() {
   console.log('\n🚫 Testing validation errors...');
-  
+
   const invalidArticle = {
     title: '', // Empty title
     content: '', // Empty content
@@ -226,7 +253,7 @@ async function testValidationErrors() {
 
   const result = await makeRequest(`${BASE_URL}/api/admin/articles`, {
     method: 'POST',
-    body: JSON.stringify(invalidArticle)
+    body: JSON.stringify(invalidArticle),
   });
 
   if (!result.ok && result.status === 400) {
@@ -235,35 +262,37 @@ async function testValidationErrors() {
     console.log(`  - Error: ${result.data?.message || result.error}`);
     return true;
   } else {
-    console.log(`❌ Validation test failed - expected 400, got ${result.status}`);
+    console.log(
+      `❌ Validation test failed - expected 400, got ${result.status}`
+    );
     return false;
   }
 }
 
 async function testSlugGeneration() {
   console.log('\n🔗 Testing slug generation...');
-  
+
   const articleWithoutSlug = {
     ...testArticle,
     title: 'Test Article Without Slug!!! @#$%',
-    slug: undefined // No slug provided
+    slug: undefined, // No slug provided
   };
 
   const result = await makeRequest(`${BASE_URL}/api/admin/articles`, {
     method: 'POST',
-    body: JSON.stringify(articleWithoutSlug)
+    body: JSON.stringify(articleWithoutSlug),
   });
 
   if (result.ok) {
     console.log('✅ Slug generation works correctly');
     console.log(`  - Title: "${articleWithoutSlug.title}"`);
     console.log(`  - Generated slug: "${result.data.slug}"`);
-    
+
     // Clean up
     await makeRequest(`${BASE_URL}/api/admin/articles/${result.data.id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
-    
+
     return result.data;
   } else {
     console.log(`❌ Slug generation test failed (${result.status})`);
@@ -275,7 +304,7 @@ async function testSlugGeneration() {
 // Main test runner
 async function runAllTests() {
   console.log('🚀 Starting Article CRUD Operations Test Suite');
-  console.log('=' .repeat(60));
+  console.log('='.repeat(60));
 
   let createdArticleId = null;
   let duplicateArticleId = null;
@@ -283,10 +312,14 @@ async function runAllTests() {
   try {
     // Test 1: Get form options
     const formOptions = await testGetFormOptions();
-    
+
     if (!testArticle.authorId || !testArticle.categoryId) {
-      console.log('\n❌ Cannot proceed with tests - missing required form options');
-      console.log('Please ensure you have at least one author and one category in the database');
+      console.log(
+        '\n❌ Cannot proceed with tests - missing required form options'
+      );
+      console.log(
+        'Please ensure you have at least one author and one category in the database'
+      );
       return;
     }
 
@@ -323,12 +356,11 @@ async function runAllTests() {
     if (duplicateArticleId) {
       await testDeleteArticle(duplicateArticleId);
     }
-
   } catch (error) {
     console.error('\n💥 Test suite failed with error:', error);
   }
 
-  console.log('\n' + '=' .repeat(60));
+  console.log('\n' + '='.repeat(60));
   console.log('🏁 Article CRUD Operations Test Suite Complete');
 }
 
@@ -345,5 +377,5 @@ module.exports = {
   testUpdateArticle,
   testDeleteArticle,
   testValidationErrors,
-  testSlugGeneration
+  testSlugGeneration,
 };

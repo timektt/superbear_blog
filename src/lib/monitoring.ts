@@ -27,7 +27,7 @@ export function withMonitoring(
   return async (req: NextRequest): Promise<NextResponse> => {
     const startTime = Date.now();
     const requestId = req.headers.get('x-request-id') || generateRequestId();
-    
+
     // Add request ID to headers for tracing
     const headers = new Headers();
     headers.set('x-request-id', requestId);
@@ -39,8 +39,11 @@ export function withMonitoring(
           requestId,
           method: req.method,
           url: req.url,
-          userAgent: req.headers.get('user-agent'),
-          ip: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+          userAgent: req.headers.get('user-agent') || undefined,
+          ip:
+            req.headers.get('x-forwarded-for') ||
+            req.headers.get('x-real-ip') ||
+            undefined,
         });
       }
 
@@ -50,13 +53,9 @@ export function withMonitoring(
 
       // Log response
       if (finalConfig.enableMetrics) {
-        logger.logApiRequest(
-          req.method,
-          req.url,
-          response.status,
-          duration,
-          { requestId }
-        );
+        logger.logApiRequest(req.method, req.url, response.status, duration, {
+          requestId,
+        });
       }
 
       // Warn about slow requests
@@ -82,7 +81,7 @@ export function withMonitoring(
       return newResponse;
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       logger.error(
         `API Error: ${req.method} ${req.url}`,
         error instanceof Error ? error : new Error(String(error)),
@@ -93,9 +92,10 @@ export function withMonitoring(
       return new NextResponse(
         JSON.stringify({
           error: {
-            message: process.env.NODE_ENV === 'development' 
-              ? String(error) 
-              : 'Internal server error',
+            message:
+              process.env.NODE_ENV === 'development'
+                ? String(error)
+                : 'Internal server error',
             requestId,
           },
         }),
@@ -119,11 +119,11 @@ export function withDatabaseMonitoring<T>(
 ): Promise<T> {
   return new Promise(async (resolve, reject) => {
     const startTime = Date.now();
-    
+
     try {
       const result = await queryFn();
       const duration = Date.now() - startTime;
-      
+
       // Log slow queries
       if (duration > defaultConfig.slowQueryThreshold!) {
         logger.warn(`Slow database query: ${queryName}`, {
@@ -132,7 +132,7 @@ export function withDatabaseMonitoring<T>(
           threshold: defaultConfig.slowQueryThreshold,
         });
       }
-      
+
       // Log query metrics in production
       if (process.env.NODE_ENV === 'production') {
         logger.debug(`Database query: ${queryName} (${duration}ms)`, {
@@ -140,17 +140,17 @@ export function withDatabaseMonitoring<T>(
           duration,
         });
       }
-      
+
       resolve(result);
     } catch (error) {
       const duration = Date.now() - startTime;
-      
+
       logger.error(
         `Database query failed: ${queryName}`,
         error instanceof Error ? error : new Error(String(error)),
         { queryName, duration }
       );
-      
+
       reject(error);
     }
   });
@@ -172,17 +172,19 @@ export class MetricsCollector {
     if (!this.metrics.has(name)) {
       this.metrics.set(name, []);
     }
-    
+
     const values = this.metrics.get(name)!;
     values.push(value);
-    
+
     // Keep only last 100 values to prevent memory leaks
     if (values.length > 100) {
       values.shift();
     }
   }
 
-  getMetrics(name: string): { avg: number; min: number; max: number; count: number } | null {
+  getMetrics(
+    name: string
+  ): { avg: number; min: number; max: number; count: number } | null {
     const values = this.metrics.get(name);
     if (!values || values.length === 0) {
       return null;
@@ -197,12 +199,15 @@ export class MetricsCollector {
   }
 
   getAllMetrics(): Record<string, ReturnType<MetricsCollector['getMetrics']>> {
-    const result: Record<string, ReturnType<MetricsCollector['getMetrics']>> = {};
-    
+    const result: Record<
+      string,
+      ReturnType<MetricsCollector['getMetrics']>
+    > = {};
+
     for (const [name] of this.metrics) {
       result[name] = this.getMetrics(name);
     }
-    
+
     return result;
   }
 
@@ -221,14 +226,11 @@ export const metricsCollector = MetricsCollector.getInstance();
 
 // Error boundary for React components
 export function createErrorBoundary(componentName: string) {
-  return (error: Error, errorInfo: any) => {
-    logger.error(
-      `React Error Boundary: ${componentName}`,
-      error,
-      {
-        componentName,
-        componentStack: errorInfo.componentStack,
-      }
-    );
+  return (error: Error, errorInfo: unknown) => {
+    logger.error(`React Error Boundary: ${componentName}`, error, {
+      componentName,
+      componentStack: (errorInfo as { componentStack?: string })
+        ?.componentStack,
+    });
   };
 }

@@ -53,7 +53,11 @@ export default function NavBar() {
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1" role="navigation" aria-label="Main navigation">
+          <nav
+            className="hidden lg:flex items-center space-x-1"
+            role="navigation"
+            aria-label="Main navigation"
+          >
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
@@ -76,7 +80,7 @@ export default function NavBar() {
             <div className="hidden md:block">
               <SearchBar />
             </div>
-            
+
             {/* Theme Toggle */}
             <ThemeToggle />
 
@@ -138,7 +142,7 @@ export default function NavBar() {
             <div className="px-3 py-2">
               <SearchBar />
             </div>
-            
+
             {/* Mobile Navigation Items */}
             {navigationItems.map((item) => (
               <Link

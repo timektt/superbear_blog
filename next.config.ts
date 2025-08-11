@@ -81,22 +81,9 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // Bundle analyzer (only in development)
-  ...(process.env.ANALYZE === 'true' && {
-    webpack: (config: unknown) => {
-      config.plugins.push(
-        new (require('@next/bundle-analyzer')({
-          enabled: true,
-        }))()
-      );
-      return config;
-    },
-  }),
-
   // Production optimizations
   ...(process.env.NODE_ENV === 'production' && {
     output: 'standalone',
-    swcMinify: true,
     compiler: {
       removeConsole: {
         exclude: ['error', 'warn'],
@@ -105,7 +92,7 @@ const nextConfig: NextConfig = {
     // Enable static optimization
     trailingSlash: false,
     generateEtags: true,
-    
+
     // Optimize bundle
     modularizeImports: {
       'lucide-react': {

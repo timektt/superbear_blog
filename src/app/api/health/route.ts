@@ -28,9 +28,10 @@ export async function GET() {
     checks.push({
       name: 'database',
       status: 'error',
-      error: process.env.NODE_ENV === 'development' 
-        ? String(error) 
-        : 'Database connection failed',
+      error:
+        process.env.NODE_ENV === 'development'
+          ? String(error)
+          : 'Database connection failed',
     });
   }
 

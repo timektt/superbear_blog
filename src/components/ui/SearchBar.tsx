@@ -2,7 +2,11 @@
 
 import { useState } from 'react';
 
-export default function SearchBar() {
+interface SearchBarProps {
+  className?: string;
+}
+
+export default function SearchBar({ className = '' }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (e: React.FormEvent) => {
@@ -14,7 +18,7 @@ export default function SearchBar() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative">
+    <form onSubmit={handleSearch} className={`relative ${className}`}>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
           <svg

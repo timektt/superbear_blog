@@ -7,7 +7,8 @@ const categories = [
     name: 'AI',
     href: '/ai',
     icon: '🤖',
-    description: 'Latest developments in artificial intelligence and machine learning',
+    description:
+      'Latest developments in artificial intelligence and machine learning',
     color: 'from-purple-500 to-indigo-600',
   },
   {
@@ -43,7 +44,8 @@ export default function ExploreByCategory() {
             Explore by Category
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Dive deep into the topics that matter most to developers and tech entrepreneurs
+            Dive deep into the topics that matter most to developers and tech
+            entrepreneurs
           </p>
         </div>
 

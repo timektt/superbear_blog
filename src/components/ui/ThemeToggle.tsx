@@ -1,10 +1,11 @@
 'use client';
 
-import { useTheme } from '@/components/providers/ThemeProvider';
+import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -17,11 +18,9 @@ export default function ThemeToggle() {
     );
   }
 
-  return <ThemeToggleClient />;
-}
-
-function ThemeToggleClient() {
-  const { theme, toggleTheme } = useTheme();
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   return (
     <button

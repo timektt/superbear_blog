@@ -16,24 +16,25 @@ export function rateLimit(
   windowMs: number = 15 * 60 * 1000 // 15 minutes
 ) {
   return (request: NextRequest) => {
-    const ip = request.headers.get('x-forwarded-for') || 
-               request.headers.get('x-real-ip') || 
-               'unknown';
-    
+    const ip =
+      request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
+
     const now = Date.now();
     const key = `rate_limit:${ip}`;
-    
+
     const current = rateLimitStore.get(key);
-    
+
     if (!current || now > current.resetTime) {
       rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
       return { allowed: true, remaining: maxRequests - 1 };
     }
-    
+
     if (current.count >= maxRequests) {
       return { allowed: false, remaining: 0 };
     }
-    
+
     current.count++;
     return { allowed: true, remaining: maxRequests - current.count };
   };
@@ -49,9 +50,12 @@ export function generateCSRFToken(): string {
 /**
  * Validate CSRF token
  */
-export function validateCSRFToken(token: string, sessionToken: string): boolean {
+export function validateCSRFToken(
+  token: string,
+  sessionToken: string
+): boolean {
   if (!token || !sessionToken) return false;
-  
+
   // In production, implement proper CSRF token validation
   // This is a simplified version
   return token.length === 64 && /^[a-f0-9]+$/.test(token);
@@ -77,22 +81,21 @@ export function sanitizeHTML(content: string): string {
 export function isValidImageURL(url: string): boolean {
   try {
     const parsedUrl = new URL(url);
-    
+
     // Only allow HTTPS
     if (parsedUrl.protocol !== 'https:') return false;
-    
+
     // Only allow specific domains
-    const allowedDomains = [
-      'res.cloudinary.com',
-      'cloudinary.com'
-    ];
-    
-    const isAllowedDomain = allowedDomains.some(domain => 
-      parsedUrl.hostname === domain || parsedUrl.hostname.endsWith(`.${domain}`)
+    const allowedDomains = ['res.cloudinary.com', 'cloudinary.com'];
+
+    const isAllowedDomain = allowedDomains.some(
+      (domain) =>
+        parsedUrl.hostname === domain ||
+        parsedUrl.hostname.endsWith(`.${domain}`)
     );
-    
+
     if (!isAllowedDomain) return false;
-    
+
     // Check for suspicious patterns
     const suspiciousPatterns = [
       /javascript:/i,
@@ -100,10 +103,10 @@ export function isValidImageURL(url: string): boolean {
       /vbscript:/i,
       /<script/i,
       /onload=/i,
-      /onerror=/i
+      /onerror=/i,
     ];
-    
-    return !suspiciousPatterns.some(pattern => pattern.test(url));
+
+    return !suspiciousPatterns.some((pattern) => pattern.test(url));
   } catch {
     return false;
   }
@@ -112,27 +115,35 @@ export function isValidImageURL(url: string): boolean {
 /**
  * Validate file upload
  */
-export function validateFileUpload(file: File): { valid: boolean; error?: string } {
+export function validateFileUpload(file: File): {
+  valid: boolean;
+  error?: string;
+} {
   const MAX_SIZE = 5 * 1024 * 1024; // 5MB
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
   const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
-  
+
   // Check file size
   if (file.size > MAX_SIZE) {
     return { valid: false, error: 'File size exceeds 5MB limit' };
   }
-  
+
   // Check MIME type
   if (!ALLOWED_TYPES.includes(file.type)) {
-    return { valid: false, error: 'Invalid file type. Only images are allowed.' };
+    return {
+      valid: false,
+      error: 'Invalid file type. Only images are allowed.',
+    };
   }
-  
+
   // Check file extension
-  const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+  const extension = file.name
+    .toLowerCase()
+    .substring(file.name.lastIndexOf('.'));
   if (!ALLOWED_EXTENSIONS.includes(extension)) {
     return { valid: false, error: 'Invalid file extension' };
   }
-  
+
   // Check for suspicious file names
   const suspiciousPatterns = [
     /\.php$/i,
@@ -141,13 +152,13 @@ export function validateFileUpload(file: File): { valid: boolean; error?: string
     /\.exe$/i,
     /\.bat$/i,
     /\.cmd$/i,
-    /\.scr$/i
+    /\.scr$/i,
   ];
-  
-  if (suspiciousPatterns.some(pattern => pattern.test(file.name))) {
+
+  if (suspiciousPatterns.some((pattern) => pattern.test(file.name))) {
     return { valid: false, error: 'Suspicious file name detected' };
   }
-  
+
   return { valid: true };
 }
 
@@ -194,7 +205,7 @@ export const CSP_HEADER = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'none'"
+  "frame-ancestors 'none'",
 ].join('; ');
 
 /**
@@ -207,7 +218,7 @@ export const SECURITY_HEADERS = {
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Content-Security-Policy': CSP_HEADER,
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+  'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
 };
 
 /**
@@ -215,7 +226,7 @@ export const SECURITY_HEADERS = {
  */
 export function sanitizeInput(input: string, maxLength: number = 1000): string {
   if (!input || typeof input !== 'string') return '';
-  
+
   return input
     .trim()
     .substring(0, maxLength)
@@ -229,23 +240,24 @@ export function sanitizeInput(input: string, maxLength: number = 1000): string {
  * Log security events
  */
 export function logSecurityEvent(
-  event: string, 
-  details: Record<string, any>, 
+  event: string,
+  details: Record<string, any>,
   request?: NextRequest
 ) {
   const logData = {
     timestamp: new Date().toISOString(),
     event,
     details,
-    ip: request?.headers.get('x-forwarded-for') || 
-        request?.headers.get('x-real-ip') || 
-        'unknown',
+    ip:
+      request?.headers.get('x-forwarded-for') ||
+      request?.headers.get('x-real-ip') ||
+      'unknown',
     userAgent: request?.headers.get('user-agent') || 'unknown',
-    url: request?.url || 'unknown'
+    url: request?.url || 'unknown',
   };
-  
+
   console.warn('SECURITY_EVENT:', JSON.stringify(logData));
-  
+
   // In production, send to security monitoring service
   // Example: Sentry, DataDog, etc.
 }

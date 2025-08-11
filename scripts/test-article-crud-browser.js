@@ -16,16 +16,16 @@ const testArticle = {
         content: [
           {
             type: 'text',
-            text: 'This is test content for the CRUD operations test.'
-          }
-        ]
-      }
-    ]
+            text: 'This is test content for the CRUD operations test.',
+          },
+        ],
+      },
+    ],
   }),
   status: 'DRAFT',
   authorId: '', // Will be set dynamically
   categoryId: '', // Will be set dynamically
-  tagIds: []
+  tagIds: [],
 };
 
 // Helper function to make authenticated requests
@@ -34,19 +34,19 @@ async function makeAuthenticatedRequest(url, options = {}) {
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers
+        ...options.headers,
       },
       credentials: 'include', // Include cookies for authentication
-      ...options
+      ...options,
     });
 
     const data = await response.json();
-    
+
     return {
       ok: response.ok,
       status: response.status,
       data,
-      response
+      response,
     };
   } catch (error) {
     console.error(`Request failed for ${url}:`, error);
@@ -54,7 +54,7 @@ async function makeAuthenticatedRequest(url, options = {}) {
       ok: false,
       status: 0,
       data: null,
-      error: error.message
+      error: error.message,
     };
   }
 }
@@ -62,16 +62,27 @@ async function makeAuthenticatedRequest(url, options = {}) {
 // Test functions
 async function testFormOptions() {
   console.log('🔍 Testing form options...');
-  
+
   const [authorsResult, categoriesResult, tagsResult] = await Promise.all([
     makeAuthenticatedRequest('/api/admin/authors'),
     makeAuthenticatedRequest('/api/admin/categories'),
-    makeAuthenticatedRequest('/api/admin/tags')
+    makeAuthenticatedRequest('/api/admin/tags'),
   ]);
 
-  console.log('Authors API:', authorsResult.ok ? '✅ Success' : `❌ Failed (${authorsResult.status})`);
-  console.log('Categories API:', categoriesResult.ok ? '✅ Success' : `❌ Failed (${categoriesResult.status})`);
-  console.log('Tags API:', tagsResult.ok ? '✅ Success' : `❌ Failed (${tagsResult.status})`);
+  console.log(
+    'Authors API:',
+    authorsResult.ok ? '✅ Success' : `❌ Failed (${authorsResult.status})`
+  );
+  console.log(
+    'Categories API:',
+    categoriesResult.ok
+      ? '✅ Success'
+      : `❌ Failed (${categoriesResult.status})`
+  );
+  console.log(
+    'Tags API:',
+    tagsResult.ok ? '✅ Success' : `❌ Failed (${tagsResult.status})`
+  );
 
   if (authorsResult.ok && authorsResult.data.authors?.length > 0) {
     testArticle.authorId = authorsResult.data.authors[0].id;
@@ -93,10 +104,10 @@ async function testFormOptions() {
 
 async function testCreateArticle() {
   console.log('📝 Testing article creation...');
-  
+
   const result = await makeAuthenticatedRequest('/api/admin/articles', {
     method: 'POST',
-    body: JSON.stringify(testArticle)
+    body: JSON.stringify(testArticle),
   });
 
   if (result.ok) {
@@ -113,7 +124,7 @@ async function testCreateArticle() {
 
 async function testValidationErrors() {
   console.log('🚫 Testing validation errors...');
-  
+
   const invalidArticle = {
     title: '', // Empty title
     content: '', // Empty content
@@ -121,7 +132,7 @@ async function testValidationErrors() {
 
   const result = await makeAuthenticatedRequest('/api/admin/articles', {
     method: 'POST',
-    body: JSON.stringify(invalidArticle)
+    body: JSON.stringify(invalidArticle),
   });
 
   if (!result.ok && result.status === 400) {
@@ -136,16 +147,19 @@ async function testValidationErrors() {
 
 async function testUpdateArticle(articleId) {
   console.log('✏️ Testing article update...');
-  
+
   const updateData = {
     title: 'Updated Test Article',
-    status: 'PUBLISHED'
+    status: 'PUBLISHED',
   };
 
-  const result = await makeAuthenticatedRequest(`/api/admin/articles/${articleId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(updateData)
-  });
+  const result = await makeAuthenticatedRequest(
+    `/api/admin/articles/${articleId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(updateData),
+    }
+  );
 
   if (result.ok) {
     console.log('✅ Article updated successfully');
@@ -161,10 +175,13 @@ async function testUpdateArticle(articleId) {
 
 async function testDeleteArticle(articleId) {
   console.log('🗑️ Testing article deletion...');
-  
-  const result = await makeAuthenticatedRequest(`/api/admin/articles/${articleId}`, {
-    method: 'DELETE'
-  });
+
+  const result = await makeAuthenticatedRequest(
+    `/api/admin/articles/${articleId}`,
+    {
+      method: 'DELETE',
+    }
+  );
 
   if (result.ok) {
     console.log('✅ Article deleted successfully');
@@ -178,28 +195,28 @@ async function testDeleteArticle(articleId) {
 
 async function testSlugGeneration() {
   console.log('🔗 Testing slug generation...');
-  
+
   const articleWithSpecialChars = {
     ...testArticle,
     title: 'Test Article With Special Characters!!! @#$%',
-    slug: undefined // Let backend generate
+    slug: undefined, // Let backend generate
   };
 
   const result = await makeAuthenticatedRequest('/api/admin/articles', {
     method: 'POST',
-    body: JSON.stringify(articleWithSpecialChars)
+    body: JSON.stringify(articleWithSpecialChars),
   });
 
   if (result.ok) {
     console.log('✅ Slug generation works');
     console.log(`Title: "${articleWithSpecialChars.title}"`);
     console.log(`Generated slug: "${result.data.slug}"`);
-    
+
     // Clean up
     await makeAuthenticatedRequest(`/api/admin/articles/${result.data.id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
     });
-    
+
     return result.data;
   } else {
     console.log('❌ Slug generation test failed');
@@ -210,15 +227,15 @@ async function testSlugGeneration() {
 
 async function testDuplicateSlug() {
   console.log('🔄 Testing duplicate slug handling...');
-  
+
   // First, create an article
   const firstArticle = await makeAuthenticatedRequest('/api/admin/articles', {
     method: 'POST',
     body: JSON.stringify({
       ...testArticle,
       title: 'First Article',
-      slug: 'duplicate-test-slug'
-    })
+      slug: 'duplicate-test-slug',
+    }),
   });
 
   if (!firstArticle.ok) {
@@ -227,38 +244,53 @@ async function testDuplicateSlug() {
   }
 
   // Try to create another with same slug
-  const duplicateArticle = await makeAuthenticatedRequest('/api/admin/articles', {
-    method: 'POST',
-    body: JSON.stringify({
-      ...testArticle,
-      title: 'Second Article',
-      slug: 'duplicate-test-slug' // Same slug
-    })
-  });
+  const duplicateArticle = await makeAuthenticatedRequest(
+    '/api/admin/articles',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        ...testArticle,
+        title: 'Second Article',
+        slug: 'duplicate-test-slug', // Same slug
+      }),
+    }
+  );
 
   if (duplicateArticle.ok) {
     console.log('✅ Duplicate slug handled correctly');
     console.log(`Original slug: duplicate-test-slug`);
     console.log(`New slug: ${duplicateArticle.data.slug}`);
-    
+
     // Clean up both articles
-    await makeAuthenticatedRequest(`/api/admin/articles/${firstArticle.data.id}`, {
-      method: 'DELETE'
-    });
-    await makeAuthenticatedRequest(`/api/admin/articles/${duplicateArticle.data.id}`, {
-      method: 'DELETE'
-    });
-    
+    await makeAuthenticatedRequest(
+      `/api/admin/articles/${firstArticle.data.id}`,
+      {
+        method: 'DELETE',
+      }
+    );
+    await makeAuthenticatedRequest(
+      `/api/admin/articles/${duplicateArticle.data.id}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
     return true;
   } else {
     console.log('❌ Duplicate slug test failed');
-    console.log('Error:', duplicateArticle.data?.message || duplicateArticle.error);
-    
+    console.log(
+      'Error:',
+      duplicateArticle.data?.message || duplicateArticle.error
+    );
+
     // Clean up first article
-    await makeAuthenticatedRequest(`/api/admin/articles/${firstArticle.data.id}`, {
-      method: 'DELETE'
-    });
-    
+    await makeAuthenticatedRequest(
+      `/api/admin/articles/${firstArticle.data.id}`,
+      {
+        method: 'DELETE',
+      }
+    );
+
     return false;
   }
 }
@@ -266,15 +298,19 @@ async function testDuplicateSlug() {
 // Main test runner
 async function runBrowserTests() {
   console.log('🚀 Starting Browser-based Article CRUD Tests');
-  console.log('=' .repeat(50));
+  console.log('='.repeat(50));
 
   try {
     // Check if we can access form options (indicates we're authenticated)
     const hasFormOptions = await testFormOptions();
-    
+
     if (!hasFormOptions) {
-      console.log('❌ Cannot proceed - missing form options or not authenticated');
-      console.log('Please ensure you are logged in as admin and have authors/categories in the database');
+      console.log(
+        '❌ Cannot proceed - missing form options or not authenticated'
+      );
+      console.log(
+        'Please ensure you are logged in as admin and have authors/categories in the database'
+      );
       return;
     }
 
@@ -290,17 +326,16 @@ async function runBrowserTests() {
     // Test full CRUD cycle
     console.log('\n🔄 Testing full CRUD cycle...');
     const createdArticle = await testCreateArticle();
-    
+
     if (createdArticle) {
       await testUpdateArticle(createdArticle.id);
       await testDeleteArticle(createdArticle.id);
     }
-
   } catch (error) {
     console.error('💥 Test suite failed:', error);
   }
 
-  console.log('\n' + '=' .repeat(50));
+  console.log('\n' + '='.repeat(50));
   console.log('🏁 Browser tests complete');
 }
 
