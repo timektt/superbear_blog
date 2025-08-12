@@ -40,14 +40,19 @@ export default async function Home() {
         <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
             <p className="text-sm text-amber-800 dark:text-amber-200 text-center">
-              🔧 Running in DB-safe mode with mock data. Configure DATABASE_URL to load real content.
+              🔧 Running in DB-safe mode with mock data. Configure DATABASE_URL
+              to load real content.
             </p>
           </div>
         </div>
-        <HomeView 
-          featured={MOCK_FEATURED} 
-          headlines={MOCK_TOP_HEADLINES} 
-          latest={MOCK_LATEST} 
+        <HomeView
+          featured={{
+            ...MOCK_FEATURED,
+            category: MOCK_FEATURED.category.name,
+            author: MOCK_FEATURED.author.name,
+          }}
+          headlines={MOCK_TOP_HEADLINES}
+          latest={MOCK_LATEST}
         />
       </>
     );
@@ -79,10 +84,14 @@ export default async function Home() {
     const featured = featuredResults[0] || MOCK_FEATURED;
     
     return (
-      <HomeView 
-        featured={featured} 
-        headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES} 
-        latest={latest.length > 0 ? latest : MOCK_LATEST} 
+      <HomeView
+        featured={{
+          ...featured,
+          category: featured.category?.name || 'Tech',
+          author: featured.author?.name || 'SuperBear Reporter',
+        }}
+        headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES}
+        latest={latest.length > 0 ? latest : MOCK_LATEST}
       />
     );
   } catch (error) {
@@ -96,10 +105,14 @@ export default async function Home() {
             </p>
           </div>
         </div>
-        <HomeView 
-          featured={MOCK_FEATURED} 
-          headlines={MOCK_TOP_HEADLINES} 
-          latest={MOCK_LATEST} 
+        <HomeView
+          featured={{
+            ...MOCK_FEATURED,
+            category: MOCK_FEATURED.category.name,
+            author: MOCK_FEATURED.author.name,
+          }}
+          headlines={MOCK_TOP_HEADLINES}
+          latest={MOCK_LATEST}
         />
       </>
     );
@@ -107,10 +120,39 @@ export default async function Home() {
 }
 
 // Home View Component
-function HomeView({ featured, headlines, latest }: {
-  featured: any;
-  headlines: any[];
-  latest: any[];
+function HomeView({
+  featured,
+  headlines,
+  latest,
+}: {
+  featured: {
+    title: string;
+    summary: string;
+    category: string;
+    author: string;
+    date: string;
+    imageUrl?: string;
+    slug?: string;
+  };
+  headlines: Array<{
+    title: string;
+    timeAgo: string;
+    slug: string;
+    createdAt?: Date;
+  }>;
+  latest: Array<{
+    id: string;
+    title: string;
+    category: string;
+    author: string;
+    date: string;
+    slug: string;
+    imageUrl?: string;
+    snippet?: string;
+    tags: string[];
+    status?: 'PUBLISHED' | 'DRAFT';
+    createdAt?: Date;
+  }>;
 }) {
   return (
     <>

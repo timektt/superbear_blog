@@ -145,7 +145,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   // DB-Safe Mode: Use mock data when database is not configured
   if (!IS_DB_CONFIGURED || !prisma) {
-    return <ArticleView article={MOCK_ARTICLE as any} relatedArticles={[]} />;
+    return <ArticleView article={MOCK_ARTICLE} relatedArticles={[]} />;
   }
 
   try {
@@ -224,16 +224,41 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     });
 
     return <ArticleView article={result} relatedArticles={relatedArticles} />;
-  } catch (error) {
-    console.warn('Database query failed, falling back to mock data:', error);
-    return <ArticleView article={MOCK_ARTICLE as any} relatedArticles={[]} />;
+  } catch {
+    console.warn('Database query failed, falling back to mock data');
+    return <ArticleView article={MOCK_ARTICLE} relatedArticles={[]} />;
   }
 }
 
 // Article View Component
-function ArticleView({ article, relatedArticles }: {
-  article: any;
-  relatedArticles: any[];
+function ArticleView({
+  article,
+  relatedArticles,
+}: {
+  article: {
+    id: string;
+    title: string;
+    summary: string;
+    slug: string;
+    content: unknown;
+    imageUrl?: string;
+    author: { name: string; avatar?: string; bio?: string };
+    category: { name: string };
+    tags: Array<{ id: string; name: string }>;
+    publishedAt?: Date;
+    updatedAt?: Date;
+  };
+  relatedArticles: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    summary?: string;
+    image?: string;
+    publishedAt?: Date;
+    author: { name: string; avatar?: string };
+    category: { name: string };
+    tags: Array<{ id: string; name: string }>;
+  }>;
 }) {
   const articleUrl = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/news/${article.slug}`;
 

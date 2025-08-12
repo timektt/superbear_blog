@@ -448,27 +448,78 @@ export const MOCK_FEATURED = {
   author: { name: 'SuperBear Reporter', id: 'mock-author-1' },
   date: 'Aug 6, 2025',
   createdAt: new Date('2025-08-06'),
+  publishedAt: new Date('2025-08-06'),
+  updatedAt: new Date('2025-08-06'),
   category: { name: 'AI', id: 'mock-cat-ai', slug: 'ai' },
-  imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&h=600&fit=crop',
-  status: 'PUBLISHED',
+  imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop',
+  status: 'PUBLISHED' as const,
   content: [
-    { type: 'paragraph', content: [{ type: 'text', text: 'OpenAI has announced the release of GPT-5, featuring groundbreaking real-time voice and vision capabilities that represent a significant leap forward in AI technology.' }] },
-    { type: 'paragraph', content: [{ type: 'text', text: 'The new model introduces multimodal reasoning, persistent memory, and live assistant capabilities that enable more natural and contextual interactions.' }] },
-    { type: 'paragraph', content: [{ type: 'text', text: 'This is mock content displayed when running in DB-safe mode. Configure DATABASE_URL to load real articles from your database.' }] },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'OpenAI has announced the release of GPT-5, featuring groundbreaking real-time voice and vision capabilities that represent a significant leap forward in AI technology.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'The new model introduces multimodal reasoning, persistent memory, and live assistant capabilities that enable more natural and contextual interactions.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'This is mock content displayed when running in DB-safe mode. Configure DATABASE_URL to load real articles from your database.',
+        },
+      ],
+    },
   ],
   tags: [
     { name: 'AI', id: 'tag-ai', slug: 'ai' },
     { name: 'OpenAI', id: 'tag-openai', slug: 'openai' },
-    { name: 'GPT-5', id: 'tag-gpt5', slug: 'gpt-5' }
-  ]
+    { name: 'GPT-5', id: 'tag-gpt5', slug: 'gpt-5' },
+  ],
 };
 
 export const MOCK_TOP_HEADLINES = [
-  { title: 'DeepMind unveils AlphaFold 3', timeAgo: '4h ago', slug: 'alphafold-3', createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000) },
-  { title: 'GitHub Copilot adds Team Sync', timeAgo: '6h ago', slug: 'copilot-team-sync', createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000) },
-  { title: 'Anthropic ships Claude 3.5 Turbo', timeAgo: '8h ago', slug: 'claude-3-5-turbo', createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000) },
-  { title: 'Vercel introduces Edge 2.0', timeAgo: '12h ago', slug: 'vercel-edge-2', createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000) },
-  { title: 'Nvidia tops $4T market cap', timeAgo: '1d ago', slug: 'nvidia-4t', createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+  {
+    title: 'DeepMind unveils AlphaFold 3',
+    timeAgo: '4h ago',
+    slug: 'alphafold-3',
+    createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000),
+  },
+  {
+    title: 'GitHub Copilot adds Team Sync',
+    timeAgo: '6h ago',
+    slug: 'copilot-team-sync',
+    createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000),
+  },
+  {
+    title: 'Anthropic ships Claude 3.5 Turbo',
+    timeAgo: '8h ago',
+    slug: 'claude-3-5-turbo',
+    createdAt: new Date(Date.now() - 8 * 60 * 60 * 1000),
+  },
+  {
+    title: 'Vercel introduces Edge 2.0',
+    timeAgo: '12h ago',
+    slug: 'vercel-edge-2',
+    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000),
+  },
+  {
+    title: 'Nvidia tops $4T market cap',
+    timeAgo: '1d ago',
+    slug: 'nvidia-4t',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+  },
 ];
 
 export const MOCK_LATEST = [
@@ -479,10 +530,10 @@ export const MOCK_LATEST = [
     author: 'Jane Doe',
     date: 'Aug 6, 2025',
     slug: 'copilot-collab',
-    imageUrl: 'https://images.unsplash.com/photo-1527443224154-9c6c2e3f1f2a?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop',
     snippet: 'Real-time pair programming and shared context for teams.',
     tags: ['AI', 'Developer Tools'],
-    status: 'PUBLISHED',
+    status: 'PUBLISHED' as const,
     createdAt: new Date('2025-08-06'),
   },
   {
@@ -492,10 +543,10 @@ export const MOCK_LATEST = [
     author: 'Alex Kim',
     date: 'Aug 6, 2025',
     slug: 'vercel-edge-2',
-    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop',
     snippet: 'Faster cold starts and streaming primitives.',
     tags: ['Edge', 'Serverless'],
-    status: 'PUBLISHED',
+    status: 'PUBLISHED' as const,
     createdAt: new Date('2025-08-06'),
   },
   {
@@ -505,19 +556,44 @@ export const MOCK_LATEST = [
     author: 'Sam Lee',
     date: 'Aug 5, 2025',
     slug: 'llama-3-1-400b',
-    imageUrl: 'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1677756119517-756a188d2d94?w=400&h=300&fit=crop',
     snippet: 'Bigger pretraining set and strong evals.',
     tags: ['LLM', 'Research'],
-    status: 'PUBLISHED',
+    status: 'PUBLISHED' as const,
     createdAt: new Date('2025-08-05'),
   },
 ];
 
 export const MOCK_ARTICLE = {
   ...MOCK_FEATURED,
+  updatedAt: new Date('2025-08-06'),
   content: [
-    { type: 'paragraph', content: [{ type: 'text', text: 'This is a mock article displayed when running in DB-safe mode.' }] },
-    { type: 'paragraph', content: [{ type: 'text', text: 'Configure DATABASE_URL in your .env file to load real articles from your database.' }] },
-    { type: 'paragraph', content: [{ type: 'text', text: 'The site is currently running without database connectivity, using static mock data for demonstration purposes.' }] },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'This is a mock article displayed when running in DB-safe mode.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'Configure DATABASE_URL in your .env file to load real articles from your database.',
+        },
+      ],
+    },
+    {
+      type: 'paragraph',
+      content: [
+        {
+          type: 'text',
+          text: 'The site is currently running without database connectivity, using static mock data for demonstration purposes.',
+        },
+      ],
+    },
   ],
 };
