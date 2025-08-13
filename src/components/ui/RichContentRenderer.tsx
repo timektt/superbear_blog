@@ -27,7 +27,7 @@ export function RichContentRenderer({
 
   return (
     <div
-      className={`prose prose-sm sm:prose-base lg:prose-lg max-w-none ${className}`}
+      className={`max-w-none ${className}`}
     >
       {renderNode(jsonContent)}
     </div>

@@ -106,7 +106,7 @@ export function Editor({
     },
     editorProps: {
       attributes: {
-        class: `prose prose-sm sm:prose-base lg:prose-lg max-w-none focus:outline-none min-h-[200px] p-3 sm:p-4 ${
+        class: `max-w-none focus:outline-none min-h-[200px] p-3 sm:p-4 ${
           disabled ? 'opacity-50 cursor-not-allowed' : ''
         }`,
       },

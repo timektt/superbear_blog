@@ -17,15 +17,15 @@ export default function TopHeadlines({ headlines }: TopHeadlinesProps) {
   const displayHeadlines = headlines.slice(0, 5);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+    <div className="bg-card rounded-xl border border-border p-6">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+        <h2 className="text-lg font-bold text-card-foreground flex items-center">
           <div className="w-1 h-5 bg-red-600 rounded-full mr-3"></div>
           Top Headlines
         </h2>
         <Link
           href="/news"
-          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium text-sm flex items-center transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-md px-2 py-1"
+          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium text-sm flex items-center transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded-md px-2 py-1"
         >
           See more
           <svg
@@ -49,7 +49,7 @@ export default function TopHeadlines({ headlines }: TopHeadlinesProps) {
           <Link
             key={index}
             href={`/news/${headline.slug || `headline-${index + 1}`}`}
-            className="group block py-3 px-2 -mx-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
+            className="group block py-3 px-2 -mx-2 rounded-lg hover:bg-muted transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
           >
             <div className="flex items-start space-x-3">
               <div className="flex-shrink-0 w-5 h-5 bg-red-100 dark:bg-red-900/30 rounded flex items-center justify-center">
@@ -58,10 +58,10 @@ export default function TopHeadlines({ headlines }: TopHeadlinesProps) {
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200 line-clamp-2 leading-snug mb-1">
+                <p className="text-sm font-semibold text-card-foreground group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors duration-200 line-clamp-2 leading-snug mb-1">
                   {headline.title}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                <p className="text-xs text-muted-foreground font-medium">
                   {headline.timeAgo}
                 </p>
               </div>

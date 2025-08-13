@@ -19,7 +19,7 @@ export default function Hero({ featuredArticle }: HeroProps) {
   return (
     <Link
       href={`/news/${featuredArticle.slug || 'featured-article'}`}
-      className="group block relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 aspect-[16/9] hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+      className="group block relative overflow-hidden rounded-xl bg-muted aspect-[16/9] hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       {/* Background Image */}
       <div className="absolute inset-0">

@@ -1,5 +1,10 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { Suspense } from 'react';
+
+// Performance optimizations
+export const revalidate = 60;
+export const fetchCache = 'force-cache';
 import Hero from '@/components/sections/Hero';
 import TopHeadlines from '@/components/sections/TopHeadlines';
 import LatestList from '@/components/sections/LatestList';
@@ -138,7 +143,7 @@ function HomeView({
   return (
     <>
       {/* Above the Fold - Hero + Headlines */}
-      <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
+      <section className="bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Featured Article - Left 8 cols */}
@@ -148,23 +153,25 @@ function HomeView({
 
             {/* Top Headlines - Right 4 cols */}
             <div className="lg:col-span-4">
-              <TopHeadlines headlines={headlines} />
+              <Suspense fallback={<TopHeadlinesSkeleton />}>
+                <TopHeadlines headlines={headlines} />
+              </Suspense>
             </div>
           </div>
         </div>
       </section>
 
       {/* Below the Fold - Latest + Right Rail */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-8 transition-colors duration-300">
+      <section className="bg-muted py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+            <h2 className="text-xl font-bold text-foreground flex items-center">
               <div className="w-1 h-6 bg-red-600 rounded-full mr-3"></div>
               Latest News
             </h2>
             <Link
               href="/news"
-              className="inline-flex items-center text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-md px-2 py-1"
+              className="inline-flex items-center text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 rounded-md px-2 py-1"
             >
               See more
               <svg
@@ -186,14 +193,16 @@ function HomeView({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Latest List - Left 8 cols */}
             <div className="lg:col-span-8">
-              <div className="bg-white dark:bg-gray-900 rounded-xl p-6">
+              <div className="bg-card rounded-xl p-6">
                 <LatestList articles={latest.slice(0, 8)} />
               </div>
             </div>
 
             {/* Right Rail - Right 4 cols */}
             <div className="lg:col-span-4">
-              <RightRail title="Most Popular" items={mockRightRailItems} />
+              <Suspense fallback={<RightRailSkeleton />}>
+                <RightRail title="Most Popular" items={mockRightRailItems} />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -221,5 +230,47 @@ function HomeView({
         </div>
       )}
     </>
+  );
+}
+
+// Loading Skeletons
+function TopHeadlinesSkeleton() {
+  return (
+    <div className="bg-card rounded-xl border border-border p-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="h-6 bg-muted rounded w-32 animate-pulse"></div>
+        <div className="h-4 bg-muted rounded w-16 animate-pulse"></div>
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex items-start space-x-3 animate-pulse">
+            <div className="w-5 h-5 bg-muted rounded"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-muted rounded w-full mb-1"></div>
+              <div className="h-3 bg-muted rounded w-16"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function RightRailSkeleton() {
+  return (
+    <div className="bg-card rounded-xl border border-border p-6">
+      <div className="h-6 bg-muted rounded w-32 mb-4 animate-pulse"></div>
+      <div className="space-y-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="flex space-x-3 animate-pulse">
+            <div className="w-12 h-12 bg-muted rounded-lg"></div>
+            <div className="flex-1">
+              <div className="h-4 bg-muted rounded w-full mb-1"></div>
+              <div className="h-3 bg-muted rounded w-16"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

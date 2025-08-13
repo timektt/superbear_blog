@@ -99,10 +99,10 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#3b82f6" />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300`}
+        className={`${inter.variable} font-sans antialiased min-h-dvh bg-background text-foreground`}
       >
         <ThemeProvider>
           <SessionProvider>{children}</SessionProvider>

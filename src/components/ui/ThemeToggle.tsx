@@ -13,9 +13,7 @@ export default function ThemeToggle() {
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
-    return (
-      <div className="p-2 w-9 h-9 rounded-lg bg-gray-100 dark:bg-gray-800 animate-pulse" />
-    );
+    return <div className="p-2 w-9 h-9 rounded-lg bg-muted animate-pulse" />;
   }
 
   const toggleTheme = () => {
@@ -25,13 +23,13 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+      className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
       title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
     >
       {theme === 'light' ? (
         <svg
-          className="w-5 h-5 text-gray-700"
+          className="w-5 h-5 text-foreground"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

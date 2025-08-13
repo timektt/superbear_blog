@@ -11,14 +11,22 @@ const SocialShareButtons = dynamic(
   () => import('@/components/ui/SocialShareButtons'),
   {
     loading: () => (
-      <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      <div className="h-8 w-32 bg-muted rounded animate-pulse" />
     ),
   }
 );
+
+const NewsletterCTA = dynamic(() => import('@/components/article/NewsletterCTA'), {
+  loading: () => <div className="h-32 bg-muted rounded-xl animate-pulse my-8" />
+});
 import { RichContentRenderer } from '@/components/ui/RichContentRenderer';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import ArticleCard from '@/components/ui/ArticleCard';
 import StructuredData from '@/components/ui/StructuredData';
+import ReadingProgress from '@/components/article/ReadingProgress';
+import BackToTop from '@/components/article/BackToTop';
+import TableOfContents from '@/components/article/TableOfContents';
+import CopyLinkButton from '@/components/article/CopyLinkButton';
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
 import { MOCK_ARTICLE } from '@/lib/mockData';
@@ -277,31 +285,36 @@ function ArticleView({
 
   return (
     <>
+      <ReadingProgress />
       <StructuredData article={article} url={articleUrl} />
-      <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Main Article Content */}
+          <article className="lg:col-span-8">
         {/* Article Header */}
         <header className="mb-8">
           {/* Category Badge */}
           <div className="mb-4">
-            <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+            <span className="inline-block bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full">
               {article.category.name}
             </span>
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
             {article.title}
           </h1>
 
           {/* Summary */}
           {article.summary && (
-            <p className="text-lg sm:text-xl text-gray-600 mb-6 leading-relaxed">
+            <p className="text-lg sm:text-xl text-muted-foreground mb-6 leading-relaxed">
               {article.summary}
             </p>
           )}
 
           {/* Article Meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-border">
             {/* Author Info */}
             <div className="flex items-center gap-3">
               {article.author.avatar && (
@@ -314,10 +327,10 @@ function ArticleView({
                 />
               )}
               <div>
-                <p className="font-medium text-gray-900">
+                <p className="font-medium text-foreground">
                   {article.author.name}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   {article.publishedAt
                     ? new Date(article.publishedAt).toLocaleDateString(
                         'en-US',
@@ -332,13 +345,19 @@ function ArticleView({
               </div>
             </div>
 
-            {/* Social Share */}
-            <SocialShareButtons
-              url={articleUrl}
-              title={article.title}
-              description={article.summary || ''}
-            />
+            {/* Social Share & Copy Link */}
+            <div className="flex items-center gap-2">
+              <CopyLinkButton url={articleUrl} title={article.title} />
+              <SocialShareButtons
+                url={articleUrl}
+                title={article.title}
+                description={article.summary || ''}
+              />
+            </div>
           </div>
+
+          {/* Table of Contents */}
+          <TableOfContents />
 
           {/* Cover Image */}
           {article.imageUrl && (
@@ -357,70 +376,99 @@ function ArticleView({
           )}
         </header>
 
-        {/* Article Content */}
-        <div className="mb-12">
-          <RichContentRenderer content={article.content as string} />
-        </div>
-
-        {/* Tags */}
-        {article.tags.length > 0 && (
-          <div className="mb-8 pb-8 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Tags</h3>
-            <div className="flex flex-wrap gap-2">
-              {article.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="inline-block bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full hover:bg-gray-200 transition-colors"
-                >
-                  #{tag.name}
-                </span>
-              ))}
+            {/* Article Content */}
+            <div className="mb-12 max-w-none">
+              <RichContentRenderer content={article.content as string} />
             </div>
-          </div>
-        )}
 
-        {/* Author Bio */}
-        {article.author.bio && (
-          <div className="mb-12 p-6 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
-              About the Author
-            </h3>
-            <div className="flex gap-4">
-              {article.author.avatar && (
-                <OptimizedImage
-                  src={article.author.avatar}
-                  alt={article.author.name}
-                  width={64}
-                  height={64}
-                  className="rounded-full flex-shrink-0"
-                />
-              )}
-              <div>
-                <p className="font-medium text-gray-900 mb-2">
-                  {article.author.name}
+            {/* Newsletter CTA */}
+            <NewsletterCTA />
+
+            {/* Tags */}
+            {article.tags.length > 0 && (
+              <div className="mb-8 pb-8 border-b border-border">
+                <h3 className="text-lg font-semibold text-foreground mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {article.tags.map((tag) => (
+                    <a
+                      key={tag.id}
+                      href={`/tag/${tag.name.toLowerCase().replace(/\s+/g, '-')}`}
+                      className="inline-block bg-secondary text-secondary-foreground text-sm px-3 py-1 rounded-full hover:bg-secondary/80 transition-colors"
+                    >
+                      #{tag.name}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Author Bio */}
+            {article.author.bio && (
+              <div className="mb-12 p-6 bg-card border border-border rounded-lg">
+                <h3 className="text-lg font-semibold text-card-foreground mb-3">
+                  About the Author
+                </h3>
+                <div className="flex gap-4">
+                  {article.author.avatar && (
+                    <OptimizedImage
+                      src={article.author.avatar}
+                      alt={article.author.name}
+                      width={64}
+                      height={64}
+                      className="rounded-full flex-shrink-0"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium text-card-foreground mb-2">
+                      {article.author.name}
+                    </p>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {article.author.bio}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </article>
+
+          {/* Right Sidebar */}
+          <aside className="lg:col-span-4">
+            <div className="sticky top-24 space-y-6">
+              <TableOfContents />
+              
+              {/* Newsletter Promo */}
+              <div className="bg-card border border-border rounded-lg p-4">
+                <h3 className="font-semibold text-card-foreground mb-2 text-sm">Stay Updated</h3>
+                <p className="text-muted-foreground text-xs mb-3">
+                  Get weekly tech insights
                 </p>
-                <p className="text-gray-600 leading-relaxed">
-                  {article.author.bio}
-                </p>
+                <a
+                  href="#newsletter"
+                  className="text-xs text-primary hover:text-primary/80 font-medium"
+                >
+                  Subscribe below →
+                </a>
               </div>
             </div>
-          </div>
-        )}
-      </article>
+          </aside>
+        </div>
 
-      {/* Related Articles */}
-      {relatedArticles.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8">
-            Related Articles
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {relatedArticles.map((relatedArticle) => (
-              <ArticleCard key={relatedArticle.id} article={relatedArticle} />
-            ))}
-          </div>
-        </section>
-      )}
+        {/* Related Articles */}
+        {relatedArticles.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-2xl font-bold text-foreground mb-8">
+              Related Articles
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedArticles.map((relatedArticle) => (
+                <ArticleCard key={relatedArticle.id} article={relatedArticle} />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <BackToTop />
     </>
   );
 }
