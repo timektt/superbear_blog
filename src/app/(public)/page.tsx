@@ -72,7 +72,7 @@ export default async function Home() {
     ]);
 
     const featured = featuredResults[0] || MOCK_FEATURED;
-    
+
     return (
       <HomeView
         featured={{
