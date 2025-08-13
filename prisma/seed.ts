@@ -1,4 +1,4 @@
-import { PrismaClient, Status } from '@prisma/client';
+import { PrismaClient, Status, AdminRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -15,9 +15,37 @@ async function main() {
       email: 'admin@superbear.blog',
       name: 'Admin User',
       password: hashedPassword,
+      role: AdminRole.SUPER_ADMIN,
     },
   });
   console.log('✅ Created admin user:', adminUser.email);
+
+  // Create additional admin users with different roles
+  const editorPassword = await bcrypt.hash('editor123', 12);
+  const editorUser = await prisma.adminUser.upsert({
+    where: { email: 'editor@superbear.blog' },
+    update: {},
+    create: {
+      email: 'editor@superbear.blog',
+      name: 'Editor User',
+      password: editorPassword,
+      role: AdminRole.EDITOR,
+    },
+  });
+  console.log('✅ Created editor user:', editorUser.email);
+
+  const authorPassword = await bcrypt.hash('author123', 12);
+  const authorUser = await prisma.adminUser.upsert({
+    where: { email: 'author@superbear.blog' },
+    update: {},
+    create: {
+      email: 'author@superbear.blog',
+      name: 'Author User',
+      password: authorPassword,
+      role: AdminRole.AUTHOR,
+    },
+  });
+  console.log('✅ Created author user:', authorUser.email);
 
   // Create author
   const author = await prisma.author.upsert({
