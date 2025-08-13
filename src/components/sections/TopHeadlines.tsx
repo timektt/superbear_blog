@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import SectionHeader from '@/components/ui/SectionHeader';
 
 interface Headline {
   title: string;
@@ -18,31 +19,13 @@ export default function TopHeadlines({ headlines }: TopHeadlinesProps) {
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
-          <div className="w-1 h-5 bg-red-600 rounded-full mr-3"></div>
-          Top Headlines
-        </h2>
-        <Link
-          href="/news"
-          className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 font-medium text-sm flex items-center transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-md px-2 py-1"
-        >
-          See more
-          <svg
-            className="ml-1 w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            />
-          </svg>
-        </Link>
-      </div>
+      <SectionHeader
+        title="Top Headlines"
+        viewAllHref="/news"
+        viewAllText="See more"
+        accentColor="red"
+        className="mb-6"
+      />
 
       <div className="space-y-3">
         {displayHeadlines.map((headline, index) => (
