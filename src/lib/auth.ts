@@ -1,11 +1,14 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
-import { prisma } from './prisma';
+import { getPrisma } from './prisma';
+import { AdminRole } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
+const prisma = getPrisma();
+
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  adapter: prisma ? PrismaAdapter(prisma) : undefined,
   providers: [
     CredentialsProvider({
       name: 'credentials',
@@ -14,40 +17,45 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.email || !credentials?.password || !prisma) {
           return null;
         }
 
-        const adminUser = await prisma.adminUser.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
+        try {
+          const adminUser = await prisma.adminUser.findUnique({
+            where: {
+              email: credentials.email,
+            },
+          });
 
-        if (!adminUser) {
+          if (!adminUser) {
+            return null;
+          }
+
+          const isPasswordValid = await bcrypt.compare(
+            credentials.password,
+            adminUser.password
+          );
+
+          if (!isPasswordValid) {
+            return null;
+          }
+
+          // Check if user is active
+          if (!adminUser.isActive) {
+            return null;
+          }
+
+          return {
+            id: adminUser.id,
+            email: adminUser.email,
+            name: adminUser.name,
+            role: adminUser.role,
+          };
+        } catch (error) {
+          console.error('Auth error:', error);
           return null;
         }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          adminUser.password
-        );
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        // Check if user is active
-        if (!adminUser.isActive) {
-          return null;
-        }
-
-        return {
-          id: adminUser.id,
-          email: adminUser.email,
-          name: adminUser.name,
-          role: adminUser.role,
-        };
       },
     }),
   ],
@@ -59,16 +67,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      // Persist the user ID and role to the token right after signin
       if (user) {
         token.id = user.id;
-        token.role = (user as any).role;
+        token.role = user.role as AdminRole;
       }
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      // Send properties to the client
+      if (token && session.user) {
         session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        session.user.role = token.role as AdminRole;
       }
       return session;
     },
