@@ -19,7 +19,7 @@ export default function Hero({ featuredArticle }: HeroProps) {
   return (
     <Link
       href={`/news/${featuredArticle.slug || 'featured-article'}`}
-      className="group block relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 aspect-[16/9] lg:aspect-[21/9] hover:scale-[1.02] transition-transform duration-300"
+      className="group block relative overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 aspect-[16/9] hover:shadow-xl transition-all duration-300 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
     >
       {/* Background Image */}
       <div className="absolute inset-0">
@@ -27,55 +27,37 @@ export default function Hero({ featuredArticle }: HeroProps) {
           src={featuredArticle.imageUrl}
           alt={featuredArticle.title}
           fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          className="object-cover group-hover:scale-105 transition-transform duration-700"
           priority
           sizes="(max-width: 1024px) 100vw, 66vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
       </div>
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8 lg:p-12">
+      <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
         {/* Category Badge */}
-        <div className="mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-600 text-white">
+        <div className="mb-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-red-600 text-white uppercase tracking-wide">
             {featuredArticle.category}
           </span>
         </div>
 
-        {/* Title */}
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 leading-tight group-hover:text-indigo-200 transition-colors duration-200">
+        {/* Title - TechCrunch style with line clamp */}
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-3 leading-tight line-clamp-3 group-hover:text-gray-100 transition-colors duration-200">
           {featuredArticle.title}
         </h1>
 
-        {/* Summary */}
-        <p className="text-gray-200 text-base sm:text-lg mb-6 leading-relaxed">
+        {/* Summary - TechCrunch dek style */}
+        <p className="text-gray-200 text-sm sm:text-base mb-4 leading-relaxed line-clamp-2">
           {featuredArticle.summary}
         </p>
 
-        {/* Meta Info */}
-        <div className="flex items-center text-sm text-gray-300 mb-6">
+        {/* Meta Info - TechCrunch byline style */}
+        <div className="flex items-center text-xs text-gray-300">
           <span className="font-medium">{featuredArticle.author}</span>
           <span className="mx-2">•</span>
           <span>{featuredArticle.date}</span>
-        </div>
-
-        {/* Read More Button */}
-        <div className="flex items-center text-white font-semibold group-hover:text-indigo-200 transition-colors duration-200">
-          <span className="mr-2">Read More</span>
-          <svg
-            className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 8l4 4m0 0l-4 4m4-4H3"
-            />
-          </svg>
         </div>
       </div>
     </Link>

@@ -6,7 +6,7 @@ interface Article {
   content: unknown;
   image: string | null;
   publishedAt: Date | null;
-  updatedAt: Date;
+  updatedAt?: Date;
   author: {
     id: string;
     name: string;
@@ -48,7 +48,7 @@ export default function StructuredData({ article, url }: StructuredDataProps) {
       height: 630,
     },
     datePublished: article.publishedAt?.toISOString(),
-    dateModified: article.updatedAt.toISOString(),
+    dateModified: (article.updatedAt || article.publishedAt || new Date()).toISOString(),
     author: {
       '@type': 'Person',
       '@id': `${baseUrl}/author/${article.author.id}`,
@@ -94,7 +94,7 @@ export default function StructuredData({ article, url }: StructuredDataProps) {
     },
     inLanguage: 'en-US',
     copyrightYear: new Date(
-      article.publishedAt || article.updatedAt
+      article.publishedAt || article.updatedAt || new Date()
     ).getFullYear(),
     copyrightHolder: {
       '@id': `${baseUrl}/#organization`,

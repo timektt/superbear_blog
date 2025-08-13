@@ -11,6 +11,7 @@ import ExploreByCategory from '@/components/sections/ExploreByCategory';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
+import { SHOW_DB_SAFE_BANNER } from '@/lib/flags';
 import {
   MOCK_FEATURED,
   MOCK_TOP_HEADLINES,
@@ -35,26 +36,15 @@ export default async function Home() {
   // DB-Safe Mode: Use mock data when database is not configured
   if (!IS_DB_CONFIGURED || !prisma) {
     return (
-      <>
-        {/* DB-Safe Mode Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <p className="text-sm text-amber-800 dark:text-amber-200 text-center">
-              🔧 Running in DB-safe mode with mock data. Configure DATABASE_URL
-              to load real content.
-            </p>
-          </div>
-        </div>
-        <HomeView
-          featured={{
-            ...MOCK_FEATURED,
-            category: MOCK_FEATURED.category.name,
-            author: MOCK_FEATURED.author.name,
-          }}
-          headlines={MOCK_TOP_HEADLINES}
-          latest={MOCK_LATEST}
-        />
-      </>
+      <HomeView
+        featured={{
+          ...MOCK_FEATURED,
+          category: MOCK_FEATURED.category.name,
+          author: MOCK_FEATURED.author.name,
+        }}
+        headlines={MOCK_TOP_HEADLINES}
+        latest={MOCK_LATEST}
+      />
     );
   }
 
@@ -97,24 +87,15 @@ export default async function Home() {
   } catch (error) {
     console.warn('Database query failed, falling back to mock data:', error);
     return (
-      <>
-        <div className="bg-red-50 dark:bg-red-900/20 border-b border-red-200 dark:border-red-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <p className="text-sm text-red-800 dark:text-red-200 text-center">
-              ⚠️ Database connection failed. Displaying mock data.
-            </p>
-          </div>
-        </div>
-        <HomeView
-          featured={{
-            ...MOCK_FEATURED,
-            category: MOCK_FEATURED.category.name,
-            author: MOCK_FEATURED.author.name,
-          }}
-          headlines={MOCK_TOP_HEADLINES}
-          latest={MOCK_LATEST}
-        />
-      </>
+      <HomeView
+        featured={{
+          ...MOCK_FEATURED,
+          category: MOCK_FEATURED.category.name,
+          author: MOCK_FEATURED.author.name,
+        }}
+        headlines={MOCK_TOP_HEADLINES}
+        latest={MOCK_LATEST}
+      />
     );
   }
 }
@@ -156,7 +137,7 @@ function HomeView({
 }) {
   return (
     <>
-      {/* Hero Band - TechCrunch Structure */}
+      {/* Above the Fold - Hero + Headlines */}
       <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -173,29 +154,44 @@ function HomeView({
         </div>
       </section>
 
-      {/* Latest News Section - TechCrunch List Layout */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-12 transition-colors duration-300">
+      {/* Below the Fold - Latest + Right Rail */}
+      <section className="bg-gray-50 dark:bg-gray-800 py-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-              <div className="w-1 h-8 bg-indigo-600 rounded-full mr-4"></div>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+              <div className="w-1 h-6 bg-red-600 rounded-full mr-3"></div>
               Latest News
             </h2>
             <Link
               href="/news"
-              className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors duration-200"
+              className="inline-flex items-center text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-md px-2 py-1"
             >
               See more
+              <svg
+                className="ml-1 w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
             </Link>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Latest List - Left 8-9 cols */}
+            {/* Latest List - Left 8 cols */}
             <div className="lg:col-span-8">
-              <LatestList articles={latest.slice(0, 6)} />
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-6">
+                <LatestList articles={latest.slice(0, 8)} />
+              </div>
             </div>
 
-            {/* Right Rail - Right 3-4 cols */}
+            {/* Right Rail - Right 4 cols */}
             <div className="lg:col-span-4">
               <RightRail title="Most Popular" items={mockRightRailItems} />
             </div>
@@ -203,10 +199,10 @@ function HomeView({
         </div>
       </section>
 
-      {/* Storylines / In Brief - Horizontal Scroller */}
+      {/* Storylines Strip */}
       <StorylinesStrip items={mockStorylinesItems} />
 
-      {/* Startups Section Block */}
+      {/* Startups Section */}
       <StartupsBlock
         featuredArticle={mockStartupsFeatured}
         sideArticles={mockStartupsSide}
@@ -215,8 +211,15 @@ function HomeView({
       {/* Podcasts Section */}
       <PodcastsBlock title="Podcasts" items={mockPodcastItems} />
 
-      {/* Explore by Category - Polished */}
+      {/* Explore by Category */}
       <ExploreByCategory />
+
+      {/* DB-Safe Banner - Feature Flagged */}
+      {!IS_DB_CONFIGURED && SHOW_DB_SAFE_BANNER && (
+        <div className="fixed bottom-3 left-3 rounded-md border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-700 dark:text-amber-300 text-xs backdrop-blur-sm z-50">
+          DB-safe mode: using mock data
+        </div>
+      )}
     </>
   );
 }

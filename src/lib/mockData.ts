@@ -394,7 +394,7 @@ export const mockStartupsSide = [
     author: 'Dr. Amanda White',
     date: '5h ago',
     imageUrl:
-      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?w=400&h=300&fit=crop',
+      'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=480&q=80',
     slug: 'healthcare-ai-150m-funding',
     snippet:
       "The company's AI can detect early-stage diseases from medical imaging with 95% accuracy.",
@@ -451,7 +451,7 @@ export const MOCK_FEATURED = {
   publishedAt: new Date('2025-08-06'),
   updatedAt: new Date('2025-08-06'),
   category: { name: 'AI', id: 'mock-cat-ai', slug: 'ai' },
-  imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=600&fit=crop',
+  imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=1600&q=80',
   status: 'PUBLISHED' as const,
   content: [
     {
@@ -530,7 +530,7 @@ export const MOCK_LATEST = [
     author: 'Jane Doe',
     date: 'Aug 6, 2025',
     slug: 'copilot-collab',
-    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=480&q=80',
     snippet: 'Real-time pair programming and shared context for teams.',
     tags: ['AI', 'Developer Tools'],
     status: 'PUBLISHED' as const,
@@ -543,7 +543,7 @@ export const MOCK_LATEST = [
     author: 'Alex Kim',
     date: 'Aug 6, 2025',
     slug: 'vercel-edge-2',
-    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=480&q=80',
     snippet: 'Faster cold starts and streaming primitives.',
     tags: ['Edge', 'Serverless'],
     status: 'PUBLISHED' as const,
@@ -556,7 +556,7 @@ export const MOCK_LATEST = [
     author: 'Sam Lee',
     date: 'Aug 5, 2025',
     slug: 'llama-3-1-400b',
-    imageUrl: 'https://images.unsplash.com/photo-1677756119517-756a188d2d94?w=400&h=300&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1677756119517-756a188d2d94?auto=format&fit=crop&w=480&q=80',
     snippet: 'Bigger pretraining set and strong evals.',
     tags: ['LLM', 'Research'],
     status: 'PUBLISHED' as const,
