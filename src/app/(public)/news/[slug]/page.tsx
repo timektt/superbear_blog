@@ -10,15 +10,18 @@ export const fetchCache = 'force-cache'; // Force caching for better performance
 const SocialShareButtons = dynamic(
   () => import('@/components/ui/SocialShareButtons'),
   {
-    loading: () => (
-      <div className="h-8 w-32 bg-muted rounded animate-pulse" />
-    ),
+    loading: () => <div className="h-8 w-32 bg-muted rounded animate-pulse" />,
   }
 );
 
-const NewsletterCTA = dynamic(() => import('@/components/article/NewsletterCTA'), {
-  loading: () => <div className="h-32 bg-muted rounded-xl animate-pulse my-8" />
-});
+const NewsletterCTA = dynamic(
+  () => import('@/components/article/NewsletterCTA'),
+  {
+    loading: () => (
+      <div className="h-32 bg-muted rounded-xl animate-pulse my-8" />
+    ),
+  }
+);
 import { RichContentRenderer } from '@/components/ui/RichContentRenderer';
 import OptimizedImage from '@/components/ui/OptimizedImage';
 import ArticleCard from '@/components/ui/ArticleCard';
@@ -287,94 +290,94 @@ function ArticleView({
     <>
       <ReadingProgress />
       <StructuredData article={article} url={articleUrl} />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Main Article Content */}
           <article className="lg:col-span-8">
-        {/* Article Header */}
-        <header className="mb-8">
-          {/* Category Badge */}
-          <div className="mb-4">
-            <span className="inline-block bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full">
-              {article.category.name}
-            </span>
-          </div>
+            {/* Article Header */}
+            <header className="mb-8">
+              {/* Category Badge */}
+              <div className="mb-4">
+                <span className="inline-block bg-primary/10 text-primary text-sm font-medium px-3 py-1 rounded-full">
+                  {article.category.name}
+                </span>
+              </div>
 
-          {/* Title */}
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
-            {article.title}
-          </h1>
+              {/* Title */}
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
+                {article.title}
+              </h1>
 
-          {/* Summary */}
-          {article.summary && (
-            <p className="text-lg sm:text-xl text-muted-foreground mb-6 leading-relaxed">
-              {article.summary}
-            </p>
-          )}
-
-          {/* Article Meta */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-border">
-            {/* Author Info */}
-            <div className="flex items-center gap-3">
-              {article.author.avatar && (
-                <OptimizedImage
-                  src={article.author.avatar}
-                  alt={article.author.name}
-                  width={48}
-                  height={48}
-                  className="rounded-full"
-                />
+              {/* Summary */}
+              {article.summary && (
+                <p className="text-lg sm:text-xl text-muted-foreground mb-6 leading-relaxed">
+                  {article.summary}
+                </p>
               )}
-              <div>
-                <p className="font-medium text-foreground">
-                  {article.author.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {article.publishedAt
-                    ? new Date(article.publishedAt).toLocaleDateString(
-                        'en-US',
-                        {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric',
-                        }
-                      )
-                    : 'Draft'}
-                </p>
+
+              {/* Article Meta */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-border">
+                {/* Author Info */}
+                <div className="flex items-center gap-3">
+                  {article.author.avatar && (
+                    <OptimizedImage
+                      src={article.author.avatar}
+                      alt={article.author.name}
+                      width={48}
+                      height={48}
+                      className="rounded-full"
+                    />
+                  )}
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {article.author.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {article.publishedAt
+                        ? new Date(article.publishedAt).toLocaleDateString(
+                            'en-US',
+                            {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            }
+                          )
+                        : 'Draft'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Social Share & Copy Link */}
+                <div className="flex items-center gap-2">
+                  <CopyLinkButton url={articleUrl} title={article.title} />
+                  <SocialShareButtons
+                    url={articleUrl}
+                    title={article.title}
+                    description={article.summary || ''}
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Social Share & Copy Link */}
-            <div className="flex items-center gap-2">
-              <CopyLinkButton url={articleUrl} title={article.title} />
-              <SocialShareButtons
-                url={articleUrl}
-                title={article.title}
-                description={article.summary || ''}
-              />
-            </div>
-          </div>
+              {/* Table of Contents */}
+              <TableOfContents />
 
-          {/* Table of Contents */}
-          <TableOfContents />
-
-          {/* Cover Image */}
-          {article.imageUrl && (
-            <div className="mb-8">
-              <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
-                <OptimizedImage
-                  src={article.imageUrl}
-                  alt={article.title}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 1024px, 100vw"
-                  className="object-cover"
-                />
-              </div>
-            </div>
-          )}
-        </header>
+              {/* Cover Image */}
+              {article.imageUrl && (
+                <div className="mb-8">
+                  <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
+                    <OptimizedImage
+                      src={article.imageUrl}
+                      alt={article.title}
+                      fill
+                      priority
+                      sizes="(min-width: 1024px) 1024px, 100vw"
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+            </header>
 
             {/* Article Content */}
             <div className="mb-12 max-w-none">
@@ -387,7 +390,9 @@ function ArticleView({
             {/* Tags */}
             {article.tags.length > 0 && (
               <div className="mb-8 pb-8 border-b border-border">
-                <h3 className="text-lg font-semibold text-foreground mb-3">Tags</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-3">
+                  Tags
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {article.tags.map((tag) => (
                     <a
@@ -435,10 +440,12 @@ function ArticleView({
           <aside className="lg:col-span-4">
             <div className="sticky top-24 space-y-6">
               <TableOfContents />
-              
+
               {/* Newsletter Promo */}
               <div className="bg-card border border-border rounded-lg p-4">
-                <h3 className="font-semibold text-card-foreground mb-2 text-sm">Stay Updated</h3>
+                <h3 className="font-semibold text-card-foreground mb-2 text-sm">
+                  Stay Updated
+                </h3>
                 <p className="text-muted-foreground text-xs mb-3">
                   Get weekly tech insights
                 </p>

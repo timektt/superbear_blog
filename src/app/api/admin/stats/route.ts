@@ -1,14 +1,21 @@
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server';
+import { requireRole } from '@/lib/auth-utils';
+import { AdminRole } from '@prisma/client';
+import { getPrisma } from '@/lib/prisma';
 
-export async function GET() {
+const prisma = getPrisma();
+
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Check authentication and role (EDITOR can view stats)
+    const roleError = await requireRole(AdminRole.EDITOR);
+    if (roleError) return roleError;
+
+    if (!prisma) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
     }
 
     // Get article counts by status

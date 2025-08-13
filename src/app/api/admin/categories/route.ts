@@ -1,17 +1,21 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import {
-  requireAuth,
-  createErrorResponse,
-  createSuccessResponse,
-} from '@/lib/auth-utils';
+import { NextRequest, NextResponse } from 'next/server';
+import { getPrisma } from '@/lib/prisma';
+import { requireRole } from '@/lib/auth-utils';
+import { AdminRole } from '@prisma/client';
 
-export async function GET() {
+const prisma = getPrisma();
+
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await requireAuth();
-    if (session instanceof NextResponse) {
-      return session; // Return error response
+    // Check authentication and role (EDITOR can manage categories)
+    const roleError = await requireRole(AdminRole.EDITOR);
+    if (roleError) return roleError;
+
+    if (!prisma) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
     }
 
     const categories = await prisma.category.findMany({
@@ -25,9 +29,15 @@ export async function GET() {
       },
     });
 
-    return createSuccessResponse({ categories });
+    return NextResponse.json({
+      success: true,
+      data: { categories }
+    });
   } catch (error) {
     console.error('Error fetching categories:', error);
-    return createErrorResponse('Failed to fetch categories', 500);
+    return NextResponse.json(
+      { error: 'Failed to fetch categories' },
+      { status: 500 }
+    );
   }
 }

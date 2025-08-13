@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import {
-  requireAuth,
-  createErrorResponse,
-  createSuccessResponse,
-} from '@/lib/auth-utils';
-import type { Status } from '@/types/database';
+import { getPrisma } from '@/lib/prisma';
+import { requireRole } from '@/lib/auth-utils';
+import { AdminRole } from '@prisma/client';
 import { z } from 'zod';
+
+const prisma = getPrisma();
 
 const createArticleSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -22,10 +20,15 @@ const createArticleSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await requireAuth();
-    if (session instanceof NextResponse) {
-      return session; // Return error response
+    // Check authentication and role (AUTHOR can view articles)
+    const roleError = await requireRole(AdminRole.AUTHOR);
+    if (roleError) return roleError;
+
+    if (!prisma) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -92,27 +95,38 @@ export async function GET(request: NextRequest) {
       prisma.article.count({ where }),
     ]);
 
-    return createSuccessResponse({
-      articles,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
+    return NextResponse.json({
+      success: true,
+      data: {
+        articles,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
       },
     });
   } catch (error) {
     console.error('Error fetching admin articles:', error);
-    return createErrorResponse('Failed to fetch articles', 500);
+    return NextResponse.json(
+      { error: 'Failed to fetch articles' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await requireAuth();
-    if (session instanceof NextResponse) {
-      return session; // Return error response
+    // Check authentication and role (AUTHOR can create articles)
+    const roleError = await requireRole(AdminRole.AUTHOR);
+    if (roleError) return roleError;
+
+    if (!prisma) {
+      return NextResponse.json(
+        { error: 'Database not available' },
+        { status: 503 }
+      );
     }
 
     const body = await request.json();
@@ -144,11 +158,17 @@ export async function POST(request: NextRequest) {
     ]);
 
     if (!author) {
-      return createErrorResponse('Author not found', 404);
+      return NextResponse.json(
+        { error: 'Author not found' },
+        { status: 404 }
+      );
     }
 
     if (!category) {
-      return createErrorResponse('Category not found', 404);
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 404 }
+      );
     }
 
     // Create article with tags
@@ -192,17 +212,26 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return createSuccessResponse(article, 201);
+    return NextResponse.json(
+      { success: true, data: article },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating article:', error);
 
     if (error instanceof z.ZodError) {
-      return createErrorResponse(
-        `Validation error: ${error.issues.map((e) => e.message).join(', ')}`,
-        400
+      return NextResponse.json(
+        { 
+          error: 'Validation error',
+          details: error.issues.map((e) => e.message)
+        },
+        { status: 400 }
       );
     }
 
-    return createErrorResponse('Failed to create article', 500);
+    return NextResponse.json(
+      { error: 'Failed to create article' },
+      { status: 500 }
+    );
   }
 }
