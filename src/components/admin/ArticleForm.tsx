@@ -7,6 +7,7 @@ import { useEditorState } from '@/components/editor/useEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { ToastContainer } from '@/components/ui/ToastContainer';
 import { useToast } from '@/lib/hooks/useToast';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import {
   articleFormSchema,
   type ArticleFormData,
@@ -42,11 +43,12 @@ interface ArticleFormProps {
   mode: 'create' | 'edit';
 }
 
-export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
+function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
   const router = useRouter();
   const { toasts, removeToast, showSuccess, showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
@@ -191,6 +193,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
 
     setLoading(true);
     setError(null);
+    setFormError(null);
 
     try {
       const url =
@@ -229,8 +232,11 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
       }, 1000); // Small delay to show the success message
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : 'An error occurred';
+        err instanceof Error ? err.message : 'An unexpected error occurred';
+      
       setError(errorMessage);
+      setFormError(errorMessage);
+      
       showError(
         mode === 'create'
           ? 'Failed to create article'
@@ -264,7 +270,7 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
             className="p-4 sm:p-6 space-y-6"
             noValidate
           >
-            {error && (
+            {(error || formError) && (
               <div
                 className="rounded-md bg-red-50 p-4"
                 role="alert"
@@ -289,7 +295,9 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
                   </div>
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-red-800">Error</h3>
-                    <div className="mt-1 text-sm text-red-700">{error}</div>
+                    <div className="mt-1 text-sm text-red-700">
+                      {error || formError}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -546,5 +554,13 @@ export default function ArticleForm({ initialData, mode }: ArticleFormProps) {
         </div>
       </div>
     </>
+  );
+}
+
+export default function ArticleForm(props: ArticleFormProps) {
+  return (
+    <ErrorBoundary>
+      <ArticleFormContent {...props} />
+    </ErrorBoundary>
   );
 }

@@ -7,17 +7,15 @@ import {
 } from '@/lib/auth-utils';
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { updateArticleSchema } from '@/lib/validations/article';
 
-const updateArticleSchema = z.object({
-  title: z.string().min(1, 'Title is required').optional(),
-  slug: z.string().optional(),
-  summary: z.string().optional(),
-  content: z.any().optional(), // Tiptap JSON content
-  image: z.string().optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).optional(),
-  authorId: z.string().optional(),
-  categoryId: z.string().optional(),
-  tagIds: z.array(z.string()).optional(),
+// Cloudinary configuration
+const cloudinary = require('cloudinary').v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export async function PATCH(
@@ -72,6 +70,30 @@ export async function PATCH(
       });
       if (!category) {
         return createErrorResponse('Category not found', 404);
+      }
+    }
+
+    // Validate tag IDs exist in database if tags are being updated
+    if (validatedData.tagIds && validatedData.tagIds.length > 0) {
+      const existingTags = await prisma.tag.findMany({
+        where: {
+          id: {
+            in: validatedData.tagIds,
+          },
+        },
+        select: { id: true },
+      });
+
+      const existingTagIds = existingTags.map((tag) => tag.id);
+      const missingTagIds = validatedData.tagIds.filter(
+        (id) => !existingTagIds.includes(id)
+      );
+
+      if (missingTagIds.length > 0) {
+        return createErrorResponse(
+          `Tags not found: ${missingTagIds.join(', ')}`,
+          400
+        );
       }
     }
 
@@ -153,9 +175,14 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Check if article exists
+    // Check if article exists and get image info
     const existingArticle = await prisma.article.findUnique({
       where: { id },
+      select: {
+        id: true,
+        image: true,
+        title: true,
+      },
     });
 
     if (!existingArticle) {
@@ -167,7 +194,30 @@ export async function DELETE(
       where: { id },
     });
 
-    return createSuccessResponse({ message: 'Article deleted successfully' });
+    // Clean up associated images from Cloudinary
+    if (existingArticle.image) {
+      try {
+        // Extract public_id from Cloudinary URL
+        const urlParts = existingArticle.image.split('/');
+        const fileWithExtension = urlParts[urlParts.length - 1];
+        const publicId = fileWithExtension.split('.')[0];
+
+        // Delete from Cloudinary
+        await cloudinary.uploader.destroy(publicId);
+        console.log(`Deleted image from Cloudinary: ${publicId}`);
+      } catch (imageError) {
+        console.error('Error deleting image from Cloudinary:', imageError);
+        // Don't fail the entire operation if image deletion fails
+      }
+    }
+
+    return createSuccessResponse({
+      message: 'Article deleted successfully',
+      deletedArticle: {
+        id: existingArticle.id,
+        title: existingArticle.title,
+      },
+    });
   } catch (error) {
     console.error('Error deleting article:', error);
     return createErrorResponse('Failed to delete article', 500);

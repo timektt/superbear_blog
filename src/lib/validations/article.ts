@@ -1,11 +1,39 @@
 import { z } from 'zod';
 
+// Consistent slug validation schema
+export const slugSchema = z
+  .string()
+  .regex(
+    /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+    'Slug must contain only lowercase letters, numbers, and hyphens'
+  )
+  .min(1, 'Slug is required')
+  .max(100, 'Slug must be less than 100 characters');
+
+// Content validation schema for Tiptap JSON
+export const contentSchema = z
+  .string()
+  .min(1, 'Content is required')
+  .refine((val) => {
+    try {
+      const parsed = JSON.parse(val);
+      return (
+        parsed &&
+        typeof parsed === 'object' &&
+        parsed.type === 'doc' &&
+        Array.isArray(parsed.content)
+      );
+    } catch {
+      return false;
+    }
+  }, 'Content must be valid Tiptap JSON with type "doc" and content array');
+
 export const articleFormSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required')
     .max(200, 'Title must be less than 200 characters'),
-  slug: z.string().optional(),
+  slug: slugSchema.optional(),
   summary: z
     .string()
     .optional()
@@ -13,7 +41,7 @@ export const articleFormSchema = z.object({
       (val) => !val || val.length <= 500,
       'Summary must be less than 500 characters'
     ),
-  content: z.string().min(1, 'Content is required'),
+  content: contentSchema,
   image: z.string().optional(),
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
   authorId: z.string().min(1, 'Author is required'),
@@ -35,16 +63,13 @@ export const validateSlug = (slug: string): boolean => {
   return slugRegex.test(slug);
 };
 
-// Schema for article validation (alias for articleFormSchema)
-export const articleSchema = z.object({
+// Create article schema for API routes
+export const createArticleSchema = z.object({
   title: z
     .string()
     .min(1, 'Title is required')
     .max(200, 'Title must be less than 200 characters'),
-  slug: z
-    .string()
-    .optional()
-    .refine((val) => !val || validateSlug(val), 'Slug must be URL-friendly'),
+  slug: slugSchema.optional(),
   summary: z
     .string()
     .optional()
@@ -52,12 +77,7 @@ export const articleSchema = z.object({
       (val) => !val || val.length <= 500,
       'Summary must be less than 500 characters'
     ),
-  content: z.any().refine((val) => {
-    if (typeof val === 'object' && val !== null) {
-      return true;
-    }
-    return false;
-  }, 'Content must be valid JSON'),
+  content: contentSchema,
   image: z
     .string()
     .optional()
@@ -75,7 +95,47 @@ export const articleSchema = z.object({
       message: 'Invalid status',
     })
     .default('DRAFT'),
+  authorId: z.string().min(1, 'Author is required'),
   categoryId: z.string().min(1, 'Category is required'),
+  tagIds: z.array(z.string()).default([]),
+});
+
+// Update article schema for API routes
+export const updateArticleSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required')
+    .max(200, 'Title must be less than 200 characters')
+    .optional(),
+  slug: slugSchema.optional(),
+  summary: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || val.length <= 500,
+      'Summary must be less than 500 characters'
+    ),
+  content: contentSchema.optional(),
+  image: z
+    .string()
+    .optional()
+    .refine((val) => {
+      if (!val) return true;
+      try {
+        new URL(val);
+        return true;
+      } catch {
+        return false;
+      }
+    }, 'Invalid image URL'),
+  status: z
+    .enum(['DRAFT', 'PUBLISHED', 'ARCHIVED'], {
+      message: 'Invalid status',
+    })
+    .optional(),
+  authorId: z.string().optional(),
+  categoryId: z.string().optional(),
+  tagIds: z.array(z.string()).optional(),
 });
 
 // Login schema

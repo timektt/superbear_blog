@@ -7,18 +7,10 @@ import {
 } from '@/lib/auth-utils';
 import type { Status } from '@/types/database';
 import { z } from 'zod';
-
-const createArticleSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  slug: z.string().optional(),
-  summary: z.string().optional(),
-  content: z.any(), // Tiptap JSON content
-  image: z.string().optional(),
-  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
-  authorId: z.string().min(1, 'Author is required'),
-  categoryId: z.string().min(1, 'Category is required'),
-  tagIds: z.array(z.string()).optional().default([]),
-});
+import {
+  createArticleSchema,
+  generateSlugFromTitle,
+} from '@/lib/validations/article';
 
 export async function GET(request: NextRequest) {
   try {
@@ -121,10 +113,7 @@ export async function POST(request: NextRequest) {
     // Generate slug if not provided
     let slug = validatedData.slug;
     if (!slug) {
-      slug = validatedData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
+      slug = generateSlugFromTitle(validatedData.title);
     }
 
     // Check if slug is unique
@@ -149,6 +138,30 @@ export async function POST(request: NextRequest) {
 
     if (!category) {
       return createErrorResponse('Category not found', 404);
+    }
+
+    // Validate tag IDs exist in database
+    if (validatedData.tagIds.length > 0) {
+      const existingTags = await prisma.tag.findMany({
+        where: {
+          id: {
+            in: validatedData.tagIds,
+          },
+        },
+        select: { id: true },
+      });
+
+      const existingTagIds = existingTags.map((tag) => tag.id);
+      const missingTagIds = validatedData.tagIds.filter(
+        (id) => !existingTagIds.includes(id)
+      );
+
+      if (missingTagIds.length > 0) {
+        return createErrorResponse(
+          `Tags not found: ${missingTagIds.join(', ')}`,
+          400
+        );
+      }
     }
 
     // Create article with tags
