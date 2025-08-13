@@ -2,62 +2,59 @@ import { Metadata } from 'next';
 import { Suspense } from 'react';
 import ListPageLayout from '@/components/sections/ListPageLayout';
 import ListSkeleton from '@/components/ui/ListSkeleton';
-import { getLatest, getMostPopular, getInBrief } from '@/lib/publicData';
+import { getByCategory, getMostPopular } from '@/lib/publicData';
 import { createListPageMetadata } from '@/lib/seo';
 
 // Performance optimizations
 export const revalidate = 60;
 export const fetchCache = 'force-cache';
 
-interface NewsPageProps {
+interface StartupsPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
   return createListPageMetadata(
-    'Latest News',
-    'Stay updated with the latest technology news, AI developments, developer tools, and startup insights from SuperBear Blog.',
-    '/news'
+    'Startup News',
+    'Latest startup funding, tech entrepreneurship, and business development insights from SuperBear Blog.',
+    '/startups'
   );
 }
 
-export default async function NewsPage({ searchParams }: NewsPageProps) {
+export default async function StartupsPage({ searchParams }: StartupsPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || '1', 10);
 
   return (
-    <Suspense fallback={<NewsPageSkeleton />}>
-      <NewsPageContent page={page} />
+    <Suspense fallback={<CategoryPageSkeleton />}>
+      <StartupsPageContent page={page} />
     </Suspense>
   );
 }
 
-async function NewsPageContent({ page }: { page: number }) {
-  const [result, mostPopular, inBriefItems] = await Promise.all([
-    getLatest({ page, pageSize: 12 }),
+async function StartupsPageContent({ page }: { page: number }) {
+  const [result, mostPopular] = await Promise.all([
+    getByCategory('Startups', { page, pageSize: 12 }),
     getMostPopular(5),
-    getInBrief(8),
   ]);
 
   return (
     <ListPageLayout
-      title="Latest News"
-      subtitle="Stay updated with the latest in tech, AI, and developer tools"
-      inBriefItems={inBriefItems}
+      title="Startup News"
+      subtitle="Latest startup funding, entrepreneurship, and business development insights"
       result={result}
       mostPopular={mostPopular}
-      basePath="/news"
-      showInBrief={true}
+      basePath="/startups"
     />
   );
 }
 
-function NewsPageSkeleton() {
+function CategoryPageSkeleton() {
   return (
     <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2 animate-pulse"></div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-40 mb-2 animate-pulse"></div>
           <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-96 animate-pulse"></div>
         </div>
         

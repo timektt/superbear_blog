@@ -1,64 +1,68 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { notFound } from 'next/navigation';
 import ListPageLayout from '@/components/sections/ListPageLayout';
 import ListSkeleton from '@/components/ui/ListSkeleton';
-import { getLatest, getMostPopular, getInBrief } from '@/lib/publicData';
-import { createListPageMetadata } from '@/lib/seo';
+import { getByTag, getMostPopular } from '@/lib/publicData';
+import { createTagPageMetadata } from '@/lib/seo';
 
 // Performance optimizations
 export const revalidate = 60;
 export const fetchCache = 'force-cache';
 
-interface NewsPageProps {
+interface TagPageProps {
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ page?: string }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
-  return createListPageMetadata(
-    'Latest News',
-    'Stay updated with the latest technology news, AI developments, developer tools, and startup insights from SuperBear Blog.',
-    '/news'
-  );
+export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const tagName = slug.replace(/-/g, ' ');
+  return createTagPageMetadata(tagName);
 }
 
-export default async function NewsPage({ searchParams }: NewsPageProps) {
-  const params = await searchParams;
-  const page = parseInt(params.page || '1', 10);
+export default async function TagPage({ params, searchParams }: TagPageProps) {
+  const { slug } = await params;
+  const searchParamsResolved = await searchParams;
+  const page = parseInt(searchParamsResolved.page || '1', 10);
+
+  if (!slug) {
+    notFound();
+  }
 
   return (
-    <Suspense fallback={<NewsPageSkeleton />}>
-      <NewsPageContent page={page} />
+    <Suspense fallback={<TagPageSkeleton />}>
+      <TagPageContent slug={slug} page={page} />
     </Suspense>
   );
 }
 
-async function NewsPageContent({ page }: { page: number }) {
-  const [result, mostPopular, inBriefItems] = await Promise.all([
-    getLatest({ page, pageSize: 12 }),
+async function TagPageContent({ slug, page }: { slug: string; page: number }) {
+  const [result, mostPopular] = await Promise.all([
+    getByTag(slug, { page, pageSize: 12 }),
     getMostPopular(5),
-    getInBrief(8),
   ]);
+
+  const tagName = slug.replace(/-/g, ' ');
 
   return (
     <ListPageLayout
-      title="Latest News"
-      subtitle="Stay updated with the latest in tech, AI, and developer tools"
-      inBriefItems={inBriefItems}
+      title={`#${tagName}`}
+      subtitle={`Articles tagged with ${tagName}`}
       result={result}
       mostPopular={mostPopular}
-      basePath="/news"
-      showInBrief={true}
+      basePath={`/tag/${slug}`}
     />
   );
 }
 
-function NewsPageSkeleton() {
+function TagPageSkeleton() {
   return (
     <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2 animate-pulse"></div>
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-96 animate-pulse"></div>
+          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
+          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

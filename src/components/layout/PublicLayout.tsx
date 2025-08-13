@@ -82,12 +82,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
               >
                 News
               </Link>
-              <Link
-                href="/admin"
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-              >
-                Admin
-              </Link>
+
               <ThemeToggle />
             </nav>
 
@@ -169,13 +164,6 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
               >
                 News
               </Link>
-              <Link
-                href="/admin"
-                onClick={closeMobileMenu}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-              >
-                Admin
-              </Link>
             </div>
           </div>
         </div>
@@ -227,14 +215,6 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
                     className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
                   >
                     News
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/admin"
-                    className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
-                  >
-                    Admin
                   </Link>
                 </li>
               </ul>

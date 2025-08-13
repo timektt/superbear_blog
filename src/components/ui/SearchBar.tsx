@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SearchBarProps {
   className?: string;
@@ -8,12 +9,13 @@ interface SearchBarProps {
 
 export default function SearchBar({ className = '' }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // TODO: Implement search functionality
-      console.log('Searching for:', searchQuery);
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
     }
   };
 
