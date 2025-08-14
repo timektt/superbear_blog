@@ -69,6 +69,7 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
     "@eslint/eslintrc": "^3",
     "@next/bundle-analyzer": "^15.4.5",
     "@playwright/test": "^1.54.2",

@@ -46,16 +46,19 @@ tests/
 - **metadata-utils.test.ts**: Tests SEO metadata generation for articles and site
 - **search-utils.test.ts**: Tests article search functionality and text highlighting
 - **validations.test.ts**: Tests Zod validation schemas for articles and login
+- **article-validations.test.ts**: Tests comprehensive article validation rules, slug generation, content validation, and duplicate handling
 
 #### Components
 - **ArticleCard.test.tsx**: Tests article card rendering, accessibility, and edge cases
 - **SearchBar.test.tsx**: Tests search input, debouncing, keyboard navigation, and accessibility
+- **ErrorBoundary.test.tsx**: Tests error boundary component with fallback UI, development/production modes, and error logging
+- **ArticleForm.test.tsx**: Tests article form error handling, validation, loading states, and user feedback
 
 ### Integration Tests
 
 #### API Routes
 - **articles.test.ts**: Tests public article API endpoints with pagination, filtering, and error handling
-- **admin-articles.test.ts**: Tests admin article CRUD operations with authentication
+- **admin-articles.test.ts**: Tests admin article CRUD operations with authentication, including PATCH/DELETE operations, duplicate slug handling, tag validation, and Cloudinary image cleanup
 
 ### End-to-End Tests
 
@@ -63,6 +66,10 @@ tests/
 - **public-site.spec.ts**: Tests public site navigation, article browsing, search, and filtering
 - **admin-interface.spec.ts**: Tests admin dashboard, article management, and rich text editing
 - **authentication.spec.ts**: Tests login/logout flows, session management, and access control
+- **admin-rbac.spec.ts**: Tests role-based access control for different user roles (ADMIN, EDITOR, VIEWER)
+- **csrf-protection.spec.ts**: Tests CSRF token validation on form submissions and sensitive operations
+- **media-handling.spec.ts**: Tests image upload, deletion, error handling, and file validation workflows
+- **theme-accessibility.spec.ts**: Tests theme switching, accessibility compliance, keyboard navigation, and ARIA landmarks
 
 ## Test Configuration
 
@@ -159,10 +166,18 @@ The `tests/utils/test-helpers.ts` file provides:
 - ✅ Article CRUD operations
 - ✅ Search and filtering
 - ✅ Rich text editing
-- ✅ Image upload
+- ✅ Image upload and management
 - ✅ SEO metadata generation
 - ✅ Responsive design
 - ✅ Accessibility features
+- ✅ Role-based access control (RBAC)
+- ✅ CSRF protection
+- ✅ Error boundary handling
+- ✅ Form validation and error states
+- ✅ Theme switching and persistence
+- ✅ Media file validation and cleanup
+- ✅ Duplicate slug handling
+- ✅ Tag validation and relationships
 
 ## Best Practices
 
