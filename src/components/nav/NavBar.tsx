@@ -46,7 +46,9 @@ export default function NavBar() {
               aria-label="SuperBear Blog - Home"
             >
               <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">SB</span>
+                <span className="text-primary-foreground font-bold text-sm">
+                  SB
+                </span>
               </div>
               <span className="hidden sm:block tracking-tight">SuperBear</span>
             </Link>

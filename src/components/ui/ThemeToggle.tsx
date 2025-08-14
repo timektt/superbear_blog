@@ -13,9 +13,7 @@ export default function ThemeToggle() {
 
   // Prevent hydration mismatch by not rendering until mounted
   if (!mounted) {
-    return (
-      <div className="p-2 w-9 h-9 rounded-lg bg-muted animate-pulse" />
-    );
+    return <div className="p-2 w-9 h-9 rounded-lg bg-muted animate-pulse" />;
   }
 
   const toggleTheme = () => {
