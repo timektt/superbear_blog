@@ -330,3 +330,294 @@ npx prisma migrate dev
 - Dependency vulnerability scans
 - Environment variable rotation
 - Access log reviews
+## Ad
+vanced CI/CD Pipeline
+
+### GitHub Actions Workflow
+
+The repository includes a comprehensive CI/CD pipeline with the following stages:
+
+#### 1. Security Scanning
+- Trivy vulnerability scanner
+- npm audit for dependency vulnerabilities
+- SARIF upload to GitHub Security tab
+
+#### 2. Test Suite
+- Unit tests with coverage reporting
+- Integration tests with database
+- End-to-end tests with Playwright
+- Coverage upload to Codecov
+
+#### 3. Build & Deploy
+- Staging deployment (develop branch)
+- Production deployment (main branch)
+- Automated database migrations
+- Post-deployment verification
+
+### Required GitHub Secrets
+
+Configure these secrets in your GitHub repository:
+
+```bash
+# Vercel Deployment
+VERCEL_TOKEN="your-vercel-token"
+VERCEL_ORG_ID="your-vercel-org-id"
+VERCEL_PROJECT_ID="your-vercel-project-id"
+
+# Database URLs
+DATABASE_URL="production-database-url"
+STAGING_DATABASE_URL="staging-database-url"
+
+# Monitoring & Error Tracking
+SENTRY_AUTH_TOKEN="your-sentry-auth-token"
+SENTRY_ORG="your-sentry-org"
+SENTRY_PROJECT="your-sentry-project"
+
+# Notifications
+SLACK_WEBHOOK="your-slack-webhook-url"
+
+# Code Coverage
+CODECOV_TOKEN="your-codecov-token"
+```
+
+### Branch Strategy
+
+- **main** → Production deployments
+- **develop** → Staging deployments  
+- **feature/** → Pull request testing
+
+## Enhanced Security Features
+
+### 1. Security Headers
+
+The application automatically sets comprehensive security headers:
+
+```typescript
+// Configured in next.config.ts
+headers: [
+  'Strict-Transport-Security',
+  'X-Content-Type-Options',
+  'X-Frame-Options', 
+  'X-XSS-Protection',
+  'Referrer-Policy',
+  'Content-Security-Policy'
+]
+```
+
+### 2. Rate Limiting
+
+Built-in rate limiting with different limits per endpoint:
+
+- Public API: 200 requests/15min
+- Admin API: 50 requests/15min
+- Auth endpoints: 10 requests/15min
+- Upload endpoints: 20 requests/hour
+
+### 3. RBAC (Role-Based Access Control)
+
+User roles with specific permissions:
+
+- **ADMIN**: Full system access
+- **EDITOR**: Article management only
+- **VIEWER**: Read-only access
+
+### 4. CSRF Protection
+
+- Automatic CSRF token validation
+- Origin header verification
+- SameSite cookie configuration
+
+## Monitoring & Error Tracking
+
+### Sentry Integration
+
+The application includes comprehensive Sentry integration:
+
+1. **Server-side error tracking**
+2. **Client-side error tracking**
+3. **Performance monitoring**
+4. **Release tracking**
+5. **User context tracking**
+
+### Health Monitoring
+
+Enhanced health check endpoint at `/api/health`:
+
+- Database connectivity
+- Memory usage monitoring
+- Response time tracking
+- External service status
+
+### Performance Monitoring
+
+- Core Web Vitals tracking
+- Bundle size analysis
+- Database query performance
+- API response times
+
+## Production Verification
+
+### Automated Smoke Tests
+
+Post-deployment verification includes:
+
+```bash
+# Run smoke tests
+npm run test:smoke
+
+# Run production E2E tests
+npm run test:e2e:production
+```
+
+### Manual Verification Checklist
+
+- [ ] Homepage loads correctly
+- [ ] Admin authentication works
+- [ ] Article CRUD operations function
+- [ ] Image upload/management works
+- [ ] Search functionality active
+- [ ] Mobile responsiveness verified
+- [ ] SEO meta tags present
+- [ ] Analytics tracking active
+- [ ] Error tracking functional
+
+### Performance Benchmarks
+
+Target Core Web Vitals:
+
+- **LCP** (Largest Contentful Paint): < 2.5s
+- **FID** (First Input Delay): < 100ms  
+- **CLS** (Cumulative Layout Shift): < 0.1
+- **TTFB** (Time to First Byte): < 600ms
+
+## Advanced Configuration
+
+### Environment-Specific Settings
+
+The application supports multiple environments with specific configurations:
+
+#### Production
+- Optimized bundle with tree shaking
+- Console.log removal (except errors/warnings)
+- Sentry error tracking enabled
+- Strict security headers
+- Rate limiting enabled
+
+#### Staging  
+- Debug mode enabled
+- Verbose logging
+- Relaxed security for testing
+- Performance monitoring active
+
+#### Development
+- Hot reloading
+- Debug mode
+- Detailed error messages
+- No rate limiting
+
+### Bundle Optimization
+
+Production builds include:
+
+- **Code splitting**: Automatic route-based splitting
+- **Tree shaking**: Remove unused code
+- **Minification**: Compress JS/CSS
+- **Image optimization**: WebP/AVIF formats
+- **Static optimization**: Pre-rendered pages
+
+## Disaster Recovery
+
+### Backup Strategy
+
+#### Database Backups
+- Automated daily backups
+- Point-in-time recovery capability
+- Cross-region replication
+- Monthly backup testing
+
+#### Application Backups
+- Git repository as source of truth
+- Environment variable backups
+- Configuration backups
+
+### Recovery Procedures
+
+#### Database Recovery
+```bash
+# Point-in-time recovery
+pg_restore --clean --if-exists -d $DATABASE_URL backup.dump
+
+# Migration rollback if needed
+npx prisma migrate reset --force
+```
+
+#### Application Recovery
+```bash
+# Rollback deployment
+vercel rollback
+
+# Emergency maintenance mode
+# Set ENABLE_MAINTENANCE_MODE=true and redeploy
+```
+
+## Compliance & Auditing
+
+### Security Compliance
+
+- HTTPS enforcement
+- Data encryption at rest and in transit
+- Regular security audits
+- Dependency vulnerability scanning
+- Access logging and monitoring
+
+### Performance Compliance
+
+- Core Web Vitals monitoring
+- Accessibility compliance (WCAG 2.1)
+- SEO optimization
+- Mobile responsiveness
+
+### Data Protection
+
+- GDPR compliance considerations
+- User data encryption
+- Secure session management
+- Privacy policy implementation
+
+## Support & Maintenance
+
+### Regular Maintenance Schedule
+
+#### Weekly
+- [ ] Review error logs and metrics
+- [ ] Check performance dashboards
+- [ ] Monitor security alerts
+- [ ] Verify backup integrity
+
+#### Monthly  
+- [ ] Update dependencies
+- [ ] Security audit review
+- [ ] Performance optimization review
+- [ ] Database maintenance
+
+#### Quarterly
+- [ ] Comprehensive security review
+- [ ] Disaster recovery testing
+- [ ] Performance benchmarking
+- [ ] Documentation updates
+
+### Emergency Contacts
+
+- **Technical Issues**: Create GitHub issue
+- **Security Incidents**: security@your-domain.com
+- **Production Outages**: Use incident response plan
+
+### Monitoring Dashboards
+
+- **Application Performance**: Vercel Dashboard
+- **Error Tracking**: Sentry Dashboard  
+- **Database Metrics**: Database provider dashboard
+- **Uptime Monitoring**: Health check service
+- **Security Monitoring**: GitHub Security tab
+
+This comprehensive deployment guide ensures a secure, performant, and maintainable production deployment with full CI/CD automation and monitoring capabilities.

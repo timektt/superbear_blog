@@ -1,0 +1,22 @@
+# Robots.txt for SuperBear Blog
+
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Disallow private files
+Disallow: /_next/
+Disallow: /monitoring/
+
+# Allow specific public API endpoints
+Allow: /api/articles
+Allow: /api/health
+
+# Sitemap location
+Sitemap: https://superbear.blog/sitemap.xml
+
+# Crawl delay for respectful crawling
+Crawl-delay: 1

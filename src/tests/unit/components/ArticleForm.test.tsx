@@ -181,7 +181,7 @@ describe('ArticleForm', () => {
     await user.selectOptions(screen.getByTestId('article-category'), 'cat-1');
 
     // Mock slow submission
-    let resolveSubmission: (value: any) => void;
+    let resolveSubmission: (value: unknown) => void;
     const submissionPromise = new Promise((resolve) => {
       resolveSubmission = resolve;
     });

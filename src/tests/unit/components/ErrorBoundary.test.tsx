@@ -111,7 +111,7 @@ describe('ErrorBoundary', () => {
     const originalLocation = window.location;
     const mockReload = jest.fn();
     
-    // @ts-ignore
+    // @ts-expect-error
     delete window.location;
     window.location = { ...originalLocation, reload: mockReload };
 

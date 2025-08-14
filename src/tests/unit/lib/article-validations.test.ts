@@ -88,7 +88,9 @@ describe('Article Validation', () => {
       summary: 'A test article',
       content: JSON.stringify({
         type: 'doc',
-        content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test' }] }],
+        content: [
+          { type: 'paragraph', content: [{ type: 'text', text: 'Test' }] },
+        ],
       }),
       image: 'https://example.com/image.jpg',
       status: 'DRAFT' as const,
@@ -118,7 +120,7 @@ describe('Article Validation', () => {
 
     it('should require title, content, authorId, and categoryId', () => {
       const requiredFields = ['title', 'content', 'authorId', 'categoryId'];
-      
+
       requiredFields.forEach((field) => {
         const invalidData = { ...validArticleData };
         delete invalidData[field as keyof typeof invalidData];

@@ -1,12 +1,24 @@
 import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
+
+// Bundle analyzer
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE_BUNDLE === 'true',
+});
+
+const isDevelopment = process.env.NODE_ENV === 'development';
+const isProduction = process.env.NODE_ENV === 'production';
+const isStaging = process.env.NODE_ENV === 'staging';
 
 const nextConfig: NextConfig = {
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react', '@tiptap/react'],
+    optimizePackageImports: ['lucide-react', '@tiptap/react', '@tiptap/starter-kit'],
+    serverComponentsExternalPackages: ['@prisma/client'],
+    optimizeCss: isProduction,
   },
 
-  // Image optimization
+  // Image optimization with Cloudinary loader
   images: {
     remotePatterns: [
       {
@@ -25,45 +37,97 @@ const nextConfig: NextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: isProduction ? 31536000 : 60, // 1 year in production, 1 minute in dev
+    dangerouslyAllowSVG: false,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
   // Compression and optimization
   compress: true,
   poweredByHeader: false,
+  generateEtags: true,
+  trailingSlash: false,
 
   // Security headers
   async headers() {
+    const securityHeaders = [
+      {
+        key: 'X-DNS-Prefetch-Control',
+        value: 'on',
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'X-Frame-Options',
+        value: 'DENY',
+      },
+      {
+        key: 'X-XSS-Protection',
+        value: '1; mode=block',
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
+      },
+    ];
+
+    // Add HSTS only in production
+    if (isProduction) {
+      securityHeaders.push({
+        key: 'Strict-Transport-Security',
+        value: 'max-age=63072000; includeSubDomains; preload',
+      });
+    }
+
+    // Content Security Policy
+    if (process.env.ENABLE_CSP === 'true') {
+      const cspHeader = `
+        default-src 'self';
+        script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com;
+        font-src 'self';
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'none';
+        upgrade-insecure-requests;
+      `.replace(/\s{2,}/g, ' ').trim();
+
+      securityHeaders.push({
+        key: 'Content-Security-Policy',
+        value: cspHeader,
+      });
+    }
+
     return [
       {
         source: '/(.*)',
+        headers: securityHeaders,
+      },
+      // Cache static assets
+      {
+        source: '/static/(.*)',
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
+        ],
+      },
+      // Cache API responses
+      {
+        source: '/api/articles',
+        headers: [
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
+            key: 'Cache-Control',
+            value: 'public, s-maxage=300, stale-while-revalidate=600',
           },
         ],
       },
@@ -78,28 +142,121 @@ const nextConfig: NextConfig = {
         destination: '/admin/articles',
         permanent: false,
       },
+      // SEO redirects
+      {
+        source: '/blog/:path*',
+        destination: '/news/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
+  // Rewrites for API versioning
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: '/api/:path*',
+      },
     ];
   },
 
   // Production optimizations
-  ...(process.env.NODE_ENV === 'production' && {
+  ...(isProduction && {
     output: 'standalone',
     compiler: {
       removeConsole: {
         exclude: ['error', 'warn'],
       },
     },
-    // Enable static optimization
-    trailingSlash: false,
-    generateEtags: true,
 
     // Optimize bundle
     modularizeImports: {
       'lucide-react': {
         transform: 'lucide-react/dist/esm/icons/{{member}}',
       },
+      '@tiptap/react': {
+        transform: '@tiptap/react/dist/packages/react/src/{{member}}',
+      },
+    },
+
+    // Webpack optimizations
+    webpack: (config, { dev, isServer }) => {
+      // Production optimizations
+      if (!dev && !isServer) {
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: 'vendor',
+              chunks: 'all',
+              test: /node_modules/,
+              priority: 20,
+            },
+            // Common chunk
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              priority: 10,
+              reuseExistingChunk: true,
+              enforce: true,
+            },
+          },
+        };
+      }
+
+      return config;
     },
   }),
+
+  // Development optimizations
+  ...(isDevelopment && {
+    webpack: (config) => {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+      return config;
+    },
+  }),
+
+  // Environment-specific configurations
+  env: {
+    CUSTOM_KEY: process.env.CUSTOM_KEY,
+    SENTRY_ENVIRONMENT: process.env.SENTRY_ENVIRONMENT || process.env.NODE_ENV,
+  },
 };
 
-export default nextConfig;
+// Apply bundle analyzer
+const configWithAnalyzer = withBundleAnalyzer(nextConfig);
+
+// Apply Sentry configuration in production
+const finalConfig = isProduction
+  ? withSentryConfig(
+      configWithAnalyzer,
+      {
+        silent: true,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        widenClientFileUpload: true,
+        transpileClientSDK: true,
+        tunnelRoute: '/monitoring',
+        hideSourceMaps: true,
+        disableLogger: true,
+        automaticVercelMonitors: true,
+      },
+      {
+        widenClientFileUpload: true,
+        transpileClientSDK: true,
+        hideSourceMaps: true,
+        disableLogger: true,
+        automaticVercelMonitors: true,
+      }
+    )
+  : configWithAnalyzer;
+
+export default finalConfig;
