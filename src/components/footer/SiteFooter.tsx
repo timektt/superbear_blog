@@ -4,20 +4,20 @@ import Link from 'next/link';
 
 export default function SiteFooter() {
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 transition-colors duration-300">
+    <footer className="bg-background border-t border-border transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SB</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-primary-foreground font-bold text-sm">SB</span>
               </div>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-bold text-foreground">
                 SuperBear Blog
               </h3>
             </div>
-            <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Filtered, in-depth tech content for developers, AI builders, and
               tech entrepreneurs. Stay ahead with the latest insights in AI,
               DevTools, and startup developments.
@@ -26,14 +26,14 @@ export default function SiteFooter() {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               Quick Links
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
                   href="/"
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
                 >
                   Home
                 </Link>
@@ -41,7 +41,7 @@ export default function SiteFooter() {
               <li>
                 <Link
                   href="/news"
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
                 >
                   Latest
                 </Link>
@@ -49,7 +49,7 @@ export default function SiteFooter() {
               <li>
                 <Link
                   href="/ai"
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
                 >
                   Categories
                 </Link>
@@ -57,7 +57,7 @@ export default function SiteFooter() {
               <li>
                 <Link
                   href="/podcast"
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
                 >
                   Podcast
                 </Link>
@@ -65,7 +65,7 @@ export default function SiteFooter() {
               <li>
                 <Link
                   href="/contact"
-                  className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 text-sm transition-colors duration-200"
+                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
                 >
                   Contact
                 </Link>
@@ -75,19 +75,19 @@ export default function SiteFooter() {
 
           {/* Connect Section */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-semibold text-foreground">
               Connect
             </h3>
             <div className="flex space-x-4">
               <a
                 href="https://twitter.com/superbear_blog"
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors duration-200"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
                 aria-label="Twitter"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-gray-600 dark:text-gray-300"
+                  className="w-5 h-5 text-muted-foreground"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -97,13 +97,13 @@ export default function SiteFooter() {
               </a>
               <a
                 href="https://github.com/superbear-blog"
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors duration-200"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
                 aria-label="GitHub"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-gray-600 dark:text-gray-300"
+                  className="w-5 h-5 text-muted-foreground"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -117,13 +117,13 @@ export default function SiteFooter() {
               </a>
               <a
                 href="https://linkedin.com/company/superbear-blog"
-                className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center hover:bg-indigo-100 dark:hover:bg-indigo-900/30 transition-colors duration-200"
+                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
                 aria-label="LinkedIn"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-gray-600 dark:text-gray-300"
+                  className="w-5 h-5 text-muted-foreground"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -139,9 +139,9 @@ export default function SiteFooter() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-8 pt-8 border-t border-border">
           <div className="text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
+            <p className="text-muted-foreground text-sm">
               © 2025 SuperBear Blog. All rights reserved.
             </p>
           </div>
