@@ -19,7 +19,7 @@ interface TemplateData {
   status: TemplateStatus;
   htmlContent: string;
   textContent: string;
-  designConfig: any;
+  designConfig: unknown;
 }
 
 export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplateEditorProps) {

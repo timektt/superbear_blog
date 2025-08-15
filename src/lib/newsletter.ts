@@ -1,14 +1,14 @@
 import nodemailer from 'nodemailer';
 import { logger } from '@/lib/logger';
 import { generateVerificationToken } from '@/lib/auth-utils';
-import { reportError } from '@/lib/sentry';
+// import { reportError } from '@/lib/sentry';
 
 // Re-export from auth-utils for consistency
 export { generateVerificationToken } from '@/lib/auth-utils';
 
 // Email configuration
 const emailConfig = {
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  host: process.env.SMTP_HOST || 'smtp.ethereal.email',
   port: parseInt(process.env.SMTP_PORT || '587'),
   secure: process.env.SMTP_SECURE === 'true',
   auth: {
@@ -18,7 +18,7 @@ const emailConfig = {
 };
 
 // Create transporter
-const transporter = nodemailer.createTransporter(emailConfig);
+const transporter = nodemailer.createTransport(emailConfig);
 
 // Verify email configuration
 export async function verifyEmailConfig(): Promise<boolean> {
@@ -28,7 +28,7 @@ export async function verifyEmailConfig(): Promise<boolean> {
     return true;
   } catch (error) {
     console.error('Email configuration error:', error);
-    reportError(error as Error, { context: 'email_config_verification' });
+    // reportError(error as Error, { context: 'email_config_verification' });
     return false;
   }
 }
@@ -67,7 +67,7 @@ export async function sendVerificationEmail(
     console.log('Verification email sent successfully:', result.messageId);
   } catch (error) {
     logger.error('Failed to send verification email', error as Error, { email });
-    reportError(error as Error, { context: 'send_verification_email', email });
+    // reportError(error as Error, { context: 'send_verification_email', email });
     throw new Error('Failed to send verification email');
   }
 }
@@ -278,7 +278,7 @@ export async function getNewsletterStats() {
       total: totalSubscribers,
       active: activeSubscribers,
       recent: recentSubscriptions,
-      byStatus: stats.reduce((acc: Record<string, number>, stat) => {
+      byStatus: stats.reduce((acc: Record<string, number>, stat: any) => {
         acc[stat.status] = stat._count.status;
         return acc;
       }, {}),

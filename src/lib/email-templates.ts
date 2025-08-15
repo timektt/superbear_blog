@@ -191,7 +191,7 @@ export async function createTemplateVersion(
   templateId: string,
   htmlContent: string,
   textContent?: string,
-  designConfig?: any
+  designConfig?: unknown
 ) {
   // Get current version count
   const versionCount = await prisma.templateVersion.count({

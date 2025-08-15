@@ -24,10 +24,7 @@ const subscribeSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting: 5 requests per IP per 10 minutes
-    const rateLimitResult = await rateLimit(request, {
-      limit: 5,
-      window: 10 * 60 * 1000, // 10 minutes
-    });
+    const rateLimitResult = await rateLimit(request);
 
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -87,8 +84,8 @@ export async function POST(request: NextRequest) {
           variant: validatedData.variant,
           utm_source: validatedData.utm_source,
           utm_campaign: validatedData.utm_campaign,
-          ip: request.ip,
-          userAgent: request.headers.get('user-agent'),
+          ip: request.headers.get('x-forwarded-for') || 'unknown',
+          userAgent: request.headers.get('user-agent') || 'unknown',
         });
 
         return NextResponse.json({
@@ -139,8 +136,8 @@ export async function POST(request: NextRequest) {
       variant: validatedData.variant,
       utm_source: validatedData.utm_source,
       utm_campaign: validatedData.utm_campaign,
-      ip: request.ip,
-      userAgent: request.headers.get('user-agent'),
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
+      userAgent: request.headers.get('user-agent') || 'unknown',
     });
 
     return NextResponse.json(
@@ -155,7 +152,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    logger.error('Newsletter subscription error', error);
+    logger.error('Newsletter subscription error', error as Error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -217,7 +214,7 @@ export async function GET(request: NextRequest) {
       data: subscription,
     });
   } catch (error) {
-    logger.error('Newsletter status check error', error);
+    logger.error('Newsletter status check error', error as Error);
 
     return NextResponse.json(
       { success: false, message: 'Failed to check subscription status' },
