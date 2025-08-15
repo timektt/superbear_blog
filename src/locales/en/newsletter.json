@@ -1,0 +1,30 @@
+{
+  "heading": "AI & Dev news in 5 minutes. Every Friday.",
+  "subheading": "Join {{count}}+ developers. No noise, just signal.",
+  "subheading_fallback": "Trusted by developers worldwide",
+  "trust_line": "No spam. Unsubscribe anytime.",
+  "placeholder": "Enter your email address",
+  "cta": "Subscribe",
+  "cta_loading": "Subscribing…",
+  "success_title": "You're in!",
+  "success_message": "Check your inbox to confirm.",
+  "benefits": {
+    "big_picture": "Weekly AI & startup landscape",
+    "dev_tools": "New tools & code discoveries", 
+    "founder_notes": "Behind-the-scenes insights"
+  },
+  "errors": {
+    "invalid_email": "Please enter a valid email.",
+    "already_subscribed": "You're already subscribed.",
+    "rate_limit": "Too many attempts. Try again in a minute.",
+    "server_error": "Server issue. Please try again."
+  },
+  "badges": {
+    "weekly_briefing": "Weekly Briefing",
+    "trusted": "Trusted",
+    "no_spam": "No Spam"
+  },
+  "analytics": {
+    "source": "newsletter_section"
+  }
+}

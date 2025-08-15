@@ -8,6 +8,7 @@ import StorylinesStrip from '@/components/sections/StorylinesStrip';
 import StartupsBlock from '@/components/sections/StartupsBlock';
 import PodcastsBlock from '@/components/sections/PodcastsBlock';
 import ExploreByCategory from '@/components/sections/ExploreByCategory';
+import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
@@ -210,6 +211,53 @@ function HomeView({
 
       {/* Podcasts Section */}
       <PodcastsBlock title="Podcasts" items={mockPodcastItems} />
+
+      {/* Newsletter Subscription */}
+      <section className="bg-gray-50 dark:bg-gray-800 py-8 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Newsletter - Left 8 cols */}
+            <div className="lg:col-span-8">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
+                    <div className="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
+                    Newsletter
+                  </h2>
+                </div>
+                <NewsletterSubscription
+                  source="homepage"
+                  variant="compact"
+                  utmSource="homepage"
+                  utmCampaign="main_section"
+                />
+              </div>
+            </div>
+
+            {/* Right Rail continues */}
+            <div className="lg:col-span-4">
+              <RightRail
+                title="Stay Connected"
+                items={[
+                  {
+                    title: 'Join 10,000+ developers',
+                    excerpt:
+                      'Get curated tech news and insights delivered weekly',
+                    timeAgo: 'Weekly',
+                    slug: '#newsletter',
+                  },
+                  {
+                    title: 'No spam, ever',
+                    excerpt: 'Unsubscribe anytime with one click',
+                    timeAgo: 'Promise',
+                    slug: '#privacy',
+                  },
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Explore by Category */}
       <ExploreByCategory />

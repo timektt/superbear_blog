@@ -8,10 +8,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-  // Enable connection pooling and SSL for production
-  directUrl = env("DIRECT_URL")
 }
 
 model Article {
@@ -80,6 +78,54 @@ enum Status {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+model Newsletter {
+  id              String            @id @default(cuid())
+  email           String            @unique
+  status          SubscriptionStatus @default(PENDING)
+  verificationToken String?         @unique
+  subscribedAt    DateTime          @default(now())
+  verifiedAt      DateTime?
+  unsubscribedAt  DateTime?
+  preferences     Json?             // JSON object for subscription preferences
+  source          String?           // Where they subscribed from (homepage, article, etc.)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  @@map("newsletters")
+}
+
+model NewsletterCampaign {
+  id          String            @id @default(cuid())
+  title       String
+  subject     String
+  content     Json              // Email template content
+  status      CampaignStatus    @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+  recipients  Int               @default(0)
+  openRate    Float?
+  clickRate   Float?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@map("newsletter_campaigns")
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  UNSUBSCRIBED
+  BOUNCED
+}
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  CANCELLED
 }
 
 enum AdminRole {

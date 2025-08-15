@@ -61,6 +61,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/articles', label: 'Articles', icon: 'articles' },
     { href: '/admin/categories', label: 'Categories', icon: 'categories' },
     { href: '/admin/tags', label: 'Tags', icon: 'tags' },
+    { href: '/admin/newsletter', label: 'Newsletter', icon: 'newsletter' },
   ];
 
   const getIcon = (iconType: string) => {
@@ -136,6 +137,23 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               strokeLinejoin="round"
               strokeWidth={2}
               d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+            />
+          </svg>
+        );
+      case 'newsletter':
+        return (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
             />
           </svg>
         );
