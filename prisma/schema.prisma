@@ -100,7 +100,8 @@ model NewsletterCampaign {
   id          String            @id @default(cuid())
   title       String
   subject     String
-  content     Json              // Email template content
+  content     Json              // Compiled email content
+  templateId  String?           // Reference to email template
   status      CampaignStatus    @default(DRAFT)
   scheduledAt DateTime?
   sentAt      DateTime?
@@ -109,6 +110,9 @@ model NewsletterCampaign {
   clickRate   Float?
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
+  
+  // Relations
+  template    EmailTemplate?    @relation(fields: [templateId], references: [id])
   
   @@map("newsletter_campaigns")
 }
@@ -134,4 +138,63 @@ enum AdminRole {
   EDITOR
   AUTHOR
   VIEWER
+}
+
+// Email Template System Models
+model EmailTemplate {
+  id          String            @id @default(cuid())
+  name        String            // Template name (e.g., "Weekly Digest", "Breaking News")
+  subject     String            // Email subject line template
+  description String?           // Template description for admin
+  category    TemplateCategory  // Template type
+  status      TemplateStatus    @default(DRAFT)
+  
+  // Template Content
+  htmlContent String            // HTML email content
+  textContent String?           // Plain text fallback
+  variables   Json?             // Available template variables
+  
+  // Design Properties
+  designConfig Json?            // Layout, colors, fonts configuration
+  
+  // Metadata
+  createdBy   String            // Admin user who created it
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  // Relations
+  campaigns   NewsletterCampaign[]
+  versions    TemplateVersion[]
+  
+  @@map("email_templates")
+}
+
+model TemplateVersion {
+  id          String        @id @default(cuid())
+  templateId  String
+  version     Int
+  htmlContent String
+  textContent String?
+  designConfig Json?
+  createdAt   DateTime      @default(now())
+  
+  template    EmailTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  @@unique([templateId, version])
+  @@map("template_versions")
+}
+
+enum TemplateCategory {
+  WELCOME       // Welcome email for new subscribers
+  NEWSLETTER    // Regular newsletter templates
+  BREAKING_NEWS // Urgent news alerts
+  DIGEST        // Weekly/monthly digest
+  PROMOTIONAL   // Marketing campaigns
+  TRANSACTIONAL // System emails (unsubscribe confirmations, etc.)
+}
+
+enum TemplateStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
 }
