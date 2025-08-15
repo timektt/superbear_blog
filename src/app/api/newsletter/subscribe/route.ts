@@ -172,6 +172,7 @@ export async function POST(request: NextRequest) {
       {
         success: false,
         message: 'Failed to subscribe to newsletter',
+        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
       },
       { status: 500 }
     );

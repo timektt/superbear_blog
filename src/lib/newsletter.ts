@@ -278,7 +278,7 @@ export async function getNewsletterStats() {
       total: totalSubscribers,
       active: activeSubscribers,
       recent: recentSubscriptions,
-      byStatus: stats.reduce((acc: Record<string, number>, stat: any) => {
+      byStatus: stats.reduce((acc: Record<string, number>, stat: unknown) => {
         acc[stat.status] = stat._count.status;
         return acc;
       }, {}),
