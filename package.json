@@ -44,7 +44,14 @@
     "deploy:docker:build": "docker-compose -f docker-compose.production.yml up --build -d",
     "health:check": "curl -f http://localhost:3000/api/health || exit 1",
     "logs:prod": "vercel logs --follow",
-    "monitor:metrics": "node -e \"fetch('http://localhost:3000/api/health').then(r=>r.json()).then(console.log)\""
+    "monitor:metrics": "node -e \"fetch('http://localhost:3000/api/health').then(r=>r.json()).then(console.log)\"",
+    "campaigns:test": "node scripts/test-campaigns.js",
+    "campaigns:scheduler": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/scheduler', {method: 'POST'}).then(r=>r.json()).then(console.log)\"",
+    "campaigns:cron": "node -e \"fetch('http://localhost:3000/api/cron/campaigns', {method: 'POST', headers: {'Authorization': 'Bearer ' + (process.env.CRON_SECRET || 'dev-secret')}}).then(r=>r.json()).then(console.log)\"",
+    "campaigns:queue": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/queue').then(r=>r.json()).then(console.log)\"",
+    "campaigns:process-queue": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/queue/process', {method: 'POST'}).then(r=>r.json()).then(console.log)\"",
+    "suppressions:stats": "node -e \"fetch('http://localhost:3000/api/admin/suppressions').then(r=>r.json()).then(console.log)\"",
+    "suppressions:export": "node -e \"fetch('http://localhost:3000/api/admin/suppressions?action=export').then(r=>r.json()).then(console.log)\""
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

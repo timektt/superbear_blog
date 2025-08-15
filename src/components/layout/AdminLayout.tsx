@@ -67,6 +67,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: 'Email Templates',
       icon: 'email-templates',
     },
+    { href: '/admin/campaigns', label: 'Campaigns', icon: 'campaigns' },
   ];
 
   const getIcon = (iconType: string) => {
@@ -176,6 +177,29 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               strokeLinejoin="round"
               strokeWidth={2}
               d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+        );
+      case 'campaigns':
+        return (
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 17h5l-5 5v-5zM4.828 7l6.586 6.586a2 2 0 002.828 0l6.586-6.586A2 2 0 0019.414 5H4.586A2 2 0 003.172 7z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
         );

@@ -93,6 +93,11 @@ model Newsletter {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   
+  // Relations
+  deliveries      CampaignDelivery[]
+  events          NewsletterEvent[]
+  newsletterPreferences NewsletterPreferences?
+  
   @@map("newsletters")
 }
 
@@ -113,6 +118,9 @@ model NewsletterCampaign {
   
   // Relations
   template    EmailTemplate?    @relation(fields: [templateId], references: [id])
+  deliveries  CampaignDelivery[]
+  events      NewsletterEvent[]
+  snapshot    CampaignSnapshot?
   
   @@map("newsletter_campaigns")
 }
@@ -127,8 +135,13 @@ enum SubscriptionStatus {
 enum CampaignStatus {
   DRAFT
   SCHEDULED
+  SNAPSHOTTING
+  QUEUED
   SENDING
+  PAUSED
   SENT
+  COMPLETED
+  FAILED
   CANCELLED
 }
 
@@ -197,4 +210,204 @@ enum TemplateStatus {
   DRAFT
   ACTIVE
   ARCHIVED
+}
+
+// Production-Ready Campaign System Models
+
+// Campaign Delivery Tracking (Idempotency & Status)
+model CampaignDelivery {
+  id              String            @id @default(cuid())
+  campaignId      String
+  recipientId     String            // Newsletter.id
+  recipientEmail  String
+  status          DeliveryStatus    @default(QUEUED)
+  attempts        Int               @default(0)
+  lastAttemptAt   DateTime?
+  deliveredAt     DateTime?
+  lastError       String?
+  idempotencyKey  String            @unique // hash(campaignId + recipientId)
+  
+  // Email content snapshot (frozen at send time)
+  subject         String
+  htmlContent     String
+  textContent     String?
+  preheader       String?
+  
+  // Tracking
+  openedAt        DateTime?
+  clickedAt       DateTime?
+  bouncedAt       DateTime?
+  complainedAt    DateTime?
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  campaign        NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  recipient       Newsletter         @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  events          NewsletterEvent[]
+  
+  @@unique([campaignId, recipientId])
+  @@index([status])
+  @@index([campaignId])
+  @@index([recipientEmail])
+  @@map("campaign_deliveries")
+}
+
+// Email Events Tracking (Opens, Clicks, Bounces, etc.)
+model NewsletterEvent {
+  id              String            @id @default(cuid())
+  campaignId      String?
+  recipientId     String?           // Newsletter.id
+  recipientEmail  String
+  deliveryId      String?           // CampaignDelivery.id
+  
+  type            EventType
+  timestamp       DateTime          @default(now())
+  
+  // Event metadata
+  userAgent       String?
+  ipAddress       String?
+  location        String?
+  linkUrl         String?           // For click events
+  
+  // Provider-specific data
+  providerEventId String?           // SendGrid/Mailgun event ID
+  providerData    Json?             // Raw provider webhook data
+  
+  createdAt       DateTime          @default(now())
+  
+  // Relations
+  campaign        NewsletterCampaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  recipient       Newsletter?         @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  delivery        CampaignDelivery?   @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
+  
+  @@index([type, timestamp])
+  @@index([campaignId])
+  @@index([recipientEmail])
+  @@map("newsletter_events")
+}
+
+// Email Suppression List (Bounces, Complaints, Unsubscribes)
+model Suppression {
+  id          String            @id @default(cuid())
+  email       String            @unique
+  reason      SuppressionReason
+  source      String?           // Campaign ID or source that caused suppression
+  timestamp   DateTime          @default(now())
+  
+  // Additional context
+  bounceType  String?           // hard/soft bounce
+  errorCode   String?           // SMTP error code
+  errorMessage String?          // Human readable error
+  
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  
+  @@index([email])
+  @@index([reason])
+  @@map("suppressions")
+}
+
+// Newsletter Preferences (Frequency, Categories, Quiet Hours)
+model NewsletterPreferences {
+  id              String            @id @default(cuid())
+  recipientId     String            @unique // Newsletter.id
+  
+  // Frequency settings
+  frequency       FrequencyType     @default(WEEKLY)
+  maxPerDay       Int               @default(1)
+  maxPerWeek      Int               @default(3)
+  
+  // Content preferences
+  categories      Json?             // Array of preferred categories
+  topics          Json?             // Array of preferred topics/tags
+  
+  // Timing preferences
+  timezone        String            @default("UTC")
+  quietHoursStart Int?              // Hour (0-23) when quiet hours start
+  quietHoursEnd   Int?              // Hour (0-23) when quiet hours end
+  
+  // Delivery preferences
+  preferredDays   Json?             // Array of preferred days (0=Sunday, 6=Saturday)
+  preferredTime   Int?              // Preferred hour for delivery (0-23)
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  recipient       Newsletter        @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  
+  @@map("newsletter_preferences")
+}
+
+// Campaign Snapshots (Frozen content at send time)
+model CampaignSnapshot {
+  id              String            @id @default(cuid())
+  campaignId      String            @unique
+  
+  // Frozen content
+  subject         String
+  htmlContent     String
+  textContent     String?
+  preheader       String?
+  
+  // Template info at snapshot time
+  templateId      String?
+  templateVersion Int?
+  
+  // Article IDs included in this campaign
+  articleIds      Json              // Array of article IDs
+  
+  // Generation metadata
+  generatedAt     DateTime          @default(now())
+  contentHash     String            // Hash of content for verification
+  
+  // Relations
+  campaign        NewsletterCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  @@map("campaign_snapshots")
+}
+
+// Enums for new models
+enum DeliveryStatus {
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  FAILED
+  SUPPRESSED
+}
+
+enum EventType {
+  SENT
+  DELIVERED
+  OPENED
+  CLICKED
+  BOUNCED
+  COMPLAINED
+  UNSUBSCRIBED
+  MARKED_AS_SPAM
+}
+
+enum SuppressionReason {
+  HARD_BOUNCE
+  SOFT_BOUNCE
+  COMPLAINT
+  UNSUBSCRIBE
+  MANUAL
+  INVALID_EMAIL
+  BLOCKED
+}
+
+enum FrequencyType {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  CUSTOM
 }
