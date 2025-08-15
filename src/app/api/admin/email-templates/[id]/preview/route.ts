@@ -73,13 +73,16 @@ export async function POST(
     };
 
     // Compile template with sample data
-    const compiled = await compileTemplate(params.id, sampleVariables);
+    const compiled = await compileTemplate(params.id, sampleVariables, 'preview@example.com');
 
     // Return requested format
     if (mode === 'text') {
       return NextResponse.json({
         content: compiled.text,
         subject: compiled.subject,
+        preheader: compiled.preheader,
+        size: compiled.size,
+        warnings: compiled.warnings,
         mode: 'text'
       });
     }
@@ -87,6 +90,9 @@ export async function POST(
     return NextResponse.json({
       content: compiled.html,
       subject: compiled.subject,
+      preheader: compiled.preheader,
+      size: compiled.size,
+      warnings: compiled.warnings,
       mode: 'html'
     });
 

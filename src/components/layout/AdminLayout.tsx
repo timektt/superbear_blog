@@ -62,7 +62,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { href: '/admin/categories', label: 'Categories', icon: 'categories' },
     { href: '/admin/tags', label: 'Tags', icon: 'tags' },
     { href: '/admin/newsletter', label: 'Newsletter', icon: 'newsletter' },
-    { href: '/admin/email-templates', label: 'Email Templates', icon: 'email-templates' },
+    {
+      href: '/admin/email-templates',
+      label: 'Email Templates',
+      icon: 'email-templates',
+    },
   ];
 
   const getIcon = (iconType: string) => {

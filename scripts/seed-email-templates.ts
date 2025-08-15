@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { DEFAULT_TEMPLATES, DEFAULT_DESIGN_CONFIG } from '../src/lib/email-templates';
+import {
+  DEFAULT_TEMPLATES,
+  DEFAULT_DESIGN_CONFIG,
+} from '../src/lib/email-templates';
 
 const prisma = new PrismaClient();
 
@@ -13,10 +16,10 @@ async function seedEmailTemplates() {
 
       // Check if template exists first
       const existingTemplate = await prisma.emailTemplate.findFirst({
-        where: { name: templateData.name }
+        where: { name: templateData.name },
       });
 
-      const template = existingTemplate 
+      const template = existingTemplate
         ? await prisma.emailTemplate.update({
             where: { id: existingTemplate.id },
             data: {
@@ -26,8 +29,8 @@ async function seedEmailTemplates() {
               htmlContent: templateData.htmlContent,
               textContent: templateData.textContent,
               designConfig: DEFAULT_DESIGN_CONFIG,
-              status: 'ACTIVE'
-            }
+              status: 'ACTIVE',
+            },
           })
         : await prisma.emailTemplate.create({
             data: {
@@ -39,17 +42,16 @@ async function seedEmailTemplates() {
               textContent: templateData.textContent,
               designConfig: DEFAULT_DESIGN_CONFIG,
               status: 'ACTIVE',
-              createdBy: 'system'
-            }
+              createdBy: 'system',
+            },
           });
-
 
       // Create initial version if it doesn't exist
       const existingVersion = await prisma.templateVersion.findFirst({
-        where: { 
+        where: {
           templateId: template.id,
-          version: 1
-        }
+          version: 1,
+        },
       });
 
       if (!existingVersion) {
@@ -59,8 +61,8 @@ async function seedEmailTemplates() {
             version: 1,
             htmlContent: templateData.htmlContent,
             textContent: templateData.textContent,
-            designConfig: DEFAULT_DESIGN_CONFIG
-          }
+            designConfig: DEFAULT_DESIGN_CONFIG,
+          },
         });
       }
 
@@ -68,7 +70,6 @@ async function seedEmailTemplates() {
     }
 
     console.log('🎉 Email templates seeded successfully!');
-
   } catch (error) {
     console.error('❌ Error seeding email templates:', error);
     throw error;

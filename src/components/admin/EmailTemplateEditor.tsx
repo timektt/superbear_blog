@@ -37,6 +37,8 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
   const [saving, setSaving] = useState(false);
   const [previewMode, setPreviewMode] = useState<'html' | 'text'>('html');
   const [previewContent, setPreviewContent] = useState('');
+  const [previewWarnings, setPreviewWarnings] = useState<string[]>([]);
+  const [previewSize, setPreviewSize] = useState<number>(0);
 
   const router = useRouter();
   const { showToast } = useToast();
@@ -148,6 +150,8 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
 
       if (response.ok) {
         setPreviewContent(data.content);
+        setPreviewWarnings(data.warnings || []);
+        setPreviewSize(data.size || 0);
       } else {
         showToast('Failed to generate preview', 'error');
       }
@@ -351,6 +355,43 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                 </button>
               </div>
             </div>
+
+            {/* Preview Warnings */}
+            {previewWarnings.length > 0 && (
+              <div className="mb-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                  ⚠️ Preview Warnings
+                </h4>
+                <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
+                  {previewWarnings.map((warning, index) => (
+                    <li key={index}>• {warning}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Email Size Info */}
+            {previewSize > 0 && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    📊 Email Size: {(previewSize / 1024).toFixed(1)} KB
+                  </span>
+                  <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                    <div 
+                      className={`h-2 rounded-full ${
+                        previewSize > 102 * 1024 ? 'bg-red-500' : 
+                        previewSize > 90 * 1024 ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}
+                      style={{ width: `${Math.min((previewSize / (102 * 1024)) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                  Gmail clips emails over 102KB
+                </p>
+              </div>
+            )}
 
             <div className="border border-gray-200 dark:border-gray-600 rounded-md min-h-[400px] p-4 bg-gray-50 dark:bg-gray-900">
               {previewContent ? (
