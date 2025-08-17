@@ -35,6 +35,7 @@ SuperBear Blog is a comprehensive tech news platform featuring a modern CMS, adv
 
 ### 🔒 **Security & Performance**
 - **Production-Ready Security** - CSRF protection, rate limiting, input validation
+- **Database Safe Mode** - Graceful degradation when database is unavailable ([Learn more](docs/DB_SAFE_MODE.md))
 - **Email Authentication** - DKIM/SPF/DMARC ready with compliance features
 - **Performance Optimized** - Image optimization, caching, and lazy loading
 - **Error Monitoring** - Sentry integration with comprehensive error tracking
