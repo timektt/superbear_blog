@@ -7,8 +7,11 @@ import {
 } from '@/lib/analytics-core';
 import { checkRateLimit } from '@/lib/security-enhanced';
 import { logger } from '@/lib/logger';
+import { handleApiError } from '@/lib/errors/handlers';
+import { IS_DEVELOPMENT } from '@/lib/env';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // POST /api/analytics/track - Track analytics events
 export async function POST(request: NextRequest) {
@@ -40,7 +43,30 @@ export async function POST(request: NextRequest) {
 
     const { type, articleId, sessionId, ...eventData } = body;
 
-    // Validate required fields
+    // Development mode: Accept minimal payload and fill defaults
+    if (IS_DEVELOPMENT) {
+      // If missing required fields in development, fill with defaults and return success
+      if (!type || !articleId) {
+        // Log once per session to avoid spam
+        const logKey = `analytics-dev-${request.headers.get('user-agent')?.substring(0, 20)}`;
+        if (!global.devAnalyticsLogged) {
+          global.devAnalyticsLogged = new Set();
+        }
+        
+        if (!global.devAnalyticsLogged.has(logKey)) {
+          logger.info('Analytics in development mode - using defaults for missing fields');
+          global.devAnalyticsLogged.add(logKey);
+        }
+
+        return NextResponse.json({ 
+          success: true, 
+          mode: 'development',
+          message: 'Analytics tracking disabled in development mode'
+        });
+      }
+    }
+
+    // Production mode: Strict validation
     if (!type || !articleId) {
       const userAgent = request.headers.get('user-agent') || '';
       const referer = request.headers.get('referer') || '';
@@ -64,8 +90,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Temporary: Return success for invalid article IDs to prevent errors
+    // Validate article ID format
     if (!articleId || typeof articleId !== 'string' || articleId.length < 10) {
+      if (IS_DEVELOPMENT) {
+        return NextResponse.json({ 
+          success: true, 
+          skipped: true,
+          reason: 'Invalid article ID in development mode'
+        });
+      }
+      
       logger.warn('Analytics tracking skipped - invalid article ID', { articleId });
       return NextResponse.json({ success: true, skipped: true });
     }
@@ -129,11 +163,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
 
   } catch (error) {
-    logger.error('Analytics tracking failed', error as Error);
-    return NextResponse.json(
-      { error: 'Failed to track analytics' },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
@@ -180,4 +210,9 @@ async function getCountryFromIP(ip: string): Promise<string | undefined> {
   // In production, use a service like MaxMind GeoIP or similar
   // For now, return undefined to maintain privacy
   return undefined;
+}
+
+// Declare global type for development logging
+declare global {
+  var devAnalyticsLogged: Set<string> | undefined;
 }
