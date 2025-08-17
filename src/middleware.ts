@@ -9,8 +9,15 @@ const apiRoutes = ['/api/admin'];
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
+  // Generate or extract request ID for logging context
+  const requestId = request.headers.get('x-request-id') || 
+    `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
   // Security headers for all requests
   const response = NextResponse.next();
+  
+  // Add request ID to response headers for tracing
+  response.headers.set('x-request-id', requestId);
   
   // Add security headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
@@ -94,11 +101,11 @@ export async function middleware(request: NextRequest) {
     const origin = request.headers.get('origin');
     const host = request.headers.get('host');
     
-    // Check origin for CSRF protection
-    if (origin && host && !origin.includes(host)) {
+    // Check origin for CSRF protection (skip for health checks)
+    if (origin && host && !origin.includes(host) && !pathname.startsWith('/api/health')) {
       return NextResponse.json(
         { error: 'CSRF token mismatch' },
-        { status: 403 }
+        { status: 403, headers: { 'x-request-id': requestId } }
       );
     }
   }

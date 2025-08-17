@@ -1,95 +1,123 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getSafePrismaClient } from '@/lib/db-safe/client';
 import { logger } from '@/lib/logger';
+import { safeEnv } from '@/lib/env';
+import { withCircuitBreaker, getCircuitBreakerStats } from '@/lib/circuit-breaker';
 
-interface HealthCheck {
-  name: string;
-  status: 'ok' | 'error';
-  responseTime?: number;
-  error?: string;
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
+type HealthStatus = 'ok' | 'degraded' | 'down';
+
+interface HealthResponse {
+  status: HealthStatus;
+  timestamp: string;
+  responseTime: number;
+  database: {
+    status: HealthStatus;
+    responseTime?: number;
+    error?: string;
+  };
+  circuitBreaker: {
+    state: string;
+    failures: number;
+    successes: number;
+  };
 }
 
-export async function GET() {
+export async function GET(): Promise<NextResponse<HealthResponse>> {
   const startTime = Date.now();
-  const checks: HealthCheck[] = [];
-  let overallStatus = 'ok';
+  let dbStatus: HealthStatus = 'down';
+  let dbResponseTime: number | undefined;
+  let dbError: string | undefined;
 
-  // Database connectivity check
+  // Database health check with circuit breaker and timeout
   try {
-    const dbStart = Date.now();
-    await prisma.$queryRaw`SELECT 1`;
-    checks.push({
-      name: 'database',
-      status: 'ok',
-      responseTime: Date.now() - dbStart,
-    });
+    const result = await withCircuitBreaker(
+      async () => {
+        const dbStart = Date.now();
+        const prisma = getSafePrismaClient();
+        
+        if (!prisma) {
+          throw new Error('Database client unavailable');
+        }
+
+        // Race between query and timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database timeout')), safeEnv.DB_HEALTHCHECK_TIMEOUT_MS);
+        });
+
+        const queryPromise = prisma.$queryRaw`SELECT 1 as health_check`;
+        
+        await Promise.race([queryPromise, timeoutPromise]);
+        
+        const responseTime = Date.now() - dbStart;
+        
+        // Determine status based on response time
+        if (responseTime < 500) {
+          return { status: 'ok' as const, responseTime };
+        } else if (responseTime < 1000) {
+          return { status: 'degraded' as const, responseTime };
+        } else {
+          return { status: 'degraded' as const, responseTime };
+        }
+      },
+      // Fallback when circuit is open
+      async () => {
+        return { status: 'degraded' as const, responseTime: 0 };
+      }
+    );
+
+    dbStatus = result.status;
+    dbResponseTime = result.responseTime;
   } catch (error) {
-    overallStatus = 'error';
-    checks.push({
-      name: 'database',
-      status: 'error',
-      error:
-        process.env.NODE_ENV === 'development'
-          ? String(error)
-          : 'Database connection failed',
-    });
+    dbStatus = 'down';
+    dbError = error instanceof Error ? error.message : 'Database check failed';
+    logger.warn('Database health check failed', error as Error);
   }
 
-  // Cloudinary connectivity check (optional)
-  if (process.env.CLOUDINARY_CLOUD_NAME) {
-    try {
-      const cloudinaryStart = Date.now();
-      const response = await fetch(
-        `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'HEAD' }
-      );
-      checks.push({
-        name: 'cloudinary',
-        status: response.ok ? 'ok' : 'error',
-        responseTime: Date.now() - cloudinaryStart,
-      });
-    } catch (error) {
-      checks.push({
-        name: 'cloudinary',
-        status: 'error',
-        error: 'Cloudinary connection failed',
-      });
-    }
+  // Get circuit breaker stats
+  const breakerStats = getCircuitBreakerStats();
+
+  // Determine overall status
+  let overallStatus: HealthStatus = 'ok';
+  if (dbStatus === 'down' || breakerStats.state === 'open') {
+    overallStatus = 'down';
+  } else if (dbStatus === 'degraded' || breakerStats.state === 'half-open') {
+    overallStatus = 'degraded';
   }
 
-  // Memory usage check
-  const memoryUsage = process.memoryUsage();
-  checks.push({
-    name: 'memory',
-    status: memoryUsage.heapUsed < 500 * 1024 * 1024 ? 'ok' : 'error', // 500MB threshold
-    responseTime: Math.round(memoryUsage.heapUsed / 1024 / 1024), // MB
-  });
-
-  const healthData = {
+  const healthResponse: HealthResponse = {
     status: overallStatus,
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-    version: process.env.npm_package_version || '1.0.0',
-    uptime: process.uptime(),
     responseTime: Date.now() - startTime,
-    checks,
-    system: {
-      nodeVersion: process.version,
-      platform: process.platform,
-      arch: process.arch,
-      memory: {
-        used: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-        total: Math.round(memoryUsage.heapTotal / 1024 / 1024),
-        external: Math.round(memoryUsage.external / 1024 / 1024),
-      },
+    database: {
+      status: dbStatus,
+      responseTime: dbResponseTime,
+      error: dbError,
+    },
+    circuitBreaker: {
+      state: breakerStats.state,
+      failures: breakerStats.failures,
+      successes: breakerStats.successes,
     },
   };
 
+  // Log health check result
   if (overallStatus === 'ok') {
-    logger.info('Health check passed', { healthData });
-    return NextResponse.json(healthData, { status: 200 });
+    logger.debug('Health check passed', { health: healthResponse });
   } else {
-    logger.error('Health check failed', undefined, { healthData });
-    return NextResponse.json(healthData, { status: 503 });
+    logger.warn('Health check degraded/failed', { health: healthResponse });
   }
+
+  // Return appropriate HTTP status
+  const httpStatus = overallStatus === 'ok' ? 200 : overallStatus === 'degraded' ? 200 : 503;
+  
+  return NextResponse.json(healthResponse, { 
+    status: httpStatus,
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+      'Pragma': 'no-cache',
+    },
+  });
 }
