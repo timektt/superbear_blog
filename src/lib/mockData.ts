@@ -1,42 +1,42 @@
-// Mock data for the redesigned homepage
+// Mock data for TechCrunch-style homepage
 
 export const mockFeaturedArticle = {
-  title: 'OpenAI launches GPT-5 with real-time voice + vision',
+  title: 'Security flaws in a carmaker\'s web portal left thousands of cars vulnerable to remote attacks',
   summary:
-    'Next-gen LLM adds multimodal reasoning, memory, and real-time assistant capabilities.',
-  category: 'AI',
-  author: 'Tech Writer',
-  date: 'Aug 6, 2025',
+    'Researchers discovered critical vulnerabilities that could allow attackers to remotely unlock doors, start engines, and track vehicle locations across multiple car manufacturers.',
+  category: 'Security',
+  author: 'Sarah Chen',
+  date: 'Aug 17, 2025',
   imageUrl:
-    'https://images.unsplash.com/photo-1527443224154-9c6c2e3f1f2a?w=1200&h=600&fit=crop',
-  slug: 'openai-gpt5-launch',
+    'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&h=600&fit=crop&auto=format',
+  slug: 'car-security-vulnerabilities',
 };
 
 export const mockTopHeadlines = [
   {
-    title: 'DeepMind unveils AlphaFold 3',
+    title: 'OpenAI announces GPT-5 with breakthrough reasoning capabilities',
+    timeAgo: '2h ago',
+    slug: 'openai-gpt5-announcement',
+  },
+  {
+    title: 'Meta\'s new AI model outperforms GPT-4 on coding benchmarks',
     timeAgo: '4h ago',
-    slug: 'deepmind-alphafold-3',
+    slug: 'meta-ai-coding-model',
   },
   {
-    title: 'GitHub Copilot adds Team Sync',
+    title: 'GitHub Copilot Enterprise reaches 1M developers',
     timeAgo: '6h ago',
-    slug: 'github-copilot-team-sync',
+    slug: 'github-copilot-milestone',
   },
   {
-    title: 'Anthropic ships Claude 3.5 Turbo',
+    title: 'Anthropic raises $4B Series C led by Google',
     timeAgo: '8h ago',
-    slug: 'anthropic-claude-35-turbo',
+    slug: 'anthropic-funding-round',
   },
   {
-    title: 'Vercel introduces Edge Runtimes 2.0',
+    title: 'Tesla\'s FSD Beta shows 40% improvement in city driving',
     timeAgo: '12h ago',
-    slug: 'vercel-edge-runtimes-2',
-  },
-  {
-    title: 'Nvidia tops $4T market cap',
-    timeAgo: '1d ago',
-    slug: 'nvidia-4t-market-cap',
+    slug: 'tesla-fsd-improvement',
   },
 ];
 

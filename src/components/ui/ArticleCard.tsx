@@ -3,12 +3,39 @@
 import Link from 'next/link';
 import Image from 'next/image';
 
-interface ArticleCardProps {
+interface Article {
+  id: string;
   title: string;
-  category: string;
+  slug: string;
+  summary?: string | null;
+  image?: string | null;
+  imageUrl?: string;
+  publishedAt?: Date | null;
+  author: {
+    id?: string;
+    name: string;
+    avatar?: string | null;
+  };
+  category: {
+    id?: string;
+    name: string;
+    slug?: string;
+  };
+  tags?: Array<{
+    id?: string;
+    name: string;
+    slug?: string;
+  }>;
+}
+
+interface ArticleCardProps {
+  // Support both individual props and article object
+  article?: Article;
+  title?: string;
+  category?: string;
   author?: string;
   date?: string;
-  imageUrl: string;
+  imageUrl?: string;
   slug?: string;
   snippet?: string;
   tags?: string[];
@@ -17,17 +44,33 @@ interface ArticleCardProps {
 }
 
 export default function ArticleCard({
-  title,
-  category,
-  author,
-  date,
-  imageUrl,
-  slug,
-  snippet,
-  tags,
+  article,
+  title: propTitle,
+  category: propCategory,
+  author: propAuthor,
+  date: propDate,
+  imageUrl: propImageUrl,
+  slug: propSlug,
+  snippet: propSnippet,
+  tags: propTags,
   variant = 'default',
   className = '',
 }: ArticleCardProps) {
+  // Use article props if provided, otherwise use individual props
+  const title = article?.title || propTitle || '';
+  const category = article?.category?.name || propCategory || '';
+  const author = article?.author?.name || propAuthor || '';
+  const date = article?.publishedAt 
+    ? new Date(article.publishedAt).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : propDate || '';
+  const imageUrl = article?.image || article?.imageUrl || propImageUrl || '/og-default.svg';
+  const slug = article?.slug || propSlug || '';
+  const snippet = article?.summary || propSnippet || '';
+  const tags = article?.tags?.map(tag => tag.name) || propTags || [];
   const href = `/news/${slug || 'article'}`;
 
   if (variant === 'compact') {

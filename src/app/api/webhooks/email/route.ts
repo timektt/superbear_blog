@@ -2,56 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { handleWebhookEvent } from '@/lib/suppression';
 import { prisma } from '@/lib/prisma';
-import { createHash, createHmac } from 'crypto';
+import { verifyWebhookSignature, checkRateLimit } from '@/lib/security-enhanced';
+import { StructuredLogger } from '@/lib/observability';
 
-// Webhook signature verification
-function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string,
-  provider: 'sendgrid' | 'mailgun' | 'postmark' | 'resend'
-): boolean {
-  try {
-    switch (provider) {
-      case 'sendgrid':
-        // SendGrid uses ECDSA signature
-        // For simplicity, we'll use HMAC verification
-        const expectedSignature = createHmac('sha256', secret)
-          .update(payload)
-          .digest('base64');
-        return signature === expectedSignature;
-        
-      case 'mailgun':
-        // Mailgun uses HMAC-SHA256
-        const [timestamp, token, hmacSignature] = signature.split(',');
-        const data = timestamp + token;
-        const expectedHmac = createHmac('sha256', secret)
-          .update(data)
-          .digest('hex');
-        return hmacSignature === expectedHmac;
-        
-      case 'postmark':
-        // Postmark uses HMAC-SHA256
-        const expectedPostmarkSig = createHmac('sha256', secret)
-          .update(payload)
-          .digest('base64');
-        return signature === expectedPostmarkSig;
-        
-      case 'resend':
-        // Resend uses HMAC-SHA256
-        const expectedResendSig = createHmac('sha256', secret)
-          .update(payload)
-          .digest('hex');
-        return signature === `sha256=${expectedResendSig}`;
-        
-      default:
-        return false;
-    }
-  } catch (error) {
-    logger.error('Webhook signature verification failed', error as Error);
-    return false;
-  }
-}
+export const runtime = 'nodejs';
+
+
 
 // Parse webhook payload based on provider
 function parseWebhookPayload(payload: any, provider: string) {
@@ -191,7 +147,26 @@ function mapResendEventType(eventType: string): string {
 
 // POST /api/webhooks/email - Handle email provider webhooks
 export async function POST(request: NextRequest) {
+  const structuredLogger = new StructuredLogger(undefined, {
+    operation: 'webhook_email_processing',
+  });
+
   try {
+    // Check rate limiting
+    const rateLimitResult = await checkRateLimit(request, 'webhook');
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString(),
+          },
+        }
+      );
+    }
+
     const body = await request.text();
     const signature = request.headers.get('x-signature') || 
                      request.headers.get('signature') ||
@@ -202,12 +177,27 @@ export async function POST(request: NextRequest) {
     // Determine provider from headers or URL params
     const { searchParams } = new URL(request.url);
     const provider = searchParams.get('provider') || 'sendgrid';
+    const timestamp = request.headers.get('x-timestamp') || request.headers.get('timestamp');
     
-    // Verify webhook signature
+    // Verify webhook signature with replay protection
     const webhookSecret = process.env.WEBHOOK_SECRET || process.env.EMAIL_WEBHOOK_SECRET;
-    if (webhookSecret && !verifyWebhookSignature(body, signature, webhookSecret, provider as any)) {
-      logger.warn('Invalid webhook signature', { provider, signature: signature.substring(0, 20) });
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    if (webhookSecret) {
+      const verificationResult = verifyWebhookSignature(
+        body, 
+        signature, 
+        webhookSecret, 
+        provider as any,
+        timestamp || undefined
+      );
+      
+      if (!verificationResult.valid) {
+        structuredLogger.warn('Invalid webhook signature', { 
+          provider, 
+          error: verificationResult.error,
+          signature: signature.substring(0, 20) 
+        });
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
     }
 
     // Parse payload

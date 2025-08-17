@@ -2,6 +2,7 @@
 import ArticleCard from '@/components/ui/ArticleCard';
 
 interface LatestArticle {
+  id?: string;
   title: string;
   category: string;
   author: string;
@@ -9,6 +10,7 @@ interface LatestArticle {
   imageUrl: string;
   slug?: string;
   snippet?: string;
+  tags?: string[];
 }
 
 interface LatestListProps {
@@ -23,7 +25,7 @@ export default function LatestList({ articles }: LatestListProps) {
     <div className="space-y-6">
       {displayArticles.map((article, index) => (
         <ArticleCard
-          key={index}
+          key={article.id || index}
           title={article.title}
           category={article.category}
           author={article.author}
@@ -31,6 +33,7 @@ export default function LatestList({ articles }: LatestListProps) {
           imageUrl={article.imageUrl}
           slug={article.slug || `article-${index + 1}`}
           snippet={article.snippet}
+          tags={article.tags}
           variant="list"
         />
       ))}

@@ -310,7 +310,7 @@ function ArticleView({
                   alt={article.author.name}
                   width={48}
                   height={48}
-                  className="rounded-full"
+                  className="rounded-full w-12 h-12 object-cover"
                 />
               )}
               <div>
@@ -347,10 +347,11 @@ function ArticleView({
                 <OptimizedImage
                   src={article.imageUrl}
                   alt={article.title}
-                  fill
+                  width={1024}
+                  height={576}
                   priority
                   sizes="(min-width: 1024px) 1024px, 100vw"
-                  className="object-cover"
+                  className="w-full h-full object-cover"
                 />
               </div>
             </div>
@@ -392,7 +393,7 @@ function ArticleView({
                   alt={article.author.name}
                   width={64}
                   height={64}
-                  className="rounded-full flex-shrink-0"
+                  className="rounded-full flex-shrink-0 w-16 h-16 object-cover"
                 />
               )}
               <div>

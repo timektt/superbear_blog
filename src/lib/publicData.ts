@@ -148,7 +148,7 @@ export async function getByCategory(categoryName: string, opts: { page?: number;
       prisma.article.findMany({
         where: { 
           status: 'PUBLISHED',
-          category: { name: { equals: categoryName, mode: 'insensitive' } }
+          category: { name: { equals: categoryName } }
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
@@ -158,7 +158,7 @@ export async function getByCategory(categoryName: string, opts: { page?: number;
       prisma.article.count({ 
         where: { 
           status: 'PUBLISHED',
-          category: { name: { equals: categoryName, mode: 'insensitive' } }
+          category: { name: { equals: categoryName } }
         }
       }),
     ]);
@@ -298,9 +298,9 @@ export async function searchArticles(q: string, opts: { page?: number; pageSize?
         where: { 
           status: 'PUBLISHED',
           OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { summary: { contains: q, mode: 'insensitive' } },
-            { tags: { some: { name: { contains: q, mode: 'insensitive' } } } }
+            { title: { contains: q } },
+            { summary: { contains: q } },
+            { tags: { some: { name: { contains: q } } } }
           ]
         },
         orderBy: { createdAt: 'desc' },
@@ -312,9 +312,9 @@ export async function searchArticles(q: string, opts: { page?: number; pageSize?
         where: { 
           status: 'PUBLISHED',
           OR: [
-            { title: { contains: q, mode: 'insensitive' } },
-            { summary: { contains: q, mode: 'insensitive' } },
-            { tags: { some: { name: { contains: q, mode: 'insensitive' } } } }
+            { title: { contains: q } },
+            { summary: { contains: q } },
+            { tags: { some: { name: { contains: q } } } }
           ]
         }
       }),

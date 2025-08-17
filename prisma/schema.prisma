@@ -30,6 +30,15 @@ model Article {
   categoryId  String
   tags        Tag[]
   
+  // Analytics relations
+  views       ArticleView[]
+  interactions ArticleInteraction[]
+  stats       ArticleStats?
+  sourceRecommendations ContentRecommendation[] @relation("SourceRecommendations")
+  targetRecommendations ContentRecommendation[] @relation("TargetRecommendations")
+  entrySession ReadingSession[] @relation("SessionEntryArticle")
+  exitSession ReadingSession[] @relation("SessionExitArticle")
+  
   @@map("articles")
 }
 
@@ -410,4 +419,199 @@ enum FrequencyType {
   BIWEEKLY
   MONTHLY
   CUSTOM
+}
+
+// Advanced Article Analytics Models
+
+// Article View Tracking (Privacy-compliant)
+model ArticleView {
+  id              String            @id @default(cuid())
+  articleId       String
+  
+  // Privacy-compliant tracking (no PII)
+  sessionId       String            // Hashed session identifier
+  fingerprint     String?           // Browser fingerprint hash
+  
+  // View metadata
+  timestamp       DateTime          @default(now())
+  userAgent       String?
+  referrer        String?
+  country         String?           // From IP geolocation
+  device          String?           // mobile/desktop/tablet
+  
+  // Engagement metrics
+  timeOnPage      Int?              // Seconds spent on page
+  scrollDepth     Float?            // Percentage scrolled (0-100)
+  readingTime     Int?              // Estimated reading time in seconds
+  bounced         Boolean           @default(false)
+  
+  // Interaction tracking
+  linksClicked    Int               @default(0)
+  socialShares    Int               @default(0)
+  newsletterSignup Boolean          @default(false)
+  
+  createdAt       DateTime          @default(now())
+  
+  // Relations
+  article         Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  interactions    ArticleInteraction[]
+  
+  @@index([articleId, timestamp])
+  @@index([sessionId])
+  @@map("article_views")
+}
+
+// Detailed Interaction Tracking
+model ArticleInteraction {
+  id              String            @id @default(cuid())
+  viewId          String
+  articleId       String
+  
+  type            InteractionType
+  timestamp       DateTime          @default(now())
+  
+  // Interaction details
+  elementId       String?           // DOM element ID
+  linkUrl         String?           // For link clicks
+  socialPlatform  String?           // For social shares
+  scrollPosition  Float?            // For scroll tracking
+  
+  // Context
+  timeFromStart   Int?              // Milliseconds from page load
+  
+  createdAt       DateTime          @default(now())
+  
+  // Relations
+  view            ArticleView       @relation(fields: [viewId], references: [id], onDelete: Cascade)
+  article         Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  
+  @@index([articleId, type])
+  @@index([viewId])
+  @@map("article_interactions")
+}
+
+// Aggregated Article Statistics (for performance)
+model ArticleStats {
+  id              String            @id @default(cuid())
+  articleId       String            @unique
+  
+  // View metrics
+  totalViews      Int               @default(0)
+  uniqueViews     Int               @default(0)
+  avgTimeOnPage   Float?            // Average seconds
+  avgScrollDepth  Float?            // Average percentage
+  bounceRate      Float?            // Percentage
+  
+  // Engagement metrics
+  totalShares     Int               @default(0)
+  totalClicks     Int               @default(0)
+  newsletterSignups Int             @default(0)
+  
+  // Performance metrics
+  avgReadingTime  Float?            // Average estimated reading time
+  completionRate  Float?            // Percentage who read to end
+  
+  // Time-based metrics
+  viewsToday      Int               @default(0)
+  viewsThisWeek   Int               @default(0)
+  viewsThisMonth  Int               @default(0)
+  
+  // Peak performance
+  peakViewsHour   Int               @default(0)
+  peakViewsDay    Int               @default(0)
+  
+  // Last updated
+  lastCalculated  DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  article         Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  
+  @@map("article_stats")
+}
+
+// Popular Content Recommendations
+model ContentRecommendation {
+  id              String            @id @default(cuid())
+  sourceArticleId String
+  targetArticleId String
+  
+  // Recommendation metrics
+  score           Float             // Recommendation strength (0-1)
+  reason          RecommendationType
+  
+  // Performance tracking
+  impressions     Int               @default(0)
+  clicks          Int               @default(0)
+  clickRate       Float?            // clicks/impressions
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  sourceArticle   Article           @relation("SourceRecommendations", fields: [sourceArticleId], references: [id], onDelete: Cascade)
+  targetArticle   Article           @relation("TargetRecommendations", fields: [targetArticleId], references: [id], onDelete: Cascade)
+  
+  @@unique([sourceArticleId, targetArticleId])
+  @@index([sourceArticleId])
+  @@map("content_recommendations")
+}
+
+// Reading Sessions (for user journey tracking)
+model ReadingSession {
+  id              String            @id @default(cuid())
+  sessionId       String            // Hashed session identifier
+  
+  // Session metadata
+  startTime       DateTime          @default(now())
+  endTime         DateTime?
+  duration        Int?              // Total session duration in seconds
+  
+  // Session stats
+  articlesRead    Int               @default(0)
+  totalReadTime   Int               @default(0)
+  pagesViewed     Int               @default(0)
+  
+  // Entry/exit tracking
+  entryArticleId  String?           // First article viewed
+  exitArticleId   String?           // Last article viewed
+  referrer        String?
+  
+  // Device/location
+  userAgent       String?
+  country         String?
+  device          String?
+  
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  
+  // Relations
+  entryArticle    Article?          @relation("SessionEntryArticle", fields: [entryArticleId], references: [id], onDelete: SetNull)
+  exitArticle     Article?          @relation("SessionExitArticle", fields: [exitArticleId], references: [id], onDelete: SetNull)
+  
+  @@index([sessionId])
+  @@index([startTime])
+  @@map("reading_sessions")
+}
+
+// Analytics Enums
+enum InteractionType {
+  LINK_CLICK
+  SOCIAL_SHARE
+  NEWSLETTER_SIGNUP
+  SCROLL_MILESTONE
+  TIME_MILESTONE
+  COPY_TEXT
+  PRINT_ARTICLE
+  BOOKMARK
+}
+
+enum RecommendationType {
+  SIMILAR_CONTENT     // Based on content similarity
+  SAME_CATEGORY       // Same category articles
+  SAME_AUTHOR         // Same author articles
+  TRENDING            // Currently trending
+  POPULAR             // Most popular overall
+  RECENT              // Recently published
+  USER_BEHAVIOR       // Based on user reading patterns
 }

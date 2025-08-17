@@ -39,9 +39,13 @@ export default async function Home() {
     return (
       <HomeView
         featured={{
-          ...MOCK_FEATURED,
+          title: MOCK_FEATURED.title,
+          summary: MOCK_FEATURED.summary,
           category: MOCK_FEATURED.category.name,
           author: MOCK_FEATURED.author.name,
+          date: MOCK_FEATURED.date,
+          imageUrl: MOCK_FEATURED.imageUrl,
+          slug: MOCK_FEATURED.slug,
         }}
         headlines={MOCK_TOP_HEADLINES}
         latest={MOCK_LATEST}
@@ -77,12 +81,26 @@ export default async function Home() {
     return (
       <HomeView
         featured={{
-          ...featured,
+          title: featured.title,
+          summary: featured.summary || '',
           category: featured.category?.name || 'Tech',
           author: featured.author?.name || 'SuperBear Reporter',
+          date: featured.createdAt ? new Date(featured.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+          imageUrl: featured.image || featured.imageUrl || '/og-default.svg',
+          slug: featured.slug,
         }}
         headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES}
-        latest={latest.length > 0 ? latest : MOCK_LATEST}
+        latest={latest.length > 0 ? latest.map(article => ({
+          id: article.id,
+          title: article.title,
+          category: article.category?.name || 'Tech',
+          author: article.author?.name || 'SuperBear Reporter',
+          date: article.createdAt ? new Date(article.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+          slug: article.slug,
+          imageUrl: article.image || article.imageUrl || '/og-default.svg',
+          snippet: article.summary || '',
+          tags: article.tags?.map(tag => tag.name) || [],
+        })) : MOCK_LATEST}
       />
     );
   } catch (error) {
@@ -90,9 +108,13 @@ export default async function Home() {
     return (
       <HomeView
         featured={{
-          ...MOCK_FEATURED,
+          title: MOCK_FEATURED.title,
+          summary: MOCK_FEATURED.summary,
           category: MOCK_FEATURED.category.name,
           author: MOCK_FEATURED.author.name,
+          date: MOCK_FEATURED.date,
+          imageUrl: MOCK_FEATURED.imageUrl,
+          slug: MOCK_FEATURED.slug,
         }}
         headlines={MOCK_TOP_HEADLINES}
         latest={MOCK_LATEST}
@@ -113,7 +135,7 @@ function HomeView({
     category: string;
     author: string;
     date: string;
-    imageUrl?: string;
+    imageUrl: string;
     slug?: string;
   };
   headlines: Array<{
@@ -129,18 +151,16 @@ function HomeView({
     author: string;
     date: string;
     slug: string;
-    imageUrl?: string;
+    imageUrl: string;
     snippet?: string;
     tags: string[];
-    status?: 'PUBLISHED' | 'DRAFT';
-    createdAt?: Date;
   }>;
 }) {
   return (
     <>
-      {/* Above the Fold - Hero + Headlines */}
-      <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Above the Fold - TechCrunch Style Hero Band */}
+      <section className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Featured Article - Left 8 cols */}
             <div className="lg:col-span-8">
@@ -155,17 +175,16 @@ function HomeView({
         </div>
       </section>
 
-      {/* Below the Fold - Latest + Right Rail */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-8 transition-colors duration-300">
+      {/* Latest News Section - TechCrunch Style */}
+      <section className="bg-white dark:bg-gray-900 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-              <div className="w-1 h-6 bg-red-600 rounded-full mr-3"></div>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               Latest News
             </h2>
             <Link
               href="/news"
-              className="inline-flex items-center text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 rounded-md px-2 py-1"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200"
             >
               See more
               <svg
@@ -185,15 +204,13 @@ function HomeView({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Latest List - Left 8 cols */}
-            <div className="lg:col-span-8">
-              <div className="bg-white dark:bg-gray-900 rounded-xl p-6">
-                <LatestList articles={latest.slice(0, 8)} />
-              </div>
+            {/* Latest List - Left 8-9 cols */}
+            <div className="lg:col-span-9">
+              <LatestList articles={latest.slice(0, 8)} />
             </div>
 
-            {/* Right Rail - Right 4 cols */}
-            <div className="lg:col-span-4">
+            {/* Right Rail - Right 3-4 cols */}
+            <div className="lg:col-span-3">
               <RightRail title="Most Popular" items={mockRightRailItems} />
             </div>
           </div>

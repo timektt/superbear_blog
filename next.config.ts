@@ -14,9 +14,11 @@ const nextConfig: NextConfig = {
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react', '@tiptap/react', '@tiptap/starter-kit'],
-    serverComponentsExternalPackages: ['@prisma/client'],
     optimizeCss: isProduction,
   },
+
+  // External packages for server components
+  serverExternalPackages: ['@prisma/client'],
 
   // Image optimization with Cloudinary loader
   images: {

@@ -32,7 +32,6 @@ export async function GET(request: NextRequest) {
     if (search) {
       where.email = {
         contains: search,
-        mode: 'insensitive',
       };
     }
 

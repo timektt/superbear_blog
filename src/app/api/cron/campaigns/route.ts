@@ -2,12 +2,39 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runCampaignScheduler } from '@/lib/campaign-scheduler';
 import { processEmailQueue } from '@/lib/email-queue';
 import { cleanupSoftBounces } from '@/lib/suppression';
+import { runDataRetentionCleanup } from '@/lib/data-lifecycle';
+import { checkRateLimit, checkIPAllowlist } from '@/lib/security-enhanced';
 import { logger } from '@/lib/logger';
+
+export const runtime = 'nodejs';
 
 // POST /api/cron/campaigns - Cron job endpoint for processing scheduled campaigns and email queue
 export async function POST(request: NextRequest) {
   try {
-    // Verify cron job authorization (in production, use a secret token)
+    // Check IP allowlist
+    if (!checkIPAllowlist(request)) {
+      logger.warn('Cron job blocked by IP allowlist', {
+        ip: request.headers.get('x-forwarded-for') || 'unknown',
+      });
+      return NextResponse.json({ error: 'IP not allowed' }, { status: 403 });
+    }
+
+    // Check rate limiting
+    const rateLimitResult = await checkRateLimit(request, 'cron');
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { 
+          status: 429,
+          headers: {
+            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+            'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString(),
+          },
+        }
+      );
+    }
+
+    // Verify cron job authorization
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'dev-secret';
     
@@ -56,6 +83,18 @@ export async function POST(request: NextRequest) {
       } catch (error) {
         logger.error('Soft bounce cleanup failed', error as Error);
         results.cleanup = { error: (error as Error).message };
+      }
+    }
+
+    // 4. Data retention cleanup (run once per day at 3 AM)
+    if (now.getHours() === 3 && now.getMinutes() < 5) {
+      try {
+        const retentionResults = await runDataRetentionCleanup();
+        results.dataRetention = retentionResults;
+        logger.info('Data retention cleanup completed');
+      } catch (error) {
+        logger.error('Data retention cleanup failed', error as Error);
+        results.dataRetention = { error: (error as Error).message };
       }
     }
 

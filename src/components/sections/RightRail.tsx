@@ -7,6 +7,7 @@ interface RightRailItem {
   imageUrl?: string;
   slug?: string;
   timeAgo?: string;
+  excerpt?: string;
 }
 
 interface RightRailProps {
@@ -28,7 +29,7 @@ export default function RightRail({ title, items }: RightRailProps) {
             title={item.title}
             category={item.category || 'News'}
             date={item.timeAgo}
-            imageUrl={item.imageUrl || '/placeholder-image.jpg'}
+            imageUrl={item.imageUrl || '/placeholder-image.svg'}
             slug={item.slug || `popular-${index + 1}`}
             variant="compact"
           />
