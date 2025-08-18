@@ -1,143 +1,164 @@
-import { Metadata } from 'next';
-import { Suspense } from 'react';
-import ListPageLayout from '@/components/sections/ListPageLayout';
-import ListSkeleton from '@/components/ui/ListSkeleton';
-import { searchArticles, getMostPopular } from '@/lib/publicData';
-import { createSearchPageMetadata } from '@/lib/seo';
+'use client';
 
-// Performance optimizations
-export const revalidate = 60;
-export const fetchCache = 'force-cache';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 
-interface SearchPageProps {
-  searchParams: Promise<{ q?: string; page?: string }>;
+interface SearchResult {
+  articles: any[];
+  total: number;
+  query: {
+    q: string;
+    tag: string;
+    category: string;
+  };
 }
 
-export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const params = await searchParams;
-  return createSearchPageMetadata(params.q);
-}
-
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const params = await searchParams;
-  const query = params.q || '';
-  const page = parseInt(params.page || '1', 10);
-
+function SearchSkeleton() {
   return (
-    <Suspense fallback={<SearchPageSkeleton />}>
-      <SearchPageContent query={query} page={page} />
-    </Suspense>
+    <div className="space-y-4">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        </div>
+      ))}
+    </div>
   );
 }
 
-async function SearchPageContent({ query, page }: { query: string; page: number }) {
-  if (!query.trim()) {
-    return <EmptySearchState />;
-  }
-
-  const [result, mostPopular] = await Promise.all([
-    searchArticles(query, { page, pageSize: 12 }),
-    getMostPopular(5),
-  ]);
+export default function SearchPage() {
+  const searchParams = useSearchParams();
+  const [results, setResults] = useState<SearchResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState('');
+  const [tag, setTag] = useState('');
+  const [category, setCategory] = useState('');
+  
+  useEffect(() => {
+    const q = searchParams.get('q') || '';
+    const t = searchParams.get('tag') || '';
+    const c = searchParams.get('category') || '';
+    
+    setQuery(q);
+    setTag(t);
+    setCategory(c);
+    
+    if (q || t || c) {
+      performSearch(q, t, c);
+    }
+  }, [searchParams]);
+  
+  const performSearch = async (q: string, tag: string, category: string) => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (tag) params.set('tag', tag);
+      if (category) params.set('category', category);
+      
+      const res = await fetch(`/api/search?${params}`);
+      const data = await res.json();
+      setResults(data);
+    } catch {
+      setResults({ articles: [], total: 0, query: { q, tag, category } });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams();
+    if (query) params.set('q', query);
+    if (tag) params.set('tag', tag);
+    if (category) params.set('category', category);
+    
+    window.history.pushState({}, '', `/search?${params}`);
+    performSearch(query, tag, category);
+  };
 
   return (
-    <ListPageLayout
-      title={`Search results for "${query}"`}
-      subtitle={result.total > 0 ? undefined : 'No articles found matching your search'}
-      result={result}
-      mostPopular={mostPopular}
-      basePath="/search"
-    />
-  );
-}
-
-function EmptySearchState() {
-  return (
-    <section className="bg-white dark:bg-gray-900 py-16 transition-colors duration-300">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-          <svg
-            className="w-10 h-10 text-gray-400 dark:text-gray-500"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Search Articles</h1>
+      
+      <form onSubmit={handleSearch} className="mb-8 space-y-4">
+        <div className="flex space-x-4">
+          <input
+            type="text"
+            placeholder="Search articles..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 p-3 border rounded"
+          />
+          <input
+            type="text"
+            placeholder="Tag"
+            value={tag}
+            onChange={(e) => setTag(e.target.value)}
+            className="w-32 p-3 border rounded"
+          />
+          <input
+            type="text"
+            placeholder="Category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-32 p-3 border rounded"
+          />
+          <button
+            type="submit"
+            className="px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+            Search
+          </button>
         </div>
-        
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Search SuperBear Blog
-        </h1>
-        
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-          Find articles about AI, developer tools, startups, and more
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-2xl mx-auto">
-          <SearchSuggestion href="/ai" label="AI News" />
-          <SearchSuggestion href="/devtools" label="Developer Tools" />
-          <SearchSuggestion href="/startups" label="Startup News" />
-          <SearchSuggestion href="/open-source" label="Open Source" />
-          <SearchSuggestion href="/search?q=machine+learning" label="Machine Learning" />
-          <SearchSuggestion href="/search?q=javascript" label="JavaScript" />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SearchSuggestion({ href, label }: { href: string; label: string }) {
-  return (
-    <a
-      href={href}
-      className="block p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
-    >
-      <span className="text-sm font-medium text-gray-900 dark:text-white">
-        {label}
-      </span>
-    </a>
-  );
-}
-
-function SearchPageSkeleton() {
-  return (
-    <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-64 mb-2 animate-pulse"></div>
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
-              <ListSkeleton />
+      </form>
+      
+      {loading && <SearchSkeleton />}
+      
+      {results && !loading && (
+        <div>
+          <p className="text-gray-600 mb-4">
+            Found {results.total} result{results.total !== 1 ? 's' : ''}
+            {results.query.q && ` for "${results.query.q}"`}
+          </p>
+          
+          {results.articles.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No articles found</h3>
+              <p className="text-gray-500">Try adjusting your search terms</p>
             </div>
-          </div>
-          <div className="lg:col-span-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-4 animate-pulse"></div>
-              <div className="space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex space-x-3 animate-pulse">
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-                    <div className="flex-1">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-1"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
-                    </div>
+          ) : (
+            <div className="space-y-6">
+              {results.articles.map((article) => (
+                <article key={article.id} className="border-b pb-6">
+                  <h2 className="text-xl font-semibold mb-2">
+                    <Link href={`/news/${article.slug}`} className="text-blue-600 hover:underline">
+                      {article.title}
+                    </Link>
+                  </h2>
+                  {article.summary && (
+                    <p className="text-gray-600 mb-2">{article.summary}</p>
+                  )}
+                  <div className="text-sm text-gray-500">
+                    {article.author?.name && `By ${article.author.name} • `}
+                    {new Date(article.publishedAt).toLocaleDateString()}
+                    {article.category && ` • ${article.category.name}`}
                   </div>
-                ))}
-              </div>
+                </article>
+              ))}
             </div>
-          </div>
+          )}
         </div>
-      </div>
-    </section>
+      )}
+      
+      {!results && !loading && (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Start searching</h3>
+          <p className="text-gray-500">Enter keywords, tags, or categories to find articles</p>
+        </div>
+      )}
+    </main>
   );
 }
