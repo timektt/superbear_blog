@@ -3,8 +3,16 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { ServiceWorkerRegistration } from '@/components/app/ServiceWorkerRegistration.client';
-import { SkipLink } from '@/components/app/SkipLink.client';
+import dynamic from 'next/dynamic';
+
+// Dynamic imports for client components
+const ServiceWorkerRegistration = dynamic(
+  () => import('@/components/app/ServiceWorkerRegistration.client')
+);
+
+const SkipLink = dynamic(
+  () => import('@/components/app/SkipLink.client')
+);
 
 const inter = Inter({
   subsets: ['latin'],
@@ -103,6 +111,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#2563eb" />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <script

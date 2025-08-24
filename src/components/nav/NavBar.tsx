@@ -34,15 +34,22 @@ export default function NavBar() {
     }
   };
 
-  const navigationItems = [
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
+
+  const mainNavigationItems = [
     { href: '/news', label: 'Latest' },
     { href: '/ai', label: 'AI' },
     { href: '/devtools', label: 'DevTools' },
-    { href: '/open-source', label: 'Open Source' },
     { href: '/startups', label: 'Startups' },
+  ];
+
+  const moreNavigationItems = [
+    { href: '/open-source', label: 'Open Source' },
     { href: '/podcasts', label: 'Podcasts' },
     { href: '/newsletter', label: 'Newsletter' },
   ];
+
+  const allNavigationItems = [...mainNavigationItems, ...moreNavigationItems];
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all duration-300 shadow-sm">

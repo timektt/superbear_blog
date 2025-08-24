@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-export function ServiceWorkerRegistration() {
+function ServiceWorkerRegistration() {
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
@@ -22,3 +22,5 @@ export function ServiceWorkerRegistration() {
   
   return null;
 }
+
+export default ServiceWorkerRegistration;

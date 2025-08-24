@@ -54,6 +54,8 @@ model Author {
   bio      String?
   avatar   String?   // Cloudinary URL
   articles Article[]
+  podcasts PodcastEpisode[]
+  newsletterIssues NewsletterIssue[]
   
   @@map("authors")
 }
@@ -63,6 +65,7 @@ model Category {
   name     String
   slug     String    @unique
   articles Article[]
+  podcasts PodcastEpisode[]
   
   @@map("categories")
 }
@@ -72,8 +75,64 @@ model Tag {
   name     String
   slug     String    @unique
   articles Article[]
+  podcasts PodcastEpisode[]
   
   @@map("tags")
+}
+
+model PodcastEpisode {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String?
+  summary       String?
+  audioUrl      String   // Cloudinary or external URL
+  coverImage    String?  // Cloudinary URL
+  duration      Int?     // Duration in seconds
+  episodeNumber Int?
+  seasonNumber  Int?
+  status        Status   @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  authorId      String
+  author        Author   @relation(fields: [authorId], references: [id])
+  categoryId    String?
+  category      Category? @relation(fields: [categoryId], references: [id])
+  tags          Tag[]
+  
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([status])
+  @@index([authorId])
+  @@index([categoryId])
+  @@map("podcast_episodes")
+}
+
+model NewsletterIssue {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  summary     String?
+  content     Json     // Rich text content (Tiptap JSON)
+  issueNumber Int      @unique
+  status      Status   @default(DRAFT)
+  publishedAt DateTime?
+  sentAt      DateTime? // When newsletter was sent to subscribers
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  authorId    String
+  author      Author   @relation(fields: [authorId], references: [id])
+  
+  @@index([slug])
+  @@index([issueNumber])
+  @@index([publishedAt])
+  @@index([status])
+  @@map("newsletter_issues")
 }
 
 model AdminUser {

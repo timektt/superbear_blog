@@ -1,6 +1,6 @@
 'use client';
 
-export function SkipLink() {
+function SkipLink() {
   return (
     <a 
       href="#main-content" 
@@ -10,3 +10,5 @@ export function SkipLink() {
     </a>
   );
 }
+
+export default SkipLink;
