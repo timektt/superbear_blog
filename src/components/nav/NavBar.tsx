@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, Menu, X, ChevronDown } from 'lucide-react';
-import ThemeToggle from '@/components/ui/ThemeToggle';
+import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -100,7 +100,7 @@ export default function NavBar() {
   const allNavigationItems = [...mainNavigationItems, ...moreNavigationItems];
 
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md border-b shadow-sm transition-all duration-200" style={{ backgroundColor: 'var(--navbar-bg)', borderColor: 'var(--navbar-border)' }}>
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-all duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -128,7 +128,7 @@ export default function NavBar() {
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
                       ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                      : 'text-foreground hover:text-primary hover:bg-muted/50'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >
@@ -150,7 +150,7 @@ export default function NavBar() {
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     moreNavigationItems.some(item => isActivePage(item.href))
                       ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                      : 'text-foreground hover:text-primary hover:bg-muted/50'
                   }`}
                   aria-expanded={isMoreDropdownOpen}
                   aria-haspopup="true"
@@ -165,11 +165,19 @@ export default function NavBar() {
                   />
                 </button>
 
+                {/* Backdrop overlay */}
+                {isMoreDropdownOpen && (
+                  <div
+                    className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
+                    onClick={closeMoreDropdown}
+                    aria-hidden="true"
+                  />
+                )}
+
                 {/* Dropdown Menu */}
                 {isMoreDropdownOpen && (
                   <div
-                    className="absolute top-full left-0 mt-2 w-64 border border-border rounded-lg shadow-dropdown z-50 py-2 animate-slide-down"
-                    style={{ backgroundColor: 'var(--dropdown-bg)' }}
+                    className="absolute top-full left-0 mt-2 w-64 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-lg z-50 py-2 animate-slide-down"
                     role="menu"
                     aria-orientation="vertical"
                   >
@@ -178,10 +186,10 @@ export default function NavBar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreDropdown}
-                        className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dropdown-bg ${
+                        className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                           isActivePage(item.href)
                             ? 'text-primary bg-primary/10'
-                            : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                            : 'text-card-foreground hover:text-primary hover:bg-muted/50'
                         }`}
                         role="menuitem"
                         aria-current={isActivePage(item.href) ? 'page' : undefined}
@@ -208,20 +216,20 @@ export default function NavBar() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-48 lg:w-64 text-sm bg-surface border border-input rounded-full focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200 hover:bg-surface-hover"
+                  className="pl-10 pr-4 py-2 w-48 lg:w-64 text-sm bg-background border border-input rounded-full focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200 hover:bg-muted/50"
                 />
               </div>
             </form>
-            <ThemeToggle />
+            <ThemeSwitcher />
           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            <ThemeToggle />
+            <ThemeSwitcher />
             <button
               type="button"
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-lg text-foreground hover:text-primary hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring transition-all duration-200"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-foreground hover:text-primary hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring transition-all duration-200"
               aria-controls="mobile-menu"
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle navigation menu"
@@ -244,7 +252,7 @@ export default function NavBar() {
           }`}
           id="mobile-menu"
         >
-          <div className="px-2 pt-2 pb-3 space-y-1 border-t shadow-lg transition-all duration-200" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}>
+          <div className="px-2 pt-2 pb-3 space-y-1 border-t border-border bg-background shadow-lg transition-all duration-200">
             {/* Mobile Search */}
             <div className="px-3 py-2">
               <form onSubmit={handleSearch}>
@@ -255,7 +263,7 @@ export default function NavBar() {
                     placeholder="Search articles..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-3 w-full text-sm bg-surface border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200"
+                    className="pl-10 pr-4 py-3 w-full text-sm bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200"
                   />
                 </div>
               </form>
@@ -271,7 +279,7 @@ export default function NavBar() {
                   className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
                       ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                      : 'text-foreground hover:text-primary hover:bg-muted/50'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >

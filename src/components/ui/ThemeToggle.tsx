@@ -46,8 +46,9 @@ export default function ThemeToggle() {
 
   return (
     <button
+      type="button"
       onClick={cycleTheme}
-      className="p-2 rounded-lg bg-surface hover:bg-surface-hover text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+      className="p-2 rounded-lg bg-background hover:bg-muted/50 text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
       aria-label={getLabel()}
       title={getLabel()}
     >

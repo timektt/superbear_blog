@@ -33,20 +33,20 @@ export default function ListPageLayout({
       )}
 
       {/* Main Content */}
-      <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
+      <section className="bg-background py-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-lg text-gray-600 dark:text-gray-300">
+              <p className="text-lg text-muted-foreground">
                 {subtitle}
               </p>
             )}
             {total > 0 && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-sm text-muted-foreground mt-2">
                 {total} article{total !== 1 ? 's' : ''} found
               </p>
             )}
@@ -55,9 +55,9 @@ export default function ListPageLayout({
           {items.length === 0 ? (
             /* Empty State */
             <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-gray-400 dark:text-gray-500"
+                  className="w-8 h-8 text-muted-foreground"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -70,10 +70,10 @@ export default function ListPageLayout({
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+              <h3 className="text-lg font-medium text-foreground mb-2">
                 No articles found
               </h3>
-              <p className="text-gray-500 dark:text-gray-400">
+              <p className="text-muted-foreground">
                 Try adjusting your search or browse other categories.
               </p>
             </div>
@@ -82,7 +82,7 @@ export default function ListPageLayout({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Articles List - Left 8 cols */}
               <div className="lg:col-span-8">
-                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                <div className="bg-card rounded-xl p-6 border border-border">
                   <LatestList articles={items} />
                 </div>
 

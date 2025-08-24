@@ -51,29 +51,29 @@ async function AIPageContent({ page }: { page: number }) {
 
 function CategoryPageSkeleton() {
   return (
-    <section className="bg-white dark:bg-gray-900 py-8 transition-colors duration-300">
+    <section className="bg-background py-8 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-80 animate-pulse"></div>
+          <div className="h-8 bg-muted rounded w-32 mb-2 animate-pulse"></div>
+          <div className="h-5 bg-muted rounded w-80 animate-pulse"></div>
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+            <div className="bg-card rounded-xl p-6 border border-border">
               <ListSkeleton />
             </div>
           </div>
           <div className="lg:col-span-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-4 animate-pulse"></div>
+            <div className="bg-card rounded-xl p-6 border border-border">
+              <div className="h-6 bg-muted rounded w-32 mb-4 animate-pulse"></div>
               <div className="space-y-4">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="flex space-x-3 animate-pulse">
-                    <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+                    <div className="w-12 h-12 bg-muted rounded-lg"></div>
                     <div className="flex-1">
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full mb-1"></div>
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16"></div>
+                      <div className="h-4 bg-muted rounded w-full mb-1"></div>
+                      <div className="h-3 bg-muted rounded w-16"></div>
                     </div>
                   </div>
                 ))}

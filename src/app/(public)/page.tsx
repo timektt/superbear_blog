@@ -8,7 +8,7 @@ import StorylinesStrip from '@/components/sections/StorylinesStrip';
 import StartupsBlock from '@/components/sections/StartupsBlock';
 import PodcastsBlock from '@/components/sections/PodcastsBlock';
 import ExploreByCategory from '@/components/sections/ExploreByCategory';
-import NewsletterSubscription from '@/components/newsletter/NewsletterSubscription';
+import { NewsletterSubscription } from '@/components/newsletter/NewsletterSubscription';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
