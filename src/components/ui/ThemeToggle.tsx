@@ -2,10 +2,11 @@
 
 import { useTheme } from 'next-themes';
 import { useState, useEffect } from 'react';
+import { Moon, Sun, Monitor } from 'lucide-react';
 
 export default function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -16,48 +17,41 @@ export default function ThemeToggle() {
     return <div className="p-2 w-9 h-9 rounded-lg bg-muted animate-pulse" />;
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
+  const cycleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
+    } else {
+      setTheme('light');
+    }
+  };
+
+  const getIcon = () => {
+    if (theme === 'system') {
+      return <Monitor className="w-5 h-5" aria-hidden="true" />;
+    }
+    return resolvedTheme === 'light' ? (
+      <Sun className="w-5 h-5" aria-hidden="true" />
+    ) : (
+      <Moon className="w-5 h-5" aria-hidden="true" />
+    );
+  };
+
+  const getLabel = () => {
+    if (theme === 'light') return 'Switch to dark mode';
+    if (theme === 'dark') return 'Switch to system mode';
+    return 'Switch to light mode';
   };
 
   return (
     <button
-      onClick={toggleTheme}
-      className="p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+      onClick={cycleTheme}
+      className="p-2 rounded-lg bg-surface hover:bg-surface-hover text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+      aria-label={getLabel()}
+      title={getLabel()}
     >
-      {theme === 'light' ? (
-        <svg
-          className="w-5 h-5 text-primary"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-          />
-        </svg>
-      ) : (
-        <svg
-          className="w-5 h-5 text-primary"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-          />
-        </svg>
-      )}
+      {getIcon()}
     </button>
   );
 }

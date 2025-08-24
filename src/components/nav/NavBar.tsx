@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, ChevronDown } from 'lucide-react';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const pathname = usePathname();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -18,6 +20,42 @@ export default function NavBar() {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
+
+  const toggleMoreDropdown = () => {
+    setIsMoreDropdownOpen(!isMoreDropdownOpen);
+  };
+
+  const closeMoreDropdown = () => {
+    setIsMoreDropdownOpen(false);
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        closeMoreDropdown();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  // Close dropdown on escape key
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMoreDropdown();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   const isActivePage = (href: string) => {
     if (href === '/news' && pathname === '/') return true; // Latest maps to homepage
@@ -34,8 +72,6 @@ export default function NavBar() {
     }
   };
 
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false);
-
   const mainNavigationItems = [
     { href: '/news', label: 'Latest' },
     { href: '/ai', label: 'AI' },
@@ -44,15 +80,27 @@ export default function NavBar() {
   ];
 
   const moreNavigationItems = [
-    { href: '/open-source', label: 'Open Source' },
-    { href: '/podcasts', label: 'Podcasts' },
-    { href: '/newsletter', label: 'Newsletter' },
+    { 
+      href: '/open-source', 
+      label: 'Open Source',
+      description: 'Latest open source projects and tools'
+    },
+    { 
+      href: '/podcasts', 
+      label: 'Podcasts',
+      description: 'Tech talks and developer interviews'
+    },
+    { 
+      href: '/newsletter', 
+      label: 'Newsletter',
+      description: 'Weekly curated tech insights'
+    },
   ];
 
   const allNavigationItems = [...mainNavigationItems, ...moreNavigationItems];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all duration-300 shadow-sm">
+    <header className="sticky top-0 z-50 backdrop-blur-md border-b shadow-sm transition-all duration-200" style={{ backgroundColor: 'var(--navbar-bg)', borderColor: 'var(--navbar-border)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -73,20 +121,80 @@ export default function NavBar() {
             aria-label="Main navigation"
           >
             <div className="flex items-center justify-center space-x-1">
-              {navigationItems.map((item) => (
+              {mainNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'text-primary bg-primary/10'
+                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >
                   {item.label}
                 </Link>
               ))}
+              
+              {/* More Dropdown */}
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={toggleMoreDropdown}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      toggleMoreDropdown();
+                    }
+                  }}
+                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                    moreNavigationItems.some(item => isActivePage(item.href))
+                      ? 'text-primary bg-primary/10'
+                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                  }`}
+                  aria-expanded={isMoreDropdownOpen}
+                  aria-haspopup="true"
+                  aria-label="More navigation options"
+                >
+                  <span>More</span>
+                  <ChevronDown 
+                    className={`w-4 h-4 transition-transform duration-200 ${
+                      isMoreDropdownOpen ? 'rotate-180' : ''
+                    }`}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isMoreDropdownOpen && (
+                  <div
+                    className="absolute top-full left-0 mt-2 w-64 border border-border rounded-lg shadow-dropdown z-50 py-2 animate-slide-down"
+                    style={{ backgroundColor: 'var(--dropdown-bg)' }}
+                    role="menu"
+                    aria-orientation="vertical"
+                  >
+                    {moreNavigationItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={closeMoreDropdown}
+                        className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-dropdown-bg ${
+                          isActivePage(item.href)
+                            ? 'text-primary bg-primary/10'
+                            : 'text-foreground hover:text-primary hover:bg-surface-hover'
+                        }`}
+                        role="menuitem"
+                        aria-current={isActivePage(item.href) ? 'page' : undefined}
+                      >
+                        <div className="font-medium">{item.label}</div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {item.description}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </nav>
 
@@ -100,7 +208,7 @@ export default function NavBar() {
                   placeholder="Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-48 lg:w-64 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  className="pl-10 pr-4 py-2 w-48 lg:w-64 text-sm bg-surface border border-input rounded-full focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200 hover:bg-surface-hover"
                 />
               </div>
             </form>
@@ -113,9 +221,9 @@ export default function NavBar() {
             <button
               type="button"
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-lg text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
+              className="inline-flex items-center justify-center p-2 rounded-lg text-foreground hover:text-primary hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring transition-all duration-200"
               aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
+              aria-expanded={isMobileMenuOpen}
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (
@@ -136,7 +244,7 @@ export default function NavBar() {
           }`}
           id="mobile-menu"
         >
-          <div className="px-2 pt-2 pb-3 space-y-1 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 shadow-lg">
+          <div className="px-2 pt-2 pb-3 space-y-1 border-t shadow-lg transition-all duration-200" style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}>
             {/* Mobile Search */}
             <div className="px-3 py-2">
               <form onSubmit={handleSearch}>
@@ -147,7 +255,7 @@ export default function NavBar() {
                     placeholder="Search articles..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-3 w-full text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+                    className="pl-10 pr-4 py-3 w-full text-sm bg-surface border border-input rounded-lg focus:ring-2 focus:ring-ring focus:border-ring text-foreground placeholder-muted-foreground transition-all duration-200"
                   />
                 </div>
               </form>
@@ -155,15 +263,15 @@ export default function NavBar() {
 
             {/* Mobile Navigation Items */}
             <div className="space-y-1">
-              {navigationItems.map((item) => (
+              {allNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 ${
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
-                      ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                      : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                      ? 'text-primary bg-primary/10'
+                      : 'text-foreground hover:text-primary hover:bg-surface-hover'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >
