@@ -2,15 +2,15 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { NewsletterIssueManagement } from '@/components/admin/NewsletterIssueManagement';
+import { PodcastCreateForm } from '@/components/admin/PodcastCreateForm';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 
 export const metadata = {
-  title: 'Newsletter Management - Admin',
-  description: 'Manage newsletter issues and campaigns',
+  title: 'Create New Podcast Episode - Admin',
+  description: 'Create a new podcast episode',
 };
 
-async function NewsletterPage() {
+async function NewPodcastPage() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
@@ -25,10 +25,10 @@ async function NewsletterPage() {
   return (
     <div className="container mx-auto py-6">
       <Suspense fallback={<LoadingSpinner />}>
-        <NewsletterIssueManagement />
+        <PodcastCreateForm />
       </Suspense>
     </div>
   );
 }
 
-export default NewsletterPage;
+export default NewPodcastPage;

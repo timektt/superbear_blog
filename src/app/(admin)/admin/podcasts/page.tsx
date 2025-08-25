@@ -2,15 +2,15 @@ import { Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { NewsletterIssueManagement } from '@/components/admin/NewsletterIssueManagement';
+import { PodcastManagement } from '@/components/admin/PodcastManagement';
 import { LoadingSpinner } from '@/components/ui/loading-states';
 
 export const metadata = {
-  title: 'Newsletter Management - Admin',
-  description: 'Manage newsletter issues and campaigns',
+  title: 'Podcast Management - Admin',
+  description: 'Manage podcast episodes and content',
 };
 
-async function NewsletterPage() {
+async function PodcastsPage() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user) {
@@ -25,10 +25,10 @@ async function NewsletterPage() {
   return (
     <div className="container mx-auto py-6">
       <Suspense fallback={<LoadingSpinner />}>
-        <NewsletterIssueManagement />
+        <PodcastManagement />
       </Suspense>
     </div>
   );
 }
 
-export default NewsletterPage;
+export default PodcastsPage;
