@@ -8,7 +8,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
-const isStaging = process.env.NODE_ENV === 'staging';
+
 
 const nextConfig: NextConfig = {
   // Enable experimental features for better performance
@@ -123,13 +123,43 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Cache public content
+      {
+        source: '/(news|ai|devtools|open-source|startups|podcasts)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=120, stale-while-revalidate=300',
+          },
+        ],
+      },
+      // Cache article pages
+      {
+        source: '/news/:slug*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=300, stale-while-revalidate=600',
+          },
+        ],
+      },
       // Cache API responses
       {
         source: '/api/articles',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, s-maxage=300, stale-while-revalidate=600',
+            value: 'public, s-maxage=60, stale-while-revalidate=120',
+          },
+        ],
+      },
+      // No cache for analytics/stats
+      {
+        source: '/api/(analytics|admin|system)/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, no-cache, must-revalidate',
           },
         ],
       },
@@ -247,13 +277,6 @@ const finalConfig = isProduction
         widenClientFileUpload: true,
         transpileClientSDK: true,
         tunnelRoute: '/monitoring',
-        hideSourceMaps: true,
-        disableLogger: true,
-        automaticVercelMonitors: true,
-      },
-      {
-        widenClientFileUpload: true,
-        transpileClientSDK: true,
         hideSourceMaps: true,
         disableLogger: true,
         automaticVercelMonitors: true,

@@ -2,7 +2,9 @@ import { z } from 'zod';
 
 // Environment validation schema
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   DATABASE_URL: z.string().optional(),
   DIRECT_URL: z.string().optional(),
   NEXTAUTH_SECRET: z.string().optional(),
@@ -13,6 +15,10 @@ const envSchema = z.object({
   SENTRY_DSN: z.string().optional(),
   SENTRY_ORG: z.string().optional(),
   SENTRY_PROJECT: z.string().optional(),
+  // Circuit breaker and health check configuration
+  DB_HEALTHCHECK_TIMEOUT_MS: z.coerce.number().default(1200),
+  BREAKER_THRESHOLD: z.coerce.number().default(5),
+  BREAKER_RESET_MS: z.coerce.number().default(30000),
 });
 
 // Parse and validate environment variables
@@ -64,7 +70,7 @@ export function isDatabaseConfigured(): boolean {
     }
 
     return false;
-  } catch (error) {
+  } catch {
     // Invalid URL format
     return false;
   }
@@ -88,6 +94,8 @@ export const ENV_INFO = {
   nodeEnv: safeEnv.NODE_ENV,
   hasDatabase: IS_DB_CONFIGURED,
   hasAuth: !!safeEnv.NEXTAUTH_SECRET,
-  hasCloudinary: !!(safeEnv.CLOUDINARY_CLOUD_NAME && safeEnv.CLOUDINARY_API_KEY),
+  hasCloudinary: !!(
+    safeEnv.CLOUDINARY_CLOUD_NAME && safeEnv.CLOUDINARY_API_KEY
+  ),
   hasSentry: !!safeEnv.SENTRY_DSN,
 } as const;

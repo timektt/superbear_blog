@@ -15,6 +15,11 @@ export async function GET() {
                 status: 'PUBLISHED',
               },
             },
+            podcasts: {
+              where: {
+                status: 'PUBLISHED',
+              },
+            },
           },
         },
       },
@@ -23,12 +28,12 @@ export async function GET() {
       },
     });
 
-    // Only return categories that have published articles
-    const categoriesWithArticles = categories.filter(
-      (category) => category._count.articles > 0
+    // Only return categories that have published content
+    const categoriesWithContent = categories.filter(
+      (category) => category._count.articles > 0 || category._count.podcasts > 0
     );
 
-    return NextResponse.json(categoriesWithArticles);
+    return NextResponse.json({ categories: categoriesWithContent });
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(
