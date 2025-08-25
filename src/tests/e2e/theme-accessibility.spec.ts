@@ -27,7 +27,7 @@ test.describe('Theme Switching and Accessibility', () => {
     const initialClass = await htmlElement.getAttribute('class');
     
     // Find and click theme toggle button
-    const themeToggle = page.locator('[data-testid="theme-toggle"]');
+    const themeToggle = page.locator('[aria-label*="theme"]').first();
     await expect(themeToggle).toBeVisible();
     
     await themeToggle.click();
@@ -212,7 +212,7 @@ test.describe('Theme Switching and Accessibility', () => {
     expect(lightThemeContrastViolations).toEqual([]);
 
     // Switch to dark theme
-    const themeToggle = page.locator('[data-testid="theme-toggle"]');
+    const themeToggle = page.locator('[aria-label*="theme"]').first();
     await themeToggle.click();
 
     // Test dark theme

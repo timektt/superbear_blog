@@ -1,4 +1,3 @@
-import { PrismaClient } from '@prisma/client';
 import { getSafePrismaClient } from '@/lib/db-safe/client';
 import { logger } from '@/lib/logger';
 
@@ -34,6 +33,21 @@ export interface AnalyticsSummary {
   };
 }
 
+export interface EngagementMetrics {
+  articleId: string;
+  timeOnPage: number;
+  scrollDepth: number;
+  bounceRate: number;
+  interactionRate: number;
+  socialShares: number;
+  linkClicks: number;
+  newsletterSignups: number;
+  period: {
+    start: Date;
+    end: Date;
+  };
+}
+
 /**
  * Aggregate campaign analytics for a specific time period
  */
@@ -58,55 +72,66 @@ export async function aggregateCampaignAnalytics(
       ...(campaignId && { campaignId }),
     };
 
-    // Get campaign snapshots for the period
-    const snapshots = await prisma.campaignSnapshot.findMany({
+    // Get campaigns with their deliveries and events for the period
+    const campaigns = await prisma.newsletterCampaign.findMany({
       where: whereClause,
       include: {
-        campaign: {
+        deliveries: {
           select: {
-            id: true,
-            name: true,
             status: true,
+            deliveredAt: true,
+            openedAt: true,
+            clickedAt: true,
+            bouncedAt: true,
+            complainedAt: true,
           },
         },
-      },
-      orderBy: {
-        createdAt: 'desc',
+        events: {
+          select: {
+            type: true,
+            timestamp: true,
+          },
+          where: {
+            timestamp: {
+              ...(startDate && { gte: startDate }),
+              ...(endDate && { lte: endDate }),
+            },
+          },
+        },
       },
     });
 
     // Aggregate metrics by campaign
     const campaignMetrics = new Map<string, CampaignAnalytics>();
 
-    for (const snapshot of snapshots) {
-      const metrics = snapshot.metrics as any;
-      const existing = campaignMetrics.get(snapshot.campaignId);
+    for (const campaign of campaigns) {
+      const deliveries = campaign.deliveries;
+      const events = campaign.events;
+      
+      const metrics = {
+        sent: deliveries.length,
+        delivered: deliveries.filter(d => d.deliveredAt).length,
+        opened: deliveries.filter(d => d.openedAt).length,
+        clicked: deliveries.filter(d => d.clickedAt).length,
+        bounced: deliveries.filter(d => d.bouncedAt).length,
+        complained: deliveries.filter(d => d.complainedAt).length,
+        unsubscribed: events.filter(e => e.type === 'UNSUBSCRIBED').length,
+      };
 
-      if (!existing) {
-        campaignMetrics.set(snapshot.campaignId, {
-          campaignId: snapshot.campaignId,
-          sent: metrics.sent || 0,
-          delivered: metrics.delivered || 0,
-          opened: metrics.opened || 0,
-          clicked: metrics.clicked || 0,
-          unsubscribed: metrics.unsubscribed || 0,
-          bounced: metrics.bounced || 0,
-          complained: metrics.complained || 0,
-          period: {
-            start: startDate,
-            end: endDate,
-          },
-        });
-      } else {
-        // Aggregate metrics (take the latest values)
-        existing.sent = Math.max(existing.sent, metrics.sent || 0);
-        existing.delivered = Math.max(existing.delivered, metrics.delivered || 0);
-        existing.opened = Math.max(existing.opened, metrics.opened || 0);
-        existing.clicked = Math.max(existing.clicked, metrics.clicked || 0);
-        existing.unsubscribed = Math.max(existing.unsubscribed, metrics.unsubscribed || 0);
-        existing.bounced = Math.max(existing.bounced, metrics.bounced || 0);
-        existing.complained = Math.max(existing.complained, metrics.complained || 0);
-      }
+      campaignMetrics.set(campaign.id, {
+        campaignId: campaign.id,
+        sent: metrics.sent,
+        delivered: metrics.delivered,
+        opened: metrics.opened,
+        clicked: metrics.clicked,
+        unsubscribed: metrics.unsubscribed,
+        bounced: metrics.bounced,
+        complained: metrics.complained,
+        period: {
+          start: startDate,
+          end: endDate,
+        },
+      });
     }
 
     return Array.from(campaignMetrics.values());
@@ -170,6 +195,100 @@ export async function getAnalyticsSummary(
 }
 
 /**
+ * Get engagement metrics with time on page, bounce rate, and interaction tracking
+ */
+export async function getEngagementMetrics(
+  articleId?: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<EngagementMetrics[]> {
+  const prisma = getSafePrismaClient();
+  
+  if (!prisma) {
+    return generateMockEngagementMetrics(articleId, startDate, endDate);
+  }
+
+  try {
+    const whereClause: any = {};
+    
+    if (articleId) {
+      whereClause.articleId = articleId;
+    }
+    
+    if (startDate || endDate) {
+      whereClause.timestamp = {};
+      if (startDate) whereClause.timestamp.gte = startDate;
+      if (endDate) whereClause.timestamp.lte = endDate;
+    }
+
+    // Get articles with their views and interactions
+    const articles = await prisma.article.findMany({
+      where: articleId ? { id: articleId } : { status: 'PUBLISHED' },
+      include: {
+        views: {
+          where: whereClause.timestamp ? { timestamp: whereClause.timestamp } : {},
+          include: {
+            interactions: true,
+          },
+        },
+      },
+    });
+
+    return articles.map(article => {
+      const views = article.views;
+      const totalViews = views.length;
+      
+      if (totalViews === 0) {
+        return {
+          articleId: article.id,
+          timeOnPage: 0,
+          scrollDepth: 0,
+          bounceRate: 0,
+          interactionRate: 0,
+          socialShares: 0,
+          linkClicks: 0,
+          newsletterSignups: 0,
+          period: {
+            start: startDate || new Date(0),
+            end: endDate || new Date(),
+          },
+        };
+      }
+
+      // Calculate engagement metrics
+      const totalTimeOnPage = views.reduce((sum, view) => sum + (view.timeOnPage || 0), 0);
+      const totalScrollDepth = views.reduce((sum, view) => sum + (view.scrollDepth || 0), 0);
+      const bounces = views.filter(view => view.bounced).length;
+      const viewsWithInteractions = views.filter(view => view.interactions.length > 0).length;
+      
+      // Count specific interaction types
+      const allInteractions = views.flatMap(view => view.interactions);
+      const socialShares = allInteractions.filter(i => i.type === 'SOCIAL_SHARE').length;
+      const linkClicks = allInteractions.filter(i => i.type === 'LINK_CLICK').length;
+      const newsletterSignups = views.filter(view => view.newsletterSignup).length;
+
+      return {
+        articleId: article.id,
+        timeOnPage: totalTimeOnPage / totalViews,
+        scrollDepth: totalScrollDepth / totalViews,
+        bounceRate: (bounces / totalViews) * 100,
+        interactionRate: (viewsWithInteractions / totalViews) * 100,
+        socialShares,
+        linkClicks,
+        newsletterSignups,
+        period: {
+          start: startDate || new Date(0),
+          end: endDate || new Date(),
+        },
+      };
+    });
+  } catch (error) {
+    logger.error('Failed to get engagement metrics', error as Error);
+    return generateMockEngagementMetrics(articleId, startDate, endDate);
+  }
+}
+
+/**
  * Generate mock analytics data for safe mode
  */
 function generateMockCampaignAnalytics(
@@ -207,6 +326,48 @@ function generateMockCampaignAnalytics(
       period: {
         start: startDate,
         end: endDate,
+      },
+    }));
+}
+
+/**
+ * Generate mock engagement metrics for safe mode
+ */
+function generateMockEngagementMetrics(
+  articleId?: string,
+  startDate?: Date,
+  endDate?: Date
+): EngagementMetrics[] {
+  const mockMetrics = [
+    {
+      articleId: articleId || 'mock-article-1',
+      timeOnPage: 245,
+      scrollDepth: 78.5,
+      bounceRate: 32.1,
+      interactionRate: 45.2,
+      socialShares: 23,
+      linkClicks: 67,
+      newsletterSignups: 12,
+    },
+    {
+      articleId: 'mock-article-2',
+      timeOnPage: 198,
+      scrollDepth: 71.2,
+      bounceRate: 28.7,
+      interactionRate: 52.3,
+      socialShares: 18,
+      linkClicks: 43,
+      newsletterSignups: 8,
+    },
+  ];
+
+  return mockMetrics
+    .filter((_, index) => !articleId || index === 0)
+    .map(metrics => ({
+      ...metrics,
+      period: {
+        start: startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        end: endDate || new Date(),
       },
     }));
 }

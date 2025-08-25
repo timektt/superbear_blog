@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -10,7 +12,9 @@ import {
   Mail, 
   Eye, 
   MousePointer, 
-  RefreshCw
+  RefreshCw,
+  Clock,
+  Users
 } from 'lucide-react';
 
 interface AnalyticsSummary {
@@ -54,28 +58,109 @@ interface DashboardData {
   };
 }
 
+interface CategoryPerformance {
+  categoryId: string;
+  categoryName: string;
+  totalViews: number;
+  uniqueViews: number;
+  avgTimeOnPage: number;
+  avgScrollDepth: number;
+  bounceRate: number;
+  totalShares: number;
+  totalClicks: number;
+  completionRate: number;
+}
+
+interface ViewMetrics {
+  totalViews: number;
+  uniqueViews: number;
+  viewsToday: number;
+  viewsThisWeek: number;
+  viewsThisMonth: number;
+  avgTimeOnPage: number;
+  avgScrollDepth: number;
+  bounceRate: number;
+  completionRate: number;
+}
+
+interface EngagementMetrics {
+  articleId: string;
+  timeOnPage: number;
+  scrollDepth: number;
+  bounceRate: number;
+  interactionRate: number;
+  socialShares: number;
+  linkClicks: number;
+  newsletterSignups: number;
+}
+
+type AnalyticsType = 'dashboard' | 'category' | 'views' | 'engagement' | 'summary';
+
 export default function CampaignAnalyticsPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState(7);
+  const [analyticsType, setAnalyticsType] = useState<AnalyticsType>('dashboard');
+  const [dateRange, setDateRange] = useState<{
+    from: Date;
+    to: Date;
+  }>({
+    from: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+    to: new Date(),
+  });
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = async (refresh = false) => {
     try {
-      setLoading(true);
-      setError(null);
+      if (refresh) {
+        setError(null);
+      } else {
+        setLoading(true);
+      }
       
-      const response = await fetch(`/api/admin/campaigns/analytics?days=${timeRange}`);
+      const params = new URLSearchParams({
+        type: analyticsType,
+        days: timeRange.toString(),
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+      });
+
+      const endpoint = refresh ? '/api/admin/campaigns/analytics' : `/api/admin/campaigns/analytics?${params}`;
+      const method = refresh ? 'POST' : 'GET';
+      const body = refresh ? JSON.stringify({
+        type: analyticsType,
+        days: timeRange,
+        startDate: dateRange.from.toISOString(),
+        endDate: dateRange.to.toISOString(),
+        forceRefresh: true,
+      }) : undefined;
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: refresh ? { 'Content-Type': 'application/json' } : {},
+        body,
+      });
+      
       if (!response.ok) {
         throw new Error('Failed to fetch analytics');
       }
       
       const result = await response.json();
       setData(result.data);
+      setLastUpdated(new Date());
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics');
-      // Set mock data for development
-      setData(getMockDashboardData());
+      // Set mock data for development based on type
+      if (analyticsType === 'dashboard') {
+        setData(getMockDashboardData());
+      } else if (analyticsType === 'category') {
+        setData(getMockCategoryData());
+      } else if (analyticsType === 'views') {
+        setData(getMockViewMetrics());
+      } else if (analyticsType === 'engagement') {
+        setData(getMockEngagementData());
+      }
     } finally {
       setLoading(false);
     }
@@ -83,7 +168,7 @@ export default function CampaignAnalyticsPage() {
 
   useEffect(() => {
     fetchAnalytics();
-  }, [timeRange]);
+  }, [timeRange, analyticsType, dateRange]);
 
   const formatNumber = (num: number): string => {
     if (num >= 1000) {
@@ -141,17 +226,36 @@ export default function CampaignAnalyticsPage() {
         </div>
         
         <div className="flex items-center space-x-4">
+          <Select value={analyticsType} onValueChange={(value: AnalyticsType) => setAnalyticsType(value)}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dashboard">Dashboard</SelectItem>
+              <SelectItem value="category">Categories</SelectItem>
+              <SelectItem value="views">Views</SelectItem>
+              <SelectItem value="engagement">Engagement</SelectItem>
+              <SelectItem value="summary">Summary</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+          />
+          
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(Number(e.target.value))}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            aria-label="Time range selector"
           >
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
           
-          <Button onClick={fetchAnalytics} variant="outline">
+          <Button onClick={() => fetchAnalytics(true)} variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
           </Button>
@@ -169,8 +273,28 @@ export default function CampaignAnalyticsPage() {
         </div>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {lastUpdated && (
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          Last updated: {lastUpdated.toLocaleString()}
+        </div>
+      )}
+
+      {/* Render different views based on analytics type */}
+      {analyticsType === 'dashboard' && renderDashboardView()}
+      {analyticsType === 'category' && renderCategoryView()}
+      {analyticsType === 'views' && renderViewsView()}
+      {analyticsType === 'engagement' && renderEngagementView()}
+      {analyticsType === 'summary' && renderDashboardView()}
+    </div>
+  );
+
+  function renderDashboardView() {
+    if (!data || !data.summary) return null;
+
+    return (
+      <>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -343,8 +467,281 @@ export default function CampaignAnalyticsPage() {
           </div>
         </div>
       </Card>
-    </div>
-  );
+      </>
+    );
+  }
+
+  function renderCategoryView() {
+    if (!data || !Array.isArray(data)) return null;
+
+    return (
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Category Performance
+        </h3>
+        <div className="space-y-4">
+          {data.map((category: CategoryPerformance) => (
+            <div
+              key={category.categoryId}
+              className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            >
+              <div className="flex-1">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  {category.categoryName}
+                </h4>
+                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span className="flex items-center gap-1">
+                    <Eye className="h-3 w-3" />
+                    {category.totalViews.toLocaleString()} views
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {category.uniqueViews.toLocaleString()} unique
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {Math.round(category.avgTimeOnPage)}s avg
+                  </span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {category.avgScrollDepth.toFixed(1)}% scroll
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {category.bounceRate.toFixed(1)}% bounce
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+
+  function renderViewsView() {
+    if (!data) return null;
+
+    const viewMetrics = data as ViewMetrics;
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Total Views
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatNumber(viewMetrics.totalViews)}
+              </p>
+            </div>
+            <Eye className="w-8 h-8 text-blue-600" />
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {formatNumber(viewMetrics.uniqueViews)} unique visitors
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Avg Time on Page
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {Math.round(viewMetrics.avgTimeOnPage)}s
+              </p>
+            </div>
+            <Clock className="w-8 h-8 text-green-600" />
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {viewMetrics.avgScrollDepth.toFixed(1)}% avg scroll
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Bounce Rate
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatPercentage(viewMetrics.bounceRate)}
+              </p>
+            </div>
+            <TrendingUp className="w-8 h-8 text-purple-600" />
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {formatPercentage(viewMetrics.completionRate)} completion
+            </span>
+          </div>
+        </Card>
+
+        <Card className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Recent Activity
+              </p>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {viewMetrics.viewsToday}
+              </p>
+            </div>
+            <BarChart3 className="w-8 h-8 text-indigo-600" />
+          </div>
+          <div className="mt-4">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {viewMetrics.viewsThisWeek} this week
+            </span>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  function renderEngagementView() {
+    if (!data || !Array.isArray(data)) return null;
+
+    return (
+      <Card className="p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Engagement Metrics
+        </h3>
+        <div className="space-y-4">
+          {data.map((engagement: EngagementMetrics) => (
+            <div
+              key={engagement.articleId}
+              className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+            >
+              <div className="flex-1">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  Article {engagement.articleId.substring(0, 8)}...
+                </h4>
+                <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
+                  <span>{Math.round(engagement.timeOnPage)}s time</span>
+                  <span>{engagement.scrollDepth.toFixed(1)}% scroll</span>
+                  <span>{engagement.interactionRate.toFixed(1)}% interaction</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                  {engagement.socialShares} shares
+                </div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  {engagement.linkClicks} clicks
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    );
+  }
+}
+
+/**
+ * Generate mock category data for development
+ */
+function getMockCategoryData(): CategoryPerformance[] {
+  return [
+    {
+      categoryId: 'ai-ml',
+      categoryName: 'AI & Machine Learning',
+      totalViews: 15420,
+      uniqueViews: 12340,
+      avgTimeOnPage: 245,
+      avgScrollDepth: 78.5,
+      bounceRate: 32.1,
+      totalShares: 234,
+      totalClicks: 567,
+      completionRate: 65.2,
+    },
+    {
+      categoryId: 'dev-tools',
+      categoryName: 'Developer Tools',
+      totalViews: 8930,
+      uniqueViews: 7120,
+      avgTimeOnPage: 198,
+      avgScrollDepth: 71.2,
+      bounceRate: 28.7,
+      totalShares: 156,
+      totalClicks: 423,
+      completionRate: 58.9,
+    },
+    {
+      categoryId: 'startups',
+      categoryName: 'Startups',
+      totalViews: 6780,
+      uniqueViews: 5430,
+      avgTimeOnPage: 312,
+      avgScrollDepth: 82.1,
+      bounceRate: 25.4,
+      totalShares: 189,
+      totalClicks: 345,
+      completionRate: 72.3,
+    },
+  ];
+}
+
+/**
+ * Generate mock view metrics for development
+ */
+function getMockViewMetrics(): ViewMetrics {
+  return {
+    totalViews: 2340,
+    uniqueViews: 1890,
+    viewsToday: 45,
+    viewsThisWeek: 312,
+    viewsThisMonth: 1240,
+    avgTimeOnPage: 234,
+    avgScrollDepth: 76.8,
+    bounceRate: 29.3,
+    completionRate: 68.7,
+  };
+}
+
+/**
+ * Generate mock engagement data for development
+ */
+function getMockEngagementData(): EngagementMetrics[] {
+  return [
+    {
+      articleId: 'mock-article-1',
+      timeOnPage: 245,
+      scrollDepth: 78.5,
+      bounceRate: 32.1,
+      interactionRate: 45.2,
+      socialShares: 23,
+      linkClicks: 67,
+      newsletterSignups: 12,
+    },
+    {
+      articleId: 'mock-article-2',
+      timeOnPage: 198,
+      scrollDepth: 71.2,
+      bounceRate: 28.7,
+      interactionRate: 52.3,
+      socialShares: 18,
+      linkClicks: 43,
+      newsletterSignups: 8,
+    },
+    {
+      articleId: 'mock-article-3',
+      timeOnPage: 312,
+      scrollDepth: 82.1,
+      bounceRate: 25.4,
+      interactionRate: 38.9,
+      socialShares: 31,
+      linkClicks: 89,
+      newsletterSignups: 15,
+    },
+  ];
 }
 
 /**
