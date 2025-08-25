@@ -227,23 +227,26 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Skip to main content link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-indigo-600 text-white px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md z-50 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
       >
         Skip to main content
       </a>
 
-      <header className="bg-white shadow-sm border-b lg:hidden" role="banner">
+      <header
+        className="bg-header text-header-foreground shadow-sm border-b border-border lg:hidden"
+        role="banner"
+      >
         <div className="px-4 sm:px-6">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <button
                 type="button"
                 onClick={toggleSidebar}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+                className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring"
                 aria-controls="mobile-sidebar"
                 aria-expanded={isSidebarOpen}
                 aria-label="Toggle sidebar menu"
@@ -264,18 +267,18 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   />
                 </svg>
               </button>
-              <h1 className="ml-4 text-lg font-bold text-gray-900">
+              <h1 className="ml-4 text-lg font-bold text-foreground">
                 SuperBear Blog Admin
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-700 hidden sm:block">
+              <span className="text-sm text-muted-foreground hidden sm:block">
                 {session.user?.name}
               </span>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="text-gray-500 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
                 aria-label="Sign out"
               >
                 <span className="hidden sm:inline">Logout</span>
@@ -313,27 +316,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-sm transform ${
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground shadow-sm transform ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}
+          } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 border-r border-border`}
           id="mobile-sidebar"
           role="navigation"
           aria-label="Admin navigation"
         >
           {/* Desktop header */}
-          <div className="hidden lg:flex items-center justify-between h-16 px-6 border-b border-gray-200">
-            <h1 className="text-lg font-bold text-gray-900">
+          <div className="hidden lg:flex items-center justify-between h-16 px-6 border-b border-border">
+            <h1 className="text-lg font-bold text-sidebar-foreground">
               SuperBear Blog Admin
             </h1>
           </div>
 
           {/* Mobile close button */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 lg:hidden">
-            <h2 className="text-lg font-bold text-gray-900">Menu</h2>
+          <div className="flex items-center justify-between h-16 px-4 border-b border-border lg:hidden">
+            <h2 className="text-lg font-bold text-sidebar-foreground">Menu</h2>
             <button
               type="button"
               onClick={closeSidebar}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-sidebar-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-ring"
               aria-label="Close sidebar"
             >
               <span className="sr-only">Close sidebar</span>
@@ -362,10 +365,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   <Link
                     href={item.href}
                     onClick={closeSidebar}
-                    className={`flex items-center px-4 py-3 text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                    className={`flex items-center px-4 py-3 text-sm rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-sidebar ${
                       isActivePage(item.href)
-                        ? 'text-indigo-600 bg-indigo-50 border-r-2 border-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                        ? 'text-primary bg-primary/10 border-r-2 border-primary'
+                        : 'text-sidebar-foreground hover:bg-muted hover:text-foreground'
                     }`}
                     aria-current={isActivePage(item.href) ? 'page' : undefined}
                   >
@@ -378,27 +381,27 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </nav>
 
           {/* User info - Desktop only */}
-          <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
+          <div className="hidden lg:block absolute bottom-0 left-0 right-0 p-4 border-t border-border">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-indigo-600">
+                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-primary">
                     {session.user?.name?.charAt(0).toUpperCase()}
                   </span>
                 </div>
               </div>
               <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-sidebar-foreground truncate">
                   {session.user?.name}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-muted-foreground truncate">
                   {session.user?.email}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="ml-2 p-2 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 rounded-md"
+                className="ml-2 p-2 text-muted-foreground hover:text-sidebar-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-sidebar rounded-md"
                 aria-label="Sign out"
                 title="Sign out"
               >
@@ -424,7 +427,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Main content */}
         <main
           id="main-content"
-          className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0"
+          className="flex-1 p-4 sm:p-6 lg:p-8 lg:ml-0 bg-content text-content-foreground"
           role="main"
         >
           {children}

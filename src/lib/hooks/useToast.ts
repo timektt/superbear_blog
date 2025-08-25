@@ -1,18 +1,30 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import type { ToastProps } from '@/components/ui/Toast';
+import type { ToastProps, ToastAction } from '@/components/ui/Toast';
+
+export interface ToastOptions {
+  title: string;
+  description?: string;
+  variant?: 'default' | 'destructive' | 'success' | 'warning';
+  duration?: number;
+  action?: ToastAction;
+}
 
 type ToastInput = Omit<ToastProps, 'id' | 'onClose'>;
 
 export function useToast() {
   const [toasts, setToasts] = useState<ToastProps[]>([]);
 
-  const addToast = useCallback((toast: ToastInput) => {
-    const id = Math.random().toString(36).substr(2, 9);
+  const toast = useCallback((options: ToastOptions) => {
+    const id = Math.random().toString(36).slice(2, 11);
     const newToast: ToastProps = {
-      ...toast,
       id,
+      variant: options.variant || 'default',
+      title: options.title,
+      description: options.description,
+      duration: options.duration,
+      action: options.action,
       onClose: () => {}, // Will be set by the container
     };
 
@@ -29,42 +41,62 @@ export function useToast() {
   }, []);
 
   // Convenience methods
-  const showSuccess = useCallback(
-    (title: string, message?: string) => {
-      return addToast({ type: 'success', title, message });
+  const success = useCallback(
+    (title: string, description?: string, options?: Partial<ToastOptions>) => {
+      return toast({ 
+        title, 
+        description, 
+        variant: 'success',
+        ...options 
+      });
     },
-    [addToast]
+    [toast]
   );
 
-  const showError = useCallback(
-    (title: string, message?: string) => {
-      return addToast({ type: 'error', title, message });
+  const error = useCallback(
+    (title: string, description?: string, options?: Partial<ToastOptions>) => {
+      return toast({ 
+        title, 
+        description, 
+        variant: 'destructive',
+        ...options 
+      });
     },
-    [addToast]
+    [toast]
   );
 
-  const showWarning = useCallback(
-    (title: string, message?: string) => {
-      return addToast({ type: 'warning', title, message });
+  const warning = useCallback(
+    (title: string, description?: string, options?: Partial<ToastOptions>) => {
+      return toast({ 
+        title, 
+        description, 
+        variant: 'warning',
+        ...options 
+      });
     },
-    [addToast]
+    [toast]
   );
 
-  const showInfo = useCallback(
-    (title: string, message?: string) => {
-      return addToast({ type: 'info', title, message });
+  const info = useCallback(
+    (title: string, description?: string, options?: Partial<ToastOptions>) => {
+      return toast({ 
+        title, 
+        description, 
+        variant: 'default',
+        ...options 
+      });
     },
-    [addToast]
+    [toast]
   );
 
   return {
+    toast,
     toasts,
-    addToast,
     removeToast,
     clearToasts,
-    showSuccess,
-    showError,
-    showWarning,
-    showInfo,
+    success,
+    error,
+    warning,
+    info,
   };
 }

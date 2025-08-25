@@ -1,79 +1,91 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { Skeleton, LoadingSpinner } from "./skeleton"
+'use client';
+
+import React from 'react';
 
 interface LoadingStateProps {
+  rows?: number;
+  columns?: number;
+  className?: string;
+}
+
+interface SkeletonProps {
   className?: string;
   children?: React.ReactNode;
 }
 
-// Generic loading wrapper
-function LoadingWrapper({ 
-  isLoading, 
-  fallback, 
-  children 
-}: { 
-  isLoading: boolean; 
-  fallback: React.ReactNode; 
-  children: React.ReactNode;
-}) {
-  if (isLoading) {
-    return <>{fallback}</>;
-  }
-  return <>{children}</>;
-}
-
-// Button loading state
-function ButtonLoading({ className, children, ...props }: LoadingStateProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
+// Base skeleton component
+export function Skeleton({ className = '', children }: SkeletonProps) {
   return (
-    <button 
-      className={cn("inline-flex items-center justify-center", className)} 
-      disabled 
-      {...props}
+    <div
+      className={`animate-pulse bg-muted rounded-md ${className}`}
+      role="status"
+      aria-label="Loading..."
     >
-      <LoadingSpinner className="w-4 h-4 mr-2" />
-      {children || "Loading..."}
-    </button>
-  );
-}
-
-// Form loading state
-function FormLoading({ className }: { className?: string }) {
-  return (
-    <div className={cn("space-y-4", className)}>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-10 w-full" />
-      </div>
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-24 w-full" />
-      </div>
-      <Skeleton className="h-10 w-24" />
+      {children}
     </div>
   );
 }
 
-// Page loading state
-function PageLoading({ className }: { className?: string }) {
+// Article List Loading State
+export function ArticleListLoading({ rows = 5, className = '' }: LoadingStateProps) {
   return (
-    <div className={cn("space-y-6 p-6", className)}>
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-1/3" />
-        <Skeleton className="h-4 w-2/3" />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <Skeleton className="h-48 w-full" />
+    <div className={`space-y-6 ${className}`} role="status" aria-label="Loading articles...">
+      <div className="sr-only">Loading articles...</div>
+      {Array.from({ length: rows }).map((_, index) => (
+        <div key={index} className="flex gap-4 p-4 border border-border rounded-lg">
+          {/* Image placeholder */}
+          <Skeleton className="w-24 h-24 flex-shrink-0" />
+          
+          {/* Content placeholder */}
+          <div className="flex-1 space-y-3">
+            {/* Title */}
+            <Skeleton className="h-6 w-3/4" />
+            
+            {/* Summary */}
             <div className="space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
             </div>
+            
+            {/* Meta info */}
+            <div className="flex gap-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Article Detail Loading State
+export function ArticleDetailLoading({ className = '' }: { className?: string }) {
+  return (
+    <div className={`max-w-4xl mx-auto space-y-8 ${className}`} role="status" aria-label="Loading article...">
+      <div className="sr-only">Loading article...</div>
+      
+      {/* Header */}
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-3/4" />
+        <div className="flex gap-4">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+      
+      {/* Featured image */}
+      <Skeleton className="w-full h-64" />
+      
+      {/* Content */}
+      <div className="space-y-4">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div key={index} className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-11/12" />
+            <Skeleton className="h-4 w-4/5" />
           </div>
         ))}
       </div>
@@ -81,164 +93,211 @@ function PageLoading({ className }: { className?: string }) {
   );
 }
 
-// Navigation loading state
-function NavigationLoading({ className }: { className?: string }) {
+// Dashboard Loading State
+export function DashboardLoading({ className = '' }: { className?: string }) {
   return (
-    <div className={cn("flex items-center space-x-4", className)}>
-      <Skeleton className="h-8 w-32" />
-      <div className="flex space-x-2">
-        <Skeleton className="h-8 w-16" />
-        <Skeleton className="h-8 w-20" />
-        <Skeleton className="h-8 w-18" />
-        <Skeleton className="h-8 w-16" />
+    <div className={`space-y-8 ${className}`} role="status" aria-label="Loading dashboard...">
+      <div className="sr-only">Loading dashboard...</div>
+      
+      {/* Header */}
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96" />
       </div>
-      <div className="ml-auto flex items-center space-x-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-8 w-8 rounded-lg" />
-      </div>
-    </div>
-  );
-}
-
-// Content loading states for different content types
-function ContentLoading({ type, className }: { type: 'article' | 'podcast' | 'newsletter'; className?: string }) {
-  switch (type) {
-    case 'article':
-      return (
-        <div className={cn("space-y-4", className)}>
-          <Skeleton className="h-48 w-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-          <div className="flex items-center space-x-2">
-            <Skeleton className="h-6 w-16" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-        </div>
-      );
-    
-    case 'podcast':
-      return (
-        <div className={cn("space-y-3", className)}>
-          <div className="flex space-x-3">
-            <Skeleton className="h-16 w-16 rounded-lg" />
-            <div className="flex-1 space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
-              <Skeleton className="h-3 w-1/4" />
-            </div>
-          </div>
-          <Skeleton className="h-12 w-full" />
-        </div>
-      );
-    
-    case 'newsletter':
-      return (
-        <div className={cn("space-y-3", className)}>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-6 w-20" />
+      
+      {/* Stats cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="p-6 border border-border rounded-lg space-y-3">
             <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-16" />
+            <Skeleton className="h-3 w-20" />
           </div>
-          <Skeleton className="h-5 w-full" />
-          <Skeleton className="h-4 w-4/5" />
-          <Skeleton className="h-4 w-3/5" />
+        ))}
+      </div>
+      
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="p-6 border border-border rounded-lg space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-64 w-full" />
         </div>
-      );
-    
-    default:
-      return <Skeleton className={cn("h-32 w-full", className)} />;
-  }
-}
-
-// Error state component
-function ErrorState({ 
-  title = "Something went wrong", 
-  message = "Please try again later", 
-  onRetry,
-  className 
-}: { 
-  title?: string; 
-  message?: string; 
-  onRetry?: () => void;
-  className?: string;
-}) {
-  return (
-    <div className={cn("flex flex-col items-center justify-center p-6 text-center", className)}>
-      <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
-        <svg 
-          className="w-6 h-6 text-destructive" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" 
-          />
-        </svg>
+        <div className="p-6 border border-border rounded-lg space-y-4">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-4">{message}</p>
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors duration-200"
-        >
-          Try Again
-        </button>
-      )}
     </div>
   );
 }
 
-// Empty state component
-function EmptyState({ 
-  title = "No items found", 
-  message = "There are no items to display", 
-  action,
-  className 
-}: { 
-  title?: string; 
-  message?: string; 
-  action?: React.ReactNode;
-  className?: string;
-}) {
+// Table Loading State
+export function TableLoading({ rows = 10, columns = 5, className = '' }: LoadingStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center p-6 text-center", className)}>
-      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-        <svg 
-          className="w-6 h-6 text-muted-foreground" 
-          fill="none" 
-          stroke="currentColor" 
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
-            strokeWidth={2} 
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4.5" 
-          />
-        </svg>
+    <div className={`space-y-4 ${className}`} role="status" aria-label="Loading table data...">
+      <div className="sr-only">Loading table data...</div>
+      
+      {/* Table header */}
+      <div className="grid gap-4 p-4 border-b border-border" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+        {Array.from({ length: columns }).map((_, index) => (
+          <Skeleton key={index} className="h-4 w-20" />
+        ))}
       </div>
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground mb-4">{message}</p>
-      {action}
+      
+      {/* Table rows */}
+      {Array.from({ length: rows }).map((_, rowIndex) => (
+        <div key={rowIndex} className="grid gap-4 p-4 border-b border-border" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+          {Array.from({ length: columns }).map((_, colIndex) => (
+            <Skeleton key={colIndex} className="h-4 w-full" />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
 
-export {
-  LoadingWrapper,
-  ButtonLoading,
-  FormLoading,
-  PageLoading,
-  NavigationLoading,
-  ContentLoading,
-  ErrorState,
-  EmptyState
+// Form Loading State
+export function FormLoading({ className = '' }: { className?: string }) {
+  return (
+    <div className={`space-y-6 ${className}`} role="status" aria-label="Loading form...">
+      <div className="sr-only">Loading form...</div>
+      
+      {/* Form fields */}
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div key={index} className="space-y-2">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ))}
+      
+      {/* Action buttons */}
+      <div className="flex gap-4 pt-4">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-20" />
+      </div>
+    </div>
+  );
+}
+
+// Analytics Loading State
+export function AnalyticsLoading({ className = '' }: { className?: string }) {
+  return (
+    <div className={`space-y-8 ${className}`} role="status" aria-label="Loading analytics...">
+      <div className="sr-only">Loading analytics...</div>
+      
+      {/* Header with filters */}
+      <div className="flex justify-between items-center">
+        <Skeleton className="h-8 w-48" />
+        <div className="flex gap-4">
+          <Skeleton className="h-10 w-32" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+      
+      {/* Key metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Array.from({ length: 3 }).map((_, index) => (
+          <div key={index} className="p-6 border border-border rounded-lg space-y-3">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-10 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        ))}
+      </div>
+      
+      {/* Charts */}
+      <div className="space-y-6">
+        <div className="p-6 border border-border rounded-lg space-y-4">
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-80 w-full" />
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="p-6 border border-border rounded-lg space-y-4">
+            <Skeleton className="h-6 w-36" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+          <div className="p-6 border border-border rounded-lg space-y-4">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-48 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Search Results Loading State
+export function SearchResultsLoading({ rows = 8, className = '' }: LoadingStateProps) {
+  return (
+    <div className={`space-y-6 ${className}`} role="status" aria-label="Loading search results...">
+      <div className="sr-only">Loading search results...</div>
+      
+      {/* Search header */}
+      <div className="space-y-2">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-4 w-32" />
+      </div>
+      
+      {/* Results */}
+      {Array.from({ length: rows }).map((_, index) => (
+        <div key={index} className="space-y-3 p-4 border border-border rounded-lg">
+          <Skeleton className="h-5 w-3/4" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+          <div className="flex gap-4">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-20" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Generic Grid Loading State
+export function GridLoading({ 
+  items = 12, 
+  columns = 3, 
+  aspectRatio = 'aspect-video',
+  className = '' 
+}: { 
+  items?: number; 
+  columns?: number; 
+  aspectRatio?: string;
+  className?: string;
+}) {
+  return (
+    <div 
+      className={`grid gap-6 ${className}`} 
+      style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}
+      role="status" 
+      aria-label="Loading grid items..."
+    >
+      <div className="sr-only">Loading grid items...</div>
+      {Array.from({ length: items }).map((_, index) => (
+        <div key={index} className="space-y-3">
+          <Skeleton className={`w-full ${aspectRatio}`} />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-3 w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Page Loading State (full page)
+export function PageLoading({ className = '' }: { className?: string }) {
+  return (
+    <div className={`min-h-screen flex items-center justify-center ${className}`} role="status" aria-label="Loading page...">
+      <div className="text-center space-y-4">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        <div className="text-lg text-muted-foreground">Loading...</div>
+      </div>
+    </div>
+  );
 }

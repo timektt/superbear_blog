@@ -30,9 +30,9 @@ function ReadingProgress() {
   }, []);
   
   return (
-    <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+    <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
       <div 
-        className="h-full bg-blue-600 transition-all duration-150"
+        className="h-full bg-primary transition-all duration-150"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -49,7 +49,7 @@ function ShareButtons({ article, baseUrl }: { article: any; baseUrl: string }) {
         href={shareUrls.twitter}
         target="_blank"
         rel="noopener noreferrer"
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
         aria-label="Share on Twitter"
       >
         Twitter
@@ -58,7 +58,7 @@ function ShareButtons({ article, baseUrl }: { article: any; baseUrl: string }) {
         href={shareUrls.facebook}
         target="_blank"
         rel="noopener noreferrer"
-        className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
+        className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
         aria-label="Share on Facebook"
       >
         Facebook
@@ -67,7 +67,7 @@ function ShareButtons({ article, baseUrl }: { article: any; baseUrl: string }) {
         href={shareUrls.linkedin}
         target="_blank"
         rel="noopener noreferrer"
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
         aria-label="Share on LinkedIn"
       >
         LinkedIn
@@ -119,9 +119,9 @@ function ReactionButton({ articleId }: { articleId: string }) {
     <button
       onClick={handleLike}
       disabled={loading}
-      className={`flex items-center space-x-2 px-4 py-2 rounded ${
-        liked ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600'
-      } hover:bg-red-50`}
+      className={`flex items-center space-x-2 px-4 py-2 rounded transition-colors ${
+        liked ? 'bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400' : 'bg-muted text-muted-foreground'
+      } hover:bg-red-50 dark:hover:bg-red-900/30`}
       aria-label={`${liked ? 'Unlike' : 'Like'} this article`}
     >
       <span>{liked ? '❤️' : '🤍'}</span>
@@ -176,9 +176,9 @@ function BookmarkButton({ articleId }: { articleId: string }) {
     <button
       onClick={handleBookmark}
       disabled={loading}
-      className={`flex items-center space-x-2 px-4 py-2 rounded ${
-        bookmarked ? 'bg-yellow-100 text-yellow-600' : 'bg-gray-100 text-gray-600'
-      } hover:bg-yellow-50`}
+      className={`flex items-center space-x-2 px-4 py-2 rounded transition-colors ${
+        bookmarked ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/20 dark:text-yellow-400' : 'bg-muted text-muted-foreground'
+      } hover:bg-yellow-50 dark:hover:bg-yellow-900/30`}
       aria-label={`${bookmarked ? 'Remove bookmark' : 'Bookmark'} this article`}
     >
       <span>{bookmarked ? '🔖' : '📑'}</span>
@@ -244,7 +244,7 @@ function Comments({ articleId }: { articleId: string }) {
   };
   
   if (loading) {
-    return <div className="animate-pulse bg-gray-200 h-32 rounded"></div>;
+    return <div className="animate-pulse bg-muted h-32 rounded"></div>;
   }
   
   return (
@@ -257,20 +257,20 @@ function Comments({ articleId }: { articleId: string }) {
           placeholder="Your name"
           value={authorName}
           onChange={(e) => setAuthorName(e.target.value)}
-          className="w-full p-3 border rounded"
+          className="w-full p-3 border border-input bg-background text-foreground rounded focus:ring-2 focus:ring-ring focus:border-ring"
           required
         />
         <textarea
           placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="w-full p-3 border rounded h-24"
+          className="w-full p-3 border border-input bg-background text-foreground rounded h-24 focus:ring-2 focus:ring-ring focus:border-ring"
           required
         />
         <button
           type="submit"
           disabled={submitting}
-          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+          className="px-6 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           {submitting ? 'Posting...' : 'Post Comment'}
         </button>

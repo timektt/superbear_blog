@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import { ToastProvider } from '@/components/providers/ToastProvider';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports for client components
@@ -10,9 +11,7 @@ const ServiceWorkerRegistration = dynamic(
   () => import('@/components/app/ServiceWorkerRegistration.client')
 );
 
-const SkipLink = dynamic(
-  () => import('@/components/app/SkipLink.client')
-);
+const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
 
 const inter = Inter({
   subsets: ['latin'],
@@ -133,9 +132,11 @@ export default function RootLayout({
         <SkipLink />
         <ThemeProvider>
           <SessionProvider>
-            <div id="main-content" tabIndex={-1}>
-              {children}
-            </div>
+            <ToastProvider>
+              <div id="main-content" tabIndex={-1}>
+                {children}
+              </div>
+            </ToastProvider>
           </SessionProvider>
         </ThemeProvider>
         <ServiceWorkerRegistration />

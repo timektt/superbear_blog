@@ -20,6 +20,8 @@ import {
   ArrowDown
 } from 'lucide-react';
 import { useToast } from '@/lib/hooks/useToast';
+import { useErrorHandler } from '@/lib/hooks/useErrorHandler';
+import { AnalyticsLoading } from '@/components/ui/loading-states';
 
 interface AnalyticsDashboardProps {
   className?: string;
@@ -74,33 +76,45 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
   const [timeRange, setTimeRange] = useState('week');
   const [refreshing, setRefreshing] = useState(false);
   const { toast } = useToast();
+  const { handleAsync, createRetryHandler } = useErrorHandler();
 
   const fetchDashboardData = async (range: string = timeRange) => {
-    try {
-      setRefreshing(true);
-      const response = await fetch(`/api/analytics/dashboard?range=${range}&limit=10`);
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch analytics data');
+    setRefreshing(true);
+    
+    const [result, error] = await handleAsync(
+      fetch(`/api/analytics/dashboard?range=${range}&limit=10`).then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Failed to fetch analytics data`);
+        }
+        return response.json();
+      }),
+      { 
+        context: 'analytics-fetch',
+        showToast: true 
       }
+    );
 
-      const result = await response.json();
+    if (result) {
       setData(result.data);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to load analytics data',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+    } else if (error) {
+      // Error is already handled by useErrorHandler
+      console.error('Analytics fetch failed:', error);
     }
+
+    setLoading(false);
+    setRefreshing(false);
   };
+
+  const retryFetchData = createRetryHandler(
+    () => fetchDashboardData(timeRange),
+    3,
+    1000,
+    { context: 'analytics-retry' }
+  );
 
   useEffect(() => {
     fetchDashboardData();
-  }, [timeRange]);
+  }, [fetchDashboardData, timeRange]);
 
   const handleTimeRangeChange = (newRange: string) => {
     setTimeRange(newRange);
@@ -127,19 +141,21 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
   };
 
   if (loading && !data) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin" />
-        <span className="ml-2">Loading analytics...</span>
-      </div>
-    );
+    return <AnalyticsLoading className={className} />;
   }
 
   if (!data) {
     return (
-      <div className="text-center py-8">
-        <BarChart3 className="w-12 h-12 mx-auto mb-4 opacity-50" />
-        <p className="text-muted-foreground">No analytics data available</p>
+      <div className={`text-center py-12 ${className}`}>
+        <BarChart3 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-lg font-semibold mb-2">No Analytics Data</h3>
+        <p className="text-muted-foreground mb-4">
+          We couldn't load your analytics data. This might be due to a connection issue.
+        </p>
+        <Button onClick={retryFetchData} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Try Again
+        </Button>
       </div>
     );
   }
@@ -174,7 +190,7 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             disabled={refreshing}
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
+            {refreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
       </div>

@@ -1,45 +1,21 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { useState, useEffect, useRef } from 'react';
-import { Moon, Sun, Monitor, ChevronDown } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Moon, Sun, Monitor, Check } from 'lucide-react';
 
-export default function ThemeSwitcher() {
+interface ThemeSwitcherProps {
+  variant?: 'button' | 'dropdown';
+  className?: string;
+}
+
+export default function ThemeSwitcher({ variant = 'button', className = '' }: ThemeSwitcherProps) {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { theme, setTheme, resolvedTheme, themes } = useTheme();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
-  // Close dropdown on escape key
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-    };
   }, []);
 
   // Prevent hydration mismatch by not rendering until mounted
@@ -47,94 +23,127 @@ export default function ThemeSwitcher() {
     return <div className="p-2 w-9 h-9 rounded-lg bg-muted animate-pulse" />;
   }
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+  const themeOptions = [
+    {
+      value: 'light',
+      label: 'Light',
+      icon: Sun,
+      description: 'Light theme'
+    },
+    {
+      value: 'dark',
+      label: 'Dark',
+      icon: Moon,
+      description: 'Dark theme'
+    },
+    {
+      value: 'system',
+      label: 'System',
+      icon: Monitor,
+      description: 'Follow system preference'
+    }
+  ];
+
+  const currentTheme = themeOptions.find(option => option.value === theme);
+  const CurrentIcon = currentTheme?.icon || Monitor;
+
+  const cycleTheme = () => {
+    if (theme === 'light') {
+      setTheme('dark');
+    } else if (theme === 'dark') {
+      setTheme('system');
+    } else {
+      setTheme('light');
+    }
   };
 
-  const selectTheme = (newTheme: string) => {
-    setTheme(newTheme);
+  const handleThemeSelect = (selectedTheme: string) => {
+    setTheme(selectedTheme);
     setIsOpen(false);
   };
 
-  const getIcon = (themeValue: string) => {
-    if (themeValue === 'system') {
-      return <Monitor className="w-4 h-4" aria-hidden="true" />;
+  const handleKeyDown = (event: React.KeyboardEvent, themeValue: string) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleThemeSelect(themeValue);
     }
-    if (themeValue === 'light') {
-      return <Sun className="w-4 h-4" aria-hidden="true" />;
-    }
-    return <Moon className="w-4 h-4" aria-hidden="true" />;
   };
 
-  const getCurrentIcon = () => {
-    if (theme === 'system') {
-      return <Monitor className="w-4 h-4" aria-hidden="true" />;
-    }
-    return resolvedTheme === 'light' ? (
-      <Sun className="w-4 h-4" aria-hidden="true" />
-    ) : (
-      <Moon className="w-4 h-4" aria-hidden="true" />
-    );
-  };
-
-  const themes = [
-    { value: 'light', label: 'Light', icon: getIcon('light') },
-    { value: 'dark', label: 'Dark', icon: getIcon('dark') },
-    { value: 'system', label: 'System', icon: getIcon('system') },
-  ];
-
-  return (
-    <div className="relative" ref={dropdownRef}>
+  if (variant === 'button') {
+    return (
       <button
         type="button"
-        onClick={toggleDropdown}
-        className="flex items-center space-x-1 p-2 rounded-lg bg-background hover:bg-muted/50 text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-        aria-label="Theme selector"
-        aria-expanded={isOpen}
-        aria-haspopup="true"
+        onClick={cycleTheme}
+        className={`p-2 rounded-lg bg-background hover:bg-muted/50 text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background ${className}`}
+        aria-label={`Current theme: ${currentTheme?.label}. Click to cycle themes.`}
+        title={`Switch theme (current: ${currentTheme?.label})`}
       >
-        {getCurrentIcon()}
-        <ChevronDown 
-          className={`w-3 h-3 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+        <CurrentIcon className="w-5 h-5" aria-hidden="true" />
+      </button>
+    );
+  }
+
+  return (
+    <div className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        onBlur={(e) => {
+          // Close dropdown when focus leaves the component
+          if (!e.currentTarget.contains(e.relatedTarget)) {
+            setIsOpen(false);
+          }
+        }}
+        className="flex items-center gap-2 p-2 rounded-lg bg-background hover:bg-muted/50 text-foreground hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+        aria-label={`Theme selector. Current theme: ${currentTheme?.label}`}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+      >
+        <CurrentIcon className="w-5 h-5" aria-hidden="true" />
+        <span className="text-sm font-medium">{currentTheme?.label}</span>
+        <svg
+          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
           aria-hidden="true"
-        />
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
-      {/* Backdrop overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
-          onClick={() => setIsOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Dropdown Menu */}
-      {isOpen && (
-        <div
-          className="absolute top-full right-0 mt-2 w-32 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-lg z-50 py-1 animate-slide-down"
-          role="menu"
-          aria-orientation="vertical"
+          className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-dropdown z-50 py-1"
+          role="listbox"
+          aria-label="Theme options"
         >
-          {themes.map((themeOption) => (
-            <button
-              key={themeOption.value}
-              type="button"
-              onClick={() => selectTheme(themeOption.value)}
-              className={`w-full flex items-center space-x-2 px-3 py-2 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                theme === themeOption.value
-                  ? 'text-primary bg-primary/10'
-                  : 'text-card-foreground hover:text-primary hover:bg-muted/50'
-              }`}
-              role="menuitem"
-              aria-current={theme === themeOption.value ? 'true' : undefined}
-            >
-              {themeOption.icon}
-              <span>{themeOption.label}</span>
-            </button>
-          ))}
+          {themeOptions.map((option) => {
+            const Icon = option.icon;
+            const isSelected = theme === option.value;
+            
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => handleThemeSelect(option.value)}
+                onKeyDown={(e) => handleKeyDown(e, option.value)}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/50 focus:bg-muted/50 focus:outline-none transition-colors duration-200"
+                role="option"
+                aria-selected={isSelected}
+                tabIndex={0}
+              >
+                <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-foreground">{option.label}</div>
+                  <div className="text-xs text-muted-foreground">{option.description}</div>
+                </div>
+                {isSelected && (
+                  <Check className="w-4 h-4 text-primary" aria-hidden="true" />
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
