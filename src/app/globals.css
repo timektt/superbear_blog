@@ -86,6 +86,10 @@
   --dropdown-bg: var(--surface);
   --dropdown-shadow: 0 10px 38px -10px rgba(22, 23, 24, 0.35), 0 10px 20px -15px rgba(22, 23, 24, 0.2);
   
+  /* Popover colors */
+  --popover: var(--surface);
+  --popover-foreground: var(--text-primary);
+  
   /* Radius */
   --radius: 0.5rem;
 }
@@ -171,6 +175,10 @@ html.dark {
   --navbar-border: var(--border-light);
   --dropdown-bg: var(--surface-100);
   --dropdown-shadow: 0 10px 38px -10px rgba(0, 0, 0, 0.5), 0 10px 20px -15px rgba(0, 0, 0, 0.3);
+  
+  /* Popover colors for dark mode */
+  --popover: var(--surface-100);
+  --popover-foreground: var(--text-primary);
 }
 
 /* Smooth theme transitions - 200ms for all theme-related properties */

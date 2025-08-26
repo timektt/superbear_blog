@@ -177,7 +177,7 @@ export default function NavBar() {
                 {/* Dropdown Menu */}
                 {isMoreDropdownOpen && (
                   <div
-                    className="absolute top-full left-0 mt-2 w-64 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-lg z-50 py-2 animate-slide-down"
+                    className="absolute top-full left-0 mt-2 w-64 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg z-50 py-2 animate-slide-down"
                     role="menu"
                     aria-orientation="vertical"
                   >
@@ -189,7 +189,7 @@ export default function NavBar() {
                         className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                           isActivePage(item.href)
                             ? 'text-primary bg-primary/10'
-                            : 'text-card-foreground hover:text-primary hover:bg-muted/50'
+                            : 'text-popover-foreground hover:text-primary hover:bg-muted/50'
                         }`}
                         role="menuitem"
                         aria-current={isActivePage(item.href) ? 'page' : undefined}

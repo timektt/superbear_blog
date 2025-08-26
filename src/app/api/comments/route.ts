@@ -32,14 +32,15 @@ export async function GET(request: NextRequest) {
   
   const prisma = getSafePrismaClient();
   if (!prisma) {
-    return NextResponse.json({ comments: [] });
+    return NextResponse.json({ comments: [], safeMode: true });
   }
   
   try {
+    const { CommentStatus } = await import('@prisma/client');
     const comments = await prisma.comment.findMany({
       where: {
         articleId,
-        status: 'approved',
+        status: CommentStatus.approved,
       },
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -47,12 +48,12 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({ comments });
   } catch {
-    return NextResponse.json({ comments: [] });
+    return NextResponse.json({ comments: [], safeMode: true });
   }
 }
 
 export async function POST(request: NextRequest) {
-  const ip = request.ip || 'unknown';
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
   
   if (!checkRateLimit(ip)) {
     return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
@@ -66,12 +67,13 @@ export async function POST(request: NextRequest) {
   
   const prisma = getSafePrismaClient();
   if (!prisma) {
-    return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
+    return NextResponse.json({ error: 'Service unavailable', safeMode: true }, { status: 503 });
   }
   
   try {
+    const { CommentStatus } = await import('@prisma/client');
     const sanitizedBody = sanitizeHtml(body);
-    const status = process.env.NODE_ENV === 'development' ? 'approved' : 'pending';
+    const status = process.env.NODE_ENV === 'development' ? CommentStatus.approved : CommentStatus.pending;
     
     const comment = await prisma.comment.create({
       data: {

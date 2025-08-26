@@ -36,38 +36,26 @@ const categories = [
 
 export default function ExploreByCategory() {
   return (
-    <section className="bg-gray-50 dark:bg-gray-800 py-16 transition-colors duration-300">
+    <section className="bg-muted/30 py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 flex items-center justify-center">
-            <div className="w-1 h-8 bg-indigo-600 rounded-full mr-4"></div>
-            Explore by Category
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground mb-3">
+            Featured Topics
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-            Dive deep into the topics that matter most to developers and tech
-            entrepreneurs
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Explore the latest in tech development and entrepreneurship
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex flex-wrap justify-center gap-3">
           {categories.map((category) => (
             <Link
               key={category.name}
               href={category.href}
-              className="group relative overflow-hidden bg-white dark:bg-gray-700 rounded-2xl p-8 border border-gray-200 dark:border-gray-600 hover:shadow-lg hover:scale-105 transition-all duration-300"
+              className="inline-flex items-center space-x-2 rounded-full border border-border bg-muted/50 px-4 py-2 text-sm font-medium text-foreground hover:bg-muted hover:text-primary transition-all duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}
-              ></div>
-              <div className="relative">
-                <div className="text-4xl mb-4">{category.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                  {category.name}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-                  {category.description}
-                </p>
-              </div>
+              <span className="text-lg">{category.icon}</span>
+              <span>{category.name}</span>
             </Link>
           ))}
         </div>

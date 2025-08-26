@@ -38,7 +38,7 @@ export default function Hero({ featuredArticle }: HeroProps) {
       <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
         {/* Category Badge */}
         <div className="mb-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-red-600 text-white uppercase tracking-wide">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-primary text-primary-foreground uppercase tracking-wide">
             {featuredArticle.category}
           </span>
         </div>

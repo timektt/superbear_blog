@@ -357,34 +357,43 @@ export default function ArticlePage({ params }: Props) {
         }}
       />
       
-      <article className="max-w-4xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{article.title}</h1>
-          {article.summary && (
-            <p className="text-xl text-gray-600 mb-4">{article.summary}</p>
-          )}
-          {article.author && (
-            <div className="text-sm text-gray-500 mb-4">
-              By{' '}
-              <a 
-                href={`/authors/${article.author.slug || 'unknown'}`}
-                className="text-blue-600 hover:underline"
-              >
-                {article.author.name}
-              </a>
-              {' '}on{' '}
-              {new Date(article.publishedAt).toLocaleDateString()}
-            </div>
-          )}
-        </header>
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <article>
+          <header className="mb-8">
+            <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground mb-4">
+              {article.title}
+            </h1>
+            {article.summary && (
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-6">
+                {article.summary}
+              </p>
+            )}
+            {article.author && (
+              <div className="flex items-center space-x-4 text-sm text-muted-foreground border-t border-border pt-4">
+                <div className="flex items-center space-x-2">
+                  <span>By</span>
+                  <a 
+                    href={`/authors/${article.author.slug || 'unknown'}`}
+                    className="text-primary hover:underline font-medium"
+                  >
+                    {article.author.name}
+                  </a>
+                </div>
+                <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                <time dateTime={article.publishedAt}>
+                  {new Date(article.publishedAt).toLocaleDateString()}
+                </time>
+              </div>
+            )}
+          </header>
 
-        <div 
-          className="prose prose-lg max-w-none"
-          dangerouslySetInnerHTML={{ __html: article.content }}
-        />
-      </article>
+          <div className="prose prose-base md:prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground prose-p:leading-relaxed prose-img:rounded-xl prose-img:border prose-img:border-border prose-a:text-primary prose-strong:text-foreground prose-code:text-foreground prose-pre:bg-muted prose-pre:border prose-pre:border-border">
+            <div dangerouslySetInnerHTML={{ __html: article.content }} />
+          </div>
+        </article>
+      </div>
       
-      <div className="max-w-4xl mx-auto mt-8">
+      <div className="max-w-3xl mx-auto px-4 mt-8">
         <div className="flex space-x-4 py-4 border-t">
           <ReactionButton articleId={article.id} />
           <BookmarkButton articleId={article.id} />
