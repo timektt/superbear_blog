@@ -4,7 +4,7 @@ import { getSafePrismaClient } from '@/lib/db-safe/client';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   const prisma = getSafePrismaClient();
-  
+
   const staticPages = [
     {
       url: baseUrl,
@@ -37,11 +37,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
   ];
-  
+
   if (!prisma) {
     return staticPages;
   }
-  
+
   try {
     const [articles, podcasts, newsletters] = await Promise.all([
       prisma.article.findMany({
@@ -63,29 +63,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         take: 1000,
       }),
     ]);
-    
+
     const articlePages = articles.map((article) => ({
       url: `${baseUrl}/news/${article.slug}`,
       lastModified: article.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
-    
+
     const podcastPages = podcasts.map((podcast) => ({
       url: `${baseUrl}/podcasts/${podcast.slug}`,
       lastModified: podcast.updatedAt,
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
-    
+
     const newsletterPages = newsletters.map((newsletter) => ({
       url: `${baseUrl}/newsletter/${newsletter.slug}`,
       lastModified: newsletter.updatedAt,
       changeFrequency: 'monthly' as const,
       priority: 0.6,
     }));
-    
-    return [...staticPages, ...articlePages, ...podcastPages, ...newsletterPages];
+
+    return [
+      ...staticPages,
+      ...articlePages,
+      ...podcastPages,
+      ...newsletterPages,
+    ];
   } catch {
     return staticPages;
   }

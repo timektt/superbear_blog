@@ -20,9 +20,12 @@ test.describe('Home Page Theme Integration', () => {
       return window.getComputedStyle(document.body).backgroundColor;
     });
 
-    const initialHeroBg = await page.locator('section').first().evaluate((el) => {
-      return window.getComputedStyle(el).backgroundColor;
-    });
+    const initialHeroBg = await page
+      .locator('section')
+      .first()
+      .evaluate((el) => {
+        return window.getComputedStyle(el).backgroundColor;
+      });
 
     // Toggle theme
     const themeToggle = page.getByRole('button', { name: /toggle theme/i });
@@ -36,9 +39,12 @@ test.describe('Home Page Theme Integration', () => {
       return window.getComputedStyle(document.body).backgroundColor;
     });
 
-    const newHeroBg = await page.locator('section').first().evaluate((el) => {
-      return window.getComputedStyle(el).backgroundColor;
-    });
+    const newHeroBg = await page
+      .locator('section')
+      .first()
+      .evaluate((el) => {
+        return window.getComputedStyle(el).backgroundColor;
+      });
 
     // Verify colors changed
     expect(initialBodyBg).not.toBe(newBodyBg);
@@ -57,22 +63,22 @@ test.describe('Home Page Theme Integration', () => {
     const whiteBackgrounds = await page.evaluate(() => {
       const elements = document.querySelectorAll('*');
       const whiteElements = [];
-      
+
       for (const el of elements) {
         const styles = window.getComputedStyle(el);
         const bg = styles.backgroundColor;
-        
+
         // Check for hard-coded white or very light colors
         if (bg === 'rgb(255, 255, 255)' || bg === 'rgba(255, 255, 255, 1)') {
           whiteElements.push({
             tag: el.tagName,
             class: el.className,
             id: el.id,
-            background: bg
+            background: bg,
           });
         }
       }
-      
+
       return whiteElements;
     });
 
@@ -108,7 +114,10 @@ test.describe('Home Page Theme Integration', () => {
     await page.goto('/');
 
     // Find newsletter section
-    const newsletterSection = page.getByText('Stay Updated').locator('..').locator('..');
+    const newsletterSection = page
+      .getByText('Stay Updated')
+      .locator('..')
+      .locator('..');
     await expect(newsletterSection).toBeVisible();
 
     // Check colors in light mode
@@ -134,7 +143,10 @@ test.describe('Home Page Theme Integration', () => {
     await page.goto('/');
 
     // Find featured topics section
-    const topicsSection = page.getByText('Featured Topics').locator('..').locator('..');
+    const topicsSection = page
+      .getByText('Featured Topics')
+      .locator('..')
+      .locator('..');
     await expect(topicsSection).toBeVisible();
 
     // Find a topic chip
@@ -175,7 +187,7 @@ test.describe('Home Page Theme Integration', () => {
 
     // Verify headings are still visible and readable
     await expect(firstHeading).toBeVisible();
-    
+
     // Check that text color changed appropriately
     const textColor = await firstHeading.evaluate((el) => {
       return window.getComputedStyle(el).color;

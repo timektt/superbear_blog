@@ -40,7 +40,7 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
             </div>
           )}
         </div>
-        
+
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between mb-2">
             {podcast.episodeNumber && (
@@ -58,7 +58,7 @@ export function PodcastCard({ podcast }: PodcastCardProps) {
             {podcast.title}
           </h3>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
           {podcast.description && (
             <p className="text-muted-foreground text-sm line-clamp-3 mb-3">

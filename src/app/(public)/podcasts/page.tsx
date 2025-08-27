@@ -9,16 +9,19 @@ import { Search } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Podcasts | SuperBear Blog',
-  description: 'Listen to our latest tech podcasts covering AI, development, startups, and more.',
+  description:
+    'Listen to our latest tech podcasts covering AI, development, startups, and more.',
   openGraph: {
     title: 'Podcasts | SuperBear Blog',
-    description: 'Listen to our latest tech podcasts covering AI, development, startups, and more.',
+    description:
+      'Listen to our latest tech podcasts covering AI, development, startups, and more.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Podcasts | SuperBear Blog',
-    description: 'Listen to our latest tech podcasts covering AI, development, startups, and more.',
+    description:
+      'Listen to our latest tech podcasts covering AI, development, startups, and more.',
   },
 };
 
@@ -34,19 +37,22 @@ interface PodcastsPageProps {
 
 async function getPodcasts(params: SearchParams) {
   const searchParams = new URLSearchParams();
-  
+
   if (params.page) searchParams.set('page', params.page);
   if (params.category) searchParams.set('category', params.category);
   if (params.search) searchParams.set('search', params.search);
-  
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/podcasts?${searchParams}`, {
-    next: { revalidate: 300 }, // Revalidate every 5 minutes
-  });
-  
+
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/podcasts?${searchParams}`,
+    {
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
+    }
+  );
+
   if (!response.ok) {
     throw new Error('Failed to fetch podcasts');
   }
-  
+
   return response.json();
 }
 
@@ -54,11 +60,11 @@ async function getCategories() {
   const response = await fetch(`${process.env.NEXTAUTH_URL}/api/categories`, {
     next: { revalidate: 3600 }, // Revalidate every hour
   });
-  
+
   if (!response.ok) {
     return [];
   }
-  
+
   const data = await response.json();
   return data.categories || [];
 }
@@ -67,7 +73,10 @@ function PodcastsLoading() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-card border border-border rounded-lg overflow-hidden">
+        <div
+          key={i}
+          className="bg-card border border-border rounded-lg overflow-hidden"
+        >
           <Skeleton className="aspect-square w-full" />
           <div className="p-4 space-y-3">
             <div className="flex justify-between">
@@ -88,7 +97,11 @@ function PodcastsLoading() {
   );
 }
 
-function PodcastFilters({ categories, currentCategory, currentSearch }: {
+function PodcastFilters({
+  categories,
+  currentCategory,
+  currentSearch,
+}: {
   categories: any[];
   currentCategory?: string;
   currentSearch?: string;
@@ -104,10 +117,10 @@ function PodcastFilters({ categories, currentCategory, currentSearch }: {
           name="search"
         />
       </div>
-      
+
       <div className="flex flex-wrap gap-2">
         <Button
-          variant={!currentCategory ? "default" : "outline"}
+          variant={!currentCategory ? 'default' : 'outline'}
           size="sm"
           asChild
         >
@@ -116,13 +129,11 @@ function PodcastFilters({ categories, currentCategory, currentSearch }: {
         {categories.map((category) => (
           <Button
             key={category.id}
-            variant={currentCategory === category.slug ? "default" : "outline"}
+            variant={currentCategory === category.slug ? 'default' : 'outline'}
             size="sm"
             asChild
           >
-            <a href={`/podcasts?category=${category.slug}`}>
-              {category.name}
-            </a>
+            <a href={`/podcasts?category=${category.slug}`}>{category.name}</a>
           </Button>
         ))}
       </div>
@@ -168,7 +179,11 @@ function PodcastGrid({ podcasts }: { podcasts: any[] }) {
   );
 }
 
-function Pagination({ currentPage, totalPages, baseUrl }: {
+function Pagination({
+  currentPage,
+  totalPages,
+  baseUrl,
+}: {
   currentPage: number;
   totalPages: number;
   baseUrl: string;
@@ -191,18 +206,18 @@ function Pagination({ currentPage, totalPages, baseUrl }: {
           <a href={`${baseUrl}&page=${currentPage - 1}`}>Previous</a>
         </Button>
       )}
-      
+
       {pages.map((page) => (
         <Button
           key={page}
-          variant={page === currentPage ? "default" : "outline"}
+          variant={page === currentPage ? 'default' : 'outline'}
           size="sm"
           asChild
         >
           <a href={`${baseUrl}&page=${page}`}>{page}</a>
         </Button>
       ))}
-      
+
       {currentPage < totalPages && (
         <Button variant="outline" size="sm" asChild>
           <a href={`${baseUrl}&page=${currentPage + 1}`}>Next</a>
@@ -212,7 +227,9 @@ function Pagination({ currentPage, totalPages, baseUrl }: {
   );
 }
 
-export default async function PodcastsPage({ searchParams }: PodcastsPageProps) {
+export default async function PodcastsPage({
+  searchParams,
+}: PodcastsPageProps) {
   const [podcastsData, categories] = await Promise.all([
     getPodcasts(searchParams),
     getCategories(),

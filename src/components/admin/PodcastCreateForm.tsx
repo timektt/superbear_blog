@@ -29,10 +29,10 @@ export function PodcastCreateForm() {
       }
     } catch (error) {
       console.error('Error creating podcast:', error);
-      toast({ 
-        title: 'Failed to create podcast', 
+      toast({
+        title: 'Failed to create podcast',
         description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive' 
+        variant: 'destructive',
       });
       throw error;
     } finally {

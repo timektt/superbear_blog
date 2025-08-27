@@ -3,17 +3,32 @@ import { test, expect } from '@playwright/test';
 test.describe('Role-Based Access Control', () => {
   // Mock authentication states
   const mockAdminSession = {
-    user: { id: '1', email: 'admin@test.com', role: 'admin', name: 'Admin User' },
+    user: {
+      id: '1',
+      email: 'admin@test.com',
+      role: 'admin',
+      name: 'Admin User',
+    },
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
 
   const mockEditorSession = {
-    user: { id: '2', email: 'editor@test.com', role: 'editor', name: 'Editor User' },
+    user: {
+      id: '2',
+      email: 'editor@test.com',
+      role: 'editor',
+      name: 'Editor User',
+    },
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
 
   const mockViewerSession = {
-    user: { id: '3', email: 'viewer@test.com', role: 'viewer', name: 'Viewer User' },
+    user: {
+      id: '3',
+      email: 'viewer@test.com',
+      role: 'viewer',
+      name: 'Viewer User',
+    },
     expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   };
 
@@ -21,11 +36,16 @@ test.describe('Role-Based Access Control', () => {
     test.beforeEach(async ({ page }) => {
       // Mock admin session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockAdminSession);
     });
 
-    test('should allow admin to access all admin features', async ({ page }) => {
+    test('should allow admin to access all admin features', async ({
+      page,
+    }) => {
       await page.goto('/admin');
       await page.waitForLoadState('networkidle');
 
@@ -46,7 +66,9 @@ test.describe('Role-Based Access Control', () => {
       ];
 
       for (const feature of adminFeatures) {
-        const featureLink = page.getByRole('link', { name: new RegExp(feature, 'i') });
+        const featureLink = page.getByRole('link', {
+          name: new RegExp(feature, 'i'),
+        });
         await expect(featureLink).toBeVisible();
       }
     });
@@ -56,7 +78,9 @@ test.describe('Role-Based Access Control', () => {
       await page.waitForLoadState('networkidle');
 
       // Should see create article button
-      const createButton = page.getByRole('button', { name: /create article/i });
+      const createButton = page.getByRole('button', {
+        name: /create article/i,
+      });
       await expect(createButton).toBeVisible();
 
       // Click create article
@@ -69,7 +93,7 @@ test.describe('Role-Based Access Control', () => {
       // Verify article form is accessible
       const titleInput = page.getByLabel(/title/i);
       const contentEditor = page.getByRole('textbox', { name: /content/i });
-      
+
       await expect(titleInput).toBeVisible();
       await expect(contentEditor).toBeVisible();
 
@@ -113,8 +137,9 @@ test.describe('Role-Based Access Control', () => {
       const metricsCards = page.getByTestId('metrics-card');
 
       // At least one analytics element should be visible
-      const hasAnalytics = await analyticsCharts.first().isVisible() || 
-                          await metricsCards.first().isVisible();
+      const hasAnalytics =
+        (await analyticsCharts.first().isVisible()) ||
+        (await metricsCards.first().isVisible());
       expect(hasAnalytics).toBe(true);
     });
   });
@@ -123,11 +148,16 @@ test.describe('Role-Based Access Control', () => {
     test.beforeEach(async ({ page }) => {
       // Mock editor session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockEditorSession);
     });
 
-    test('should allow editor to access content management', async ({ page }) => {
+    test('should allow editor to access content management', async ({
+      page,
+    }) => {
       await page.goto('/admin');
       await page.waitForLoadState('networkidle');
 
@@ -142,12 +172,16 @@ test.describe('Role-Based Access Control', () => {
       await expect(categoriesLink).toBeVisible();
     });
 
-    test('should allow editor to create and edit articles', async ({ page }) => {
+    test('should allow editor to create and edit articles', async ({
+      page,
+    }) => {
       await page.goto('/admin/articles');
       await page.waitForLoadState('networkidle');
 
       // Should see create article button
-      const createButton = page.getByRole('button', { name: /create article/i });
+      const createButton = page.getByRole('button', {
+        name: /create article/i,
+      });
       await expect(createButton).toBeVisible();
 
       // Should be able to edit existing articles
@@ -160,15 +194,17 @@ test.describe('Role-Based Access Control', () => {
     test('should restrict editor from user management', async ({ page }) => {
       // Try to access user management
       await page.goto('/admin/users');
-      
+
       // Should be redirected or show access denied
       await page.waitForLoadState('networkidle');
-      
-      const accessDenied = page.getByText(/access denied|unauthorized|forbidden/i);
+
+      const accessDenied = page.getByText(
+        /access denied|unauthorized|forbidden/i
+      );
       const isRedirected = !page.url().includes('/admin/users');
-      
+
       // Either should show access denied or be redirected
-      const hasRestriction = await accessDenied.isVisible() || isRedirected;
+      const hasRestriction = (await accessDenied.isVisible()) || isRedirected;
       expect(hasRestriction).toBe(true);
     });
 
@@ -177,10 +213,12 @@ test.describe('Role-Based Access Control', () => {
       await page.waitForLoadState('networkidle');
 
       // Should not have access to system settings
-      const accessDenied = page.getByText(/access denied|unauthorized|forbidden/i);
+      const accessDenied = page.getByText(
+        /access denied|unauthorized|forbidden/i
+      );
       const isRedirected = !page.url().includes('/admin/settings');
-      
-      const hasRestriction = await accessDenied.isVisible() || isRedirected;
+
+      const hasRestriction = (await accessDenied.isVisible()) || isRedirected;
       expect(hasRestriction).toBe(true);
     });
   });
@@ -189,11 +227,16 @@ test.describe('Role-Based Access Control', () => {
     test.beforeEach(async ({ page }) => {
       // Mock viewer session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockViewerSession);
     });
 
-    test('should allow viewer to access read-only admin interface', async ({ page }) => {
+    test('should allow viewer to access read-only admin interface', async ({
+      page,
+    }) => {
       await page.goto('/admin');
       await page.waitForLoadState('networkidle');
 
@@ -210,8 +253,10 @@ test.describe('Role-Based Access Control', () => {
       await page.waitForLoadState('networkidle');
 
       // Should not see create button or it should be disabled
-      const createButton = page.getByRole('button', { name: /create article/i });
-      
+      const createButton = page.getByRole('button', {
+        name: /create article/i,
+      });
+
       if (await createButton.isVisible()) {
         await expect(createButton).toBeDisabled();
       } else {
@@ -237,13 +282,17 @@ test.describe('Role-Based Access Control', () => {
       }
     });
 
-    test('should allow viewer to view analytics in read-only mode', async ({ page }) => {
+    test('should allow viewer to view analytics in read-only mode', async ({
+      page,
+    }) => {
       await page.goto('/admin/analytics');
       await page.waitForLoadState('networkidle');
 
       // Should see analytics but no modification controls
       const analyticsCharts = page.getByTestId('analytics-chart');
-      const exportButtons = page.getByRole('button', { name: /export|download/i });
+      const exportButtons = page.getByRole('button', {
+        name: /export|download/i,
+      });
 
       // Should see charts
       if (await analyticsCharts.first().isVisible()) {
@@ -261,7 +310,7 @@ test.describe('Role-Based Access Control', () => {
     test('should redirect unauthenticated users to login', async ({ page }) => {
       // Clear any existing session
       await page.context().clearCookies();
-      
+
       await page.goto('/admin');
       await page.waitForLoadState('networkidle');
 
@@ -269,7 +318,8 @@ test.describe('Role-Based Access Control', () => {
       expect(page.url()).toContain('/login');
 
       // Should see login form
-      const loginForm = page.getByRole('form') || page.getByTestId('login-form');
+      const loginForm =
+        page.getByRole('form') || page.getByTestId('login-form');
       const emailInput = page.getByLabel(/email/i);
       const passwordInput = page.getByLabel(/password/i);
 
@@ -277,13 +327,15 @@ test.describe('Role-Based Access Control', () => {
       await expect(passwordInput).toBeVisible();
     });
 
-    test('should block API access for unauthenticated requests', async ({ page }) => {
+    test('should block API access for unauthenticated requests', async ({
+      page,
+    }) => {
       // Clear session
       await page.context().clearCookies();
 
       // Try to access admin API endpoint
       const response = await page.request.get('/api/admin/articles');
-      
+
       // Should return 401 Unauthorized
       expect(response.status()).toBe(401);
     });
@@ -293,7 +345,10 @@ test.describe('Role-Based Access Control', () => {
     test('should enforce permissions on API endpoints', async ({ page }) => {
       // Test with editor session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockEditorSession);
 
       await page.goto('/admin');
@@ -307,10 +362,15 @@ test.describe('Role-Based Access Control', () => {
       expect(usersResponse.status()).toBe(403);
     });
 
-    test('should validate permissions on form submissions', async ({ page }) => {
+    test('should validate permissions on form submissions', async ({
+      page,
+    }) => {
       // Test with viewer session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockViewerSession);
 
       await page.goto('/admin');
@@ -329,7 +389,10 @@ test.describe('Role-Based Access Control', () => {
     test('should handle role changes gracefully', async ({ page }) => {
       // Start with admin session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockAdminSession);
 
       await page.goto('/admin/users');
@@ -340,7 +403,10 @@ test.describe('Role-Based Access Control', () => {
 
       // Simulate role change to viewer
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockViewerSession);
 
       // Refresh page
@@ -348,19 +414,26 @@ test.describe('Role-Based Access Control', () => {
       await page.waitForLoadState('networkidle');
 
       // Should lose access
-      const accessDenied = page.getByText(/access denied|unauthorized|forbidden/i);
+      const accessDenied = page.getByText(
+        /access denied|unauthorized|forbidden/i
+      );
       const isRedirected = !page.url().includes('/admin/users');
-      
-      const hasRestriction = await accessDenied.isVisible() || isRedirected;
+
+      const hasRestriction = (await accessDenied.isVisible()) || isRedirected;
       expect(hasRestriction).toBe(true);
     });
   });
 
   test.describe('UI Permission Indicators', () => {
-    test('should show appropriate UI elements based on role', async ({ page }) => {
+    test('should show appropriate UI elements based on role', async ({
+      page,
+    }) => {
       // Test admin UI
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockAdminSession);
 
       await page.goto('/admin');
@@ -369,12 +442,15 @@ test.describe('Role-Based Access Control', () => {
       // Admin should see all navigation items
       const navItems = page.getByRole('navigation').getByRole('link');
       const navCount = await navItems.count();
-      
+
       expect(navCount).toBeGreaterThan(3); // Should have multiple nav items
 
       // Switch to editor
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockEditorSession);
 
       await page.reload();
@@ -383,23 +459,28 @@ test.describe('Role-Based Access Control', () => {
       // Editor should see fewer navigation items
       const editorNavItems = page.getByRole('navigation').getByRole('link');
       const editorNavCount = await editorNavItems.count();
-      
+
       expect(editorNavCount).toBeLessThanOrEqual(navCount);
     });
 
     test('should disable buttons based on permissions', async ({ page }) => {
       // Test with viewer session
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockViewerSession);
 
       await page.goto('/admin/articles');
       await page.waitForLoadState('networkidle');
 
       // Action buttons should be disabled or hidden
-      const actionButtons = page.getByRole('button', { name: /(create|edit|delete|publish)/i });
-      
-      for (let i = 0; i < await actionButtons.count(); i++) {
+      const actionButtons = page.getByRole('button', {
+        name: /(create|edit|delete|publish)/i,
+      });
+
+      for (let i = 0; i < (await actionButtons.count()); i++) {
         const button = actionButtons.nth(i);
         if (await button.isVisible()) {
           await expect(button).toBeDisabled();
@@ -409,17 +490,24 @@ test.describe('Role-Based Access Control', () => {
   });
 
   test.describe('Security Headers and CSRF', () => {
-    test('should include CSRF protection for state-changing operations', async ({ page }) => {
+    test('should include CSRF protection for state-changing operations', async ({
+      page,
+    }) => {
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockAdminSession);
 
       await page.goto('/admin/articles/new');
       await page.waitForLoadState('networkidle');
 
       // Check for CSRF token in form
-      const csrfToken = page.locator('input[name="csrf_token"], input[name="_token"]');
-      
+      const csrfToken = page.locator(
+        'input[name="csrf_token"], input[name="_token"]'
+      );
+
       if (await csrfToken.isVisible()) {
         const tokenValue = await csrfToken.getAttribute('value');
         expect(tokenValue).toBeTruthy();
@@ -429,7 +517,10 @@ test.describe('Role-Based Access Control', () => {
 
     test('should validate CSRF tokens on form submission', async ({ page }) => {
       await page.addInitScript((session) => {
-        window.localStorage.setItem('next-auth.session-token', JSON.stringify(session));
+        window.localStorage.setItem(
+          'next-auth.session-token',
+          JSON.stringify(session)
+        );
       }, mockAdminSession);
 
       // Try to submit form without CSRF token

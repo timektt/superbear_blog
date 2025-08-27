@@ -6,7 +6,7 @@ export default function PodcastLoading() {
       <div className="mb-6">
         <Skeleton className="h-8 w-32" />
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* Header skeleton */}
@@ -20,7 +20,7 @@ export default function PodcastLoading() {
             <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-5 w-32" />
           </div>
-          
+
           {/* Audio player skeleton */}
           <div className="border rounded-lg p-4">
             <div className="flex items-center space-x-4">
@@ -38,7 +38,7 @@ export default function PodcastLoading() {
               </div>
             </div>
           </div>
-          
+
           {/* Content skeleton */}
           <div className="space-y-4">
             <Skeleton className="h-6 w-24" />
@@ -48,7 +48,7 @@ export default function PodcastLoading() {
               <Skeleton className="h-4 w-3/4" />
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <Skeleton className="h-6 w-32" />
             <div className="space-y-2">
@@ -59,10 +59,10 @@ export default function PodcastLoading() {
             </div>
           </div>
         </div>
-        
+
         <aside className="space-y-6">
           <Skeleton className="aspect-square w-full" />
-          
+
           <div className="space-y-3">
             <Skeleton className="h-5 w-16" />
             <div className="flex flex-wrap gap-2">
@@ -71,7 +71,7 @@ export default function PodcastLoading() {
               <Skeleton className="h-6 w-14" />
             </div>
           </div>
-          
+
           <div className="space-y-4">
             <Skeleton className="h-5 w-32" />
             {Array.from({ length: 3 }).map((_, i) => (

@@ -22,7 +22,9 @@ export interface CampaignSnapshotData {
 }
 
 // Create campaign snapshot with enhanced metadata and versioning
-export async function createCampaignSnapshot(campaignId: string): Promise<CampaignSnapshotData> {
+export async function createCampaignSnapshot(
+  campaignId: string
+): Promise<CampaignSnapshotData> {
   logger.info('Creating campaign snapshot', { campaignId });
 
   const prisma = getSafePrismaClient();
@@ -43,7 +45,7 @@ export async function createCampaignSnapshot(campaignId: string): Promise<Campai
 
   // Get template version
   const templateVersion = await getNextSnapshotVersion(campaignId);
-  
+
   // Get recipient count for metadata
   const recipientCount = await prisma.newsletter.count({
     where: {
@@ -53,7 +55,7 @@ export async function createCampaignSnapshot(campaignId: string): Promise<Campai
 
   // Generate campaign content with current articles
   const campaignContent = await generateCampaignContent(campaign.templateId!);
-  
+
   // Get template variables
   const templateVariables = {
     subscriber: {
@@ -82,7 +84,9 @@ export async function createCampaignSnapshot(campaignId: string): Promise<Campai
 
   // Extract article IDs from content
   const articleIds = [
-    ...(campaignContent.articles.featured ? [campaignContent.articles.featured.id] : []),
+    ...(campaignContent.articles.featured
+      ? [campaignContent.articles.featured.id]
+      : []),
     ...campaignContent.articles.latest.map((article: any) => article.id),
   ];
 
@@ -139,12 +143,12 @@ export async function createCampaignSnapshot(campaignId: string): Promise<Campai
     },
   });
 
-  logger.info('Campaign snapshot created', { 
-    campaignId, 
+  logger.info('Campaign snapshot created', {
+    campaignId,
     contentHash,
     articleCount: articleIds.length,
     templateVersion,
-    recipientCount
+    recipientCount,
   });
 
   return snapshotData;
@@ -153,7 +157,9 @@ export async function createCampaignSnapshot(campaignId: string): Promise<Campai
 /**
  * Get next snapshot version for proper version tracking
  */
-export async function getNextSnapshotVersion(campaignId: string): Promise<number> {
+export async function getNextSnapshotVersion(
+  campaignId: string
+): Promise<number> {
   const prisma = getSafePrismaClient();
   if (!prisma) {
     return 1;
@@ -173,7 +179,9 @@ export async function getNextSnapshotVersion(campaignId: string): Promise<number
 }
 
 // Get campaign snapshot
-export async function getCampaignSnapshot(campaignId: string): Promise<CampaignSnapshotData | null> {
+export async function getCampaignSnapshot(
+  campaignId: string
+): Promise<CampaignSnapshotData | null> {
   const prisma = getSafePrismaClient();
   if (!prisma) {
     return null;
@@ -194,7 +202,9 @@ export async function getCampaignSnapshot(campaignId: string): Promise<CampaignS
     preheader: snapshot.preheader || '',
     templateId: snapshot.templateId || undefined,
     templateVersion: snapshot.templateVersion || undefined,
-    articleIds: Array.isArray(snapshot.articleIds) ? snapshot.articleIds as string[] : [],
+    articleIds: Array.isArray(snapshot.articleIds)
+      ? (snapshot.articleIds as string[])
+      : [],
     contentHash: snapshot.contentHash,
     metadata: {
       templateVersion: snapshot.templateVersion || 1,
@@ -206,9 +216,11 @@ export async function getCampaignSnapshot(campaignId: string): Promise<CampaignS
 }
 
 // Verify snapshot integrity
-export async function verifyCampaignSnapshot(campaignId: string): Promise<boolean> {
+export async function verifyCampaignSnapshot(
+  campaignId: string
+): Promise<boolean> {
   const snapshot = await getCampaignSnapshot(campaignId);
-  
+
   if (!snapshot) {
     return false;
   }
@@ -219,12 +231,12 @@ export async function verifyCampaignSnapshot(campaignId: string): Promise<boolea
     .digest('hex');
 
   const isValid = calculatedHash === snapshot.contentHash;
-  
+
   if (!isValid) {
-    logger.warn('Campaign snapshot integrity check failed', { 
+    logger.warn('Campaign snapshot integrity check failed', {
       campaignId,
       expectedHash: snapshot.contentHash,
-      calculatedHash 
+      calculatedHash,
     });
   }
 
@@ -232,7 +244,9 @@ export async function verifyCampaignSnapshot(campaignId: string): Promise<boolea
 }
 
 // Delete campaign snapshot
-export async function deleteCampaignSnapshot(campaignId: string): Promise<void> {
+export async function deleteCampaignSnapshot(
+  campaignId: string
+): Promise<void> {
   const prisma = getSafePrismaClient();
   if (!prisma) {
     throw new Error('Database unavailable');

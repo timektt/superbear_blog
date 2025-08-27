@@ -20,18 +20,16 @@ export default function PageShell({
   className = '',
 }: PageShellProps) {
   return (
-    <section className={`bg-background py-8 transition-colors duration-300 ${className}`}>
+    <section
+      className={`bg-background py-8 transition-colors duration-300 ${className}`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {title}
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
             {subtitle && (
-              <p className="text-lg text-muted-foreground">
-                {subtitle}
-              </p>
+              <p className="text-lg text-muted-foreground">{subtitle}</p>
             )}
           </div>
           {seeMoreHref && (

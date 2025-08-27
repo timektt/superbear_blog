@@ -62,7 +62,7 @@ test.describe('Article Page Typography and Layout', () => {
 
     // Check that it contains author and date
     await expect(metaRow).toContainText('By');
-    
+
     // Check spacing and layout
     const metaStyles = await metaRow.evaluate((el) => {
       const styles = window.getComputedStyle(el);
@@ -82,7 +82,9 @@ test.describe('Article Page Typography and Layout', () => {
     expect(fontSize).toBeLessThan(16); // Smaller than base font size
   });
 
-  test('article body text has proper line height and spacing', async ({ page }) => {
+  test('article body text has proper line height and spacing', async ({
+    page,
+  }) => {
     await page.goto('/news/sample-article');
 
     // Find the prose content
@@ -101,7 +103,7 @@ test.describe('Article Page Typography and Layout', () => {
     const lineHeight = parseFloat(proseStyles.lineHeight);
     const fontSize = parseFloat(proseStyles.fontSize);
     const ratio = lineHeight / fontSize;
-    
+
     expect(ratio).toBeGreaterThanOrEqual(1.6);
   });
 
@@ -140,7 +142,7 @@ test.describe('Article Page Typography and Layout', () => {
 
     if (imageCount > 0) {
       const firstImage = images.first();
-      
+
       const imageStyles = await firstImage.evaluate((el) => {
         const styles = window.getComputedStyle(el);
         return {
@@ -151,7 +153,7 @@ test.describe('Article Page Typography and Layout', () => {
 
       // Should have rounded corners
       expect(imageStyles.borderRadius).not.toBe('0px');
-      
+
       // Should have a border
       expect(imageStyles.border).not.toBe('none');
       expect(imageStyles.border).not.toBe('0px');

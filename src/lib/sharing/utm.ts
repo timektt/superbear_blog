@@ -2,7 +2,11 @@
  * UTM parameter utilities for social sharing
  */
 
-export function addUtmParams(url: string, source: string, medium = 'social'): string {
+export function addUtmParams(
+  url: string,
+  source: string,
+  medium = 'social'
+): string {
   const urlObj = new URL(url);
   urlObj.searchParams.set('utm_source', source);
   urlObj.searchParams.set('utm_medium', medium);
@@ -13,7 +17,7 @@ export function addUtmParams(url: string, source: string, medium = 'social'): st
 export function generateShareUrls(articleUrl: string, title: string) {
   const encodedUrl = encodeURIComponent(articleUrl);
   const encodedTitle = encodeURIComponent(title);
-  
+
   return {
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,

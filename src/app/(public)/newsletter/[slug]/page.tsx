@@ -14,42 +14,52 @@ interface NewsletterIssuePageProps {
 }
 
 async function getNewsletterIssue(slug: string) {
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/newsletter/issues/${slug}`, {
-    next: { revalidate: 300 },
-  });
-  
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/newsletter/issues/${slug}`,
+    {
+      next: { revalidate: 300 },
+    }
+  );
+
   if (!response.ok) {
     return null;
   }
-  
+
   return response.json();
 }
 
 async function getRecentIssues(currentId?: string) {
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/newsletter/issues?limit=3`, {
-    next: { revalidate: 300 },
-  });
-  
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/newsletter/issues?limit=3`,
+    {
+      next: { revalidate: 300 },
+    }
+  );
+
   if (!response.ok) {
     return [];
   }
-  
+
   const data = await response.json();
   return (data.issues || []).filter((issue: any) => issue.id !== currentId);
 }
 
-export async function generateMetadata({ params }: NewsletterIssuePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: NewsletterIssuePageProps): Promise<Metadata> {
   const issue = await getNewsletterIssue(params.slug);
-  
+
   if (!issue) {
     return {
       title: 'Newsletter Issue Not Found',
     };
   }
-  
+
   return {
     title: `${issue.title} - Issue #${issue.issueNumber} | SuperBear Blog`,
-    description: issue.summary || `Read newsletter issue #${issue.issueNumber} from SuperBear Blog`,
+    description:
+      issue.summary ||
+      `Read newsletter issue #${issue.issueNumber} from SuperBear Blog`,
     openGraph: {
       title: `${issue.title} - Issue #${issue.issueNumber}`,
       description: issue.summary,
@@ -77,7 +87,7 @@ function renderContent(content: any) {
       </div>
     );
   }
-  
+
   // Handle Tiptap JSON content
   if (content && typeof content === 'object') {
     // For now, render as plain text. In a full implementation,
@@ -90,22 +100,24 @@ function renderContent(content: any) {
       </div>
     );
   }
-  
+
   return null;
 }
 
-export default async function NewsletterIssuePage({ params }: NewsletterIssuePageProps) {
+export default async function NewsletterIssuePage({
+  params,
+}: NewsletterIssuePageProps) {
   const [issue, recentIssues] = await Promise.all([
     getNewsletterIssue(params.slug),
-    getNewsletterIssue(params.slug).then(i => 
+    getNewsletterIssue(params.slug).then((i) =>
       i ? getRecentIssues(i.id) : []
     ),
   ]);
-  
+
   if (!issue) {
     notFound();
   }
-  
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -122,14 +134,14 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
       name: 'SuperBear Blog',
     },
   };
-  
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <article className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
@@ -139,14 +151,12 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
             </Link>
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3 space-y-6">
             <header className="space-y-4">
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="secondary">
-                  Issue #{issue.issueNumber}
-                </Badge>
+                <Badge variant="secondary">Issue #{issue.issueNumber}</Badge>
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
                   <time dateTime={issue.publishedAt}>
@@ -158,29 +168,29 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
                   <span>By {issue.author.name}</span>
                 </div>
               </div>
-              
+
               <h1 className="text-3xl font-bold leading-tight">
                 {issue.title}
               </h1>
-              
+
               {issue.summary && (
                 <p className="text-xl text-muted-foreground leading-relaxed">
                   {issue.summary}
                 </p>
               )}
             </header>
-            
+
             <div className="flex items-center gap-4 py-4 border-y">
               <Button variant="outline" size="sm">
                 <Share2 className="w-4 h-4 mr-2" />
                 Share Issue
               </Button>
             </div>
-            
+
             <div className="prose prose-gray max-w-none">
               {renderContent(issue.content)}
             </div>
-            
+
             {/* Newsletter CTA */}
             <div className="bg-muted/50 rounded-lg p-6 mt-8">
               <div className="flex items-start gap-4">
@@ -190,16 +200,20 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
                 <div className="flex-1">
                   <h3 className="font-semibold mb-2">Enjoyed this issue?</h3>
                   <p className="text-muted-foreground text-sm mb-4">
-                    Subscribe to get future issues delivered directly to your inbox.
+                    Subscribe to get future issues delivered directly to your
+                    inbox.
                   </p>
                   <div className="max-w-md">
-                    <NewsletterSubscription variant="inline" showBenefits={false} />
+                    <NewsletterSubscription
+                      variant="inline"
+                      showBenefits={false}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          
+
           <aside className="space-y-6">
             {recentIssues.length > 0 && (
               <div>
@@ -207,7 +221,7 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
                 <div className="space-y-4">
                   {recentIssues.slice(0, 3).map((recentIssue: any) => (
                     <div key={recentIssue.id} className="border rounded-lg p-4">
-                      <Link 
+                      <Link
                         href={`/newsletter/${recentIssue.slug}`}
                         className="block hover:bg-muted/50 transition-colors -m-4 p-4 rounded-lg"
                       >
@@ -233,13 +247,18 @@ export default async function NewsletterIssuePage({ params }: NewsletterIssuePag
                     </div>
                   ))}
                 </div>
-                
-                <Button variant="outline" size="sm" className="w-full mt-4" asChild>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-4"
+                  asChild
+                >
                   <Link href="/newsletter">View All Issues</Link>
                 </Button>
               </div>
             )}
-            
+
             {/* Subscription sidebar */}
             <div className="border rounded-lg p-4">
               <h3 className="font-semibold mb-3">Subscribe to Newsletter</h3>

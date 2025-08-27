@@ -24,7 +24,6 @@ export async function GET(
       success: true,
       stats,
     });
-
   } catch (error) {
     logger.error('Failed to get campaign statistics', error as Error);
     return NextResponse.json(

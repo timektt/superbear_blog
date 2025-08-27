@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSafePrismaClient } from '@/lib/db-safe/client';
 import { searchArticles, getSearchSuggestions } from '@/lib/search/query';
 import { rateLimit } from '@/lib/rate-limit';
+import { compressedApiRoute } from '@/lib/compression';
+import e from 'express';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   // Apply rate limiting
   const rateLimitResult = await rateLimit(request);
   if (!rateLimitResult.success) {
@@ -79,6 +81,7 @@ export async function GET(request: NextRequest) {
 
     // Add cache headers for search results
     response.headers.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=600');
+    response.headers.set('X-Cache', 'MISS');
     
     return response;
   } catch (error) {
@@ -91,4 +94,8 @@ export async function GET(request: NextRequest) {
       error: 'Search failed',
     }, { status: 500 });
   }
-}
+}e
+xport const GET = compressedApiRoute(handler, {
+  threshold: 512, // Compress search responses larger than 512 bytes
+  level: 7, // Higher compression for search results
+});

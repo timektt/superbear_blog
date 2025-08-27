@@ -4,7 +4,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Play, Pause, Square, RotateCcw, BarChart3 } from 'lucide-react';
+import {
+  AlertTriangle,
+  Play,
+  Pause,
+  Square,
+  RotateCcw,
+  BarChart3,
+} from 'lucide-react';
 import { useToast } from '@/lib/hooks/useToast';
 
 interface CampaignControlPanelProps {
@@ -16,18 +23,24 @@ interface CampaignControlPanelProps {
   onStatusChange?: () => void;
 }
 
-export function CampaignControlPanel({ campaign, onStatusChange }: CampaignControlPanelProps) {
+export function CampaignControlPanel({
+  campaign,
+  onStatusChange,
+}: CampaignControlPanelProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const handleAction = async (action: string, data?: any) => {
     setLoading(action);
     try {
-      const response = await fetch(`/api/admin/campaigns/${campaign.id}/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data || {}),
-      });
+      const response = await fetch(
+        `/api/admin/campaigns/${campaign.id}/${action}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data || {}),
+        }
+      );
 
       const result = await response.json();
 
@@ -44,7 +57,10 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : `Failed to ${action} campaign`,
+        description:
+          error instanceof Error
+            ? error.message
+            : `Failed to ${action} campaign`,
         variant: 'destructive',
       });
     } finally {
@@ -53,7 +69,11 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
   };
 
   const handleEmergencyStop = async () => {
-    if (!confirm('Are you sure you want to trigger an emergency stop for ALL campaigns? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to trigger an emergency stop for ALL campaigns? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -84,7 +104,10 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to trigger emergency stop',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to trigger emergency stop',
         variant: 'destructive',
       });
     } finally {
@@ -93,7 +116,10 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
   };
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+    const variants: Record<
+      string,
+      'default' | 'secondary' | 'destructive' | 'outline'
+    > = {
       DRAFT: 'outline',
       SCHEDULED: 'secondary',
       QUEUED: 'secondary',
@@ -104,17 +130,15 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
       FAILED: 'destructive',
     };
 
-    return (
-      <Badge variant={variants[status] || 'outline'}>
-        {status}
-      </Badge>
-    );
+    return <Badge variant={variants[status] || 'outline'}>{status}</Badge>;
   };
 
   const canPause = ['QUEUED', 'SENDING'].includes(campaign.status);
   const canResume = campaign.status === 'PAUSED';
   const canCancel = ['QUEUED', 'SENDING', 'PAUSED'].includes(campaign.status);
-  const canRetry = ['COMPLETED', 'FAILED', 'CANCELLED'].includes(campaign.status);
+  const canRetry = ['COMPLETED', 'FAILED', 'CANCELLED'].includes(
+    campaign.status
+  );
 
   return (
     <Card>
@@ -158,7 +182,8 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
               variant="destructive"
               size="sm"
               onClick={() => {
-                if (!confirm('Are you sure you want to cancel this campaign?')) return;
+                if (!confirm('Are you sure you want to cancel this campaign?'))
+                  return;
                 const reason = prompt('Reason for cancellation:');
                 if (reason) handleAction('cancel', { reason });
               }}
@@ -174,8 +199,12 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
               variant="outline"
               size="sm"
               onClick={() => {
-                const maxRetries = prompt('Maximum retry attempts (default: 3):');
-                handleAction('retry', { maxRetries: maxRetries ? parseInt(maxRetries) : 3 });
+                const maxRetries = prompt(
+                  'Maximum retry attempts (default: 3):'
+                );
+                handleAction('retry', {
+                  maxRetries: maxRetries ? parseInt(maxRetries) : 3,
+                });
               }}
               disabled={loading === 'retry'}
             >
@@ -187,7 +216,9 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.open(`/api/admin/campaigns/${campaign.id}/stats`, '_blank')}
+            onClick={() =>
+              window.open(`/api/admin/campaigns/${campaign.id}/stats`, '_blank')
+            }
           >
             <BarChart3 className="w-4 h-4 mr-2" />
             View Stats
@@ -203,7 +234,9 @@ export function CampaignControlPanel({ campaign, onStatusChange }: CampaignContr
             className="w-full"
           >
             <AlertTriangle className="w-4 h-4 mr-2" />
-            {loading === 'emergency-stop' ? 'Stopping All...' : 'Emergency Stop All Campaigns'}
+            {loading === 'emergency-stop'
+              ? 'Stopping All...'
+              : 'Emergency Stop All Campaigns'}
           </Button>
           <p className="text-xs text-muted-foreground mt-2">
             This will immediately pause ALL active campaigns system-wide.

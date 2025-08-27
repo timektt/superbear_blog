@@ -4,6 +4,8 @@ import './globals.css';
 import { SessionProvider } from '@/components/providers/SessionProvider';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
 import { ToastProvider } from '@/components/providers/ToastProvider';
+import NavBar from '@/components/nav/NavBar';
+import SiteFooter from '@/components/footer/SiteFooter';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports for client components
@@ -133,8 +135,12 @@ export default function RootLayout({
         <ThemeProvider>
           <SessionProvider>
             <ToastProvider>
-              <div id="main-content" tabIndex={-1}>
-                {children}
+              <div className="min-h-screen flex flex-col">
+                <NavBar />
+                <main className="flex-1" id="main-content" tabIndex={-1}>
+                  {children}
+                </main>
+                <SiteFooter />
               </div>
             </ToastProvider>
           </SessionProvider>

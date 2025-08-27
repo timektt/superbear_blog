@@ -26,19 +26,22 @@ export type PaginatedResult = {
 
 // Enhanced mock data for different categories
 const MOCK_CATEGORIES = {
-  ai: MOCK_LATEST.filter(item => item.category === 'AI'),
-  devtools: MOCK_LATEST.filter(item => item.category === 'DevTools'),
-  'open-source': MOCK_LATEST.filter(item => item.category === 'Open Source'),
+  ai: MOCK_LATEST.filter((item) => item.category === 'AI'),
+  devtools: MOCK_LATEST.filter((item) => item.category === 'DevTools'),
+  'open-source': MOCK_LATEST.filter((item) => item.category === 'Open Source'),
   startups: [
     {
       id: 'mock-startup-1',
-      title: 'Y Combinator Winter 2025 batch includes record number of AI startups',
+      title:
+        'Y Combinator Winter 2025 batch includes record number of AI startups',
       category: 'Startups',
       author: 'Emma Thompson',
       date: 'Aug 6, 2025',
       slug: 'yc-winter-2025-ai-startups',
-      imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=480&q=80',
-      snippet: 'The accelerator\'s latest cohort features 127 companies, with 45% focused on AI.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=480&q=80',
+      snippet:
+        "The accelerator's latest cohort features 127 companies, with 45% focused on AI.",
       tags: ['Startups', 'AI', 'Y Combinator'],
       status: 'PUBLISHED' as const,
       createdAt: new Date('2025-08-06'),
@@ -50,8 +53,10 @@ const MOCK_CATEGORIES = {
       author: 'Michael Brown',
       date: 'Aug 5, 2025',
       slug: 'ramp-8b-valuation',
-      imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=480&q=80',
-      snippet: 'The corporate card and expense management company raised $300M in Series D.',
+      imageUrl:
+        'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=480&q=80',
+      snippet:
+        'The corporate card and expense management company raised $300M in Series D.',
       tags: ['Fintech', 'Funding'],
       status: 'PUBLISHED' as const,
       createdAt: new Date('2025-08-05'),
@@ -59,7 +64,9 @@ const MOCK_CATEGORIES = {
   ],
 };
 
-export async function getLatest(opts: { page?: number; pageSize?: number } = {}): Promise<PaginatedResult> {
+export async function getLatest(
+  opts: { page?: number; pageSize?: number } = {}
+): Promise<PaginatedResult> {
   const { page = 1, pageSize = 12 } = opts;
   const prisma = getPrisma();
 
@@ -88,16 +95,18 @@ export async function getLatest(opts: { page?: number; pageSize?: number } = {})
       prisma.article.count({ where: { status: 'PUBLISHED' } }),
     ]);
 
-    const transformedItems: PublicListItem[] = items.map(item => ({
+    const transformedItems: PublicListItem[] = items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));
@@ -123,17 +132,22 @@ export async function getLatest(opts: { page?: number; pageSize?: number } = {})
   }
 }
 
-export async function getByCategory(categoryName: string, opts: { page?: number; pageSize?: number } = {}): Promise<PaginatedResult> {
+export async function getByCategory(
+  categoryName: string,
+  opts: { page?: number; pageSize?: number } = {}
+): Promise<PaginatedResult> {
   const { page = 1, pageSize = 12 } = opts;
   const prisma = getPrisma();
 
   if (!IS_DB_CONFIGURED || !prisma) {
     // Mock category filtering
-    const categoryKey = categoryName.toLowerCase().replace(' ', '-') as keyof typeof MOCK_CATEGORIES;
+    const categoryKey = categoryName
+      .toLowerCase()
+      .replace(' ', '-') as keyof typeof MOCK_CATEGORIES;
     const categoryItems = MOCK_CATEGORIES[categoryKey] || [];
     const start = (page - 1) * pageSize;
     const items = categoryItems.slice(start, start + pageSize);
-    
+
     return {
       items,
       total: categoryItems.length,
@@ -146,33 +160,35 @@ export async function getByCategory(categoryName: string, opts: { page?: number;
   try {
     const [items, total] = await Promise.all([
       prisma.article.findMany({
-        where: { 
+        where: {
           status: 'PUBLISHED',
-          category: { name: { equals: categoryName } }
+          category: { name: { equals: categoryName } },
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: { author: true, category: true, tags: true },
       }),
-      prisma.article.count({ 
-        where: { 
+      prisma.article.count({
+        where: {
           status: 'PUBLISHED',
-          category: { name: { equals: categoryName } }
-        }
+          category: { name: { equals: categoryName } },
+        },
       }),
     ]);
 
-    const transformedItems: PublicListItem[] = items.map(item => ({
+    const transformedItems: PublicListItem[] = items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));
@@ -190,18 +206,23 @@ export async function getByCategory(categoryName: string, opts: { page?: number;
   }
 }
 
-export async function getByTag(tagSlug: string, opts: { page?: number; pageSize?: number } = {}): Promise<PaginatedResult> {
+export async function getByTag(
+  tagSlug: string,
+  opts: { page?: number; pageSize?: number } = {}
+): Promise<PaginatedResult> {
   const { page = 1, pageSize = 12 } = opts;
   const prisma = getPrisma();
 
   if (!IS_DB_CONFIGURED || !prisma) {
     // Mock tag filtering
-    const taggedItems = MOCK_LATEST.filter(item => 
-      item.tags.some(tag => tag.toLowerCase().replace(/\s+/g, '-') === tagSlug)
+    const taggedItems = MOCK_LATEST.filter((item) =>
+      item.tags.some(
+        (tag) => tag.toLowerCase().replace(/\s+/g, '-') === tagSlug
+      )
     );
     const start = (page - 1) * pageSize;
     const items = taggedItems.slice(start, start + pageSize);
-    
+
     return {
       items,
       total: taggedItems.length,
@@ -214,33 +235,35 @@ export async function getByTag(tagSlug: string, opts: { page?: number; pageSize?
   try {
     const [items, total] = await Promise.all([
       prisma.article.findMany({
-        where: { 
+        where: {
           status: 'PUBLISHED',
-          tags: { some: { slug: tagSlug } }
+          tags: { some: { slug: tagSlug } },
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: { author: true, category: true, tags: true },
       }),
-      prisma.article.count({ 
-        where: { 
+      prisma.article.count({
+        where: {
           status: 'PUBLISHED',
-          tags: { some: { slug: tagSlug } }
-        }
+          tags: { some: { slug: tagSlug } },
+        },
       }),
     ]);
 
-    const transformedItems: PublicListItem[] = items.map(item => ({
+    const transformedItems: PublicListItem[] = items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));
@@ -258,7 +281,10 @@ export async function getByTag(tagSlug: string, opts: { page?: number; pageSize?
   }
 }
 
-export async function searchArticles(q: string, opts: { page?: number; pageSize?: number } = {}): Promise<PaginatedResult> {
+export async function searchArticles(
+  q: string,
+  opts: { page?: number; pageSize?: number } = {}
+): Promise<PaginatedResult> {
   const { page = 1, pageSize = 12 } = opts;
   const prisma = getPrisma();
 
@@ -275,14 +301,15 @@ export async function searchArticles(q: string, opts: { page?: number; pageSize?
   if (!IS_DB_CONFIGURED || !prisma) {
     // Mock search
     const query = q.toLowerCase();
-    const searchResults = MOCK_LATEST.filter(item => 
-      item.title.toLowerCase().includes(query) ||
-      item.snippet?.toLowerCase().includes(query) ||
-      item.tags.some(tag => tag.toLowerCase().includes(query))
+    const searchResults = MOCK_LATEST.filter(
+      (item) =>
+        item.title.toLowerCase().includes(query) ||
+        item.snippet?.toLowerCase().includes(query) ||
+        item.tags.some((tag) => tag.toLowerCase().includes(query))
     );
     const start = (page - 1) * pageSize;
     const items = searchResults.slice(start, start + pageSize);
-    
+
     return {
       items,
       total: searchResults.length,
@@ -295,41 +322,43 @@ export async function searchArticles(q: string, opts: { page?: number; pageSize?
   try {
     const [items, total] = await Promise.all([
       prisma.article.findMany({
-        where: { 
+        where: {
           status: 'PUBLISHED',
           OR: [
             { title: { contains: q } },
             { summary: { contains: q } },
-            { tags: { some: { name: { contains: q } } } }
-          ]
+            { tags: { some: { name: { contains: q } } } },
+          ],
         },
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * pageSize,
         take: pageSize,
         include: { author: true, category: true, tags: true },
       }),
-      prisma.article.count({ 
-        where: { 
+      prisma.article.count({
+        where: {
           status: 'PUBLISHED',
           OR: [
             { title: { contains: q } },
             { summary: { contains: q } },
-            { tags: { some: { name: { contains: q } } } }
-          ]
-        }
+            { tags: { some: { name: { contains: q } } } },
+          ],
+        },
       }),
     ]);
 
-    const transformedItems: PublicListItem[] = items.map(item => ({
+    const transformedItems: PublicListItem[] = items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));
@@ -371,16 +400,18 @@ export async function getMostPopular(limit = 5): Promise<PublicListItem[]> {
       include: { author: true, category: true, tags: true },
     });
 
-    return items.map(item => ({
+    return items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));
@@ -405,16 +436,18 @@ export async function getInBrief(limit = 8): Promise<PublicListItem[]> {
       include: { author: true, category: true, tags: true },
     });
 
-    return items.map(item => ({
+    return items.map((item) => ({
       id: item.id,
       title: item.title,
       slug: item.slug,
       imageUrl: item.image || undefined,
       category: item.category.name,
       author: item.author.name,
-      date: item.publishedAt?.toLocaleDateString() || item.createdAt.toLocaleDateString(),
+      date:
+        item.publishedAt?.toLocaleDateString() ||
+        item.createdAt.toLocaleDateString(),
       snippet: item.summary || undefined,
-      tags: item.tags.map(tag => tag.name),
+      tags: item.tags.map((tag) => tag.name),
       status: item.status as 'PUBLISHED' | 'DRAFT',
       createdAt: item.createdAt,
     }));

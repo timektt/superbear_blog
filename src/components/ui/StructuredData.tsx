@@ -48,7 +48,11 @@ export default function StructuredData({ article, url }: StructuredDataProps) {
       height: 630,
     },
     datePublished: article.publishedAt?.toISOString(),
-    dateModified: (article.updatedAt || article.publishedAt || new Date()).toISOString(),
+    dateModified: (
+      article.updatedAt ||
+      article.publishedAt ||
+      new Date()
+    ).toISOString(),
     author: {
       '@type': 'Person',
       '@id': `${baseUrl}/author/${article.author.id}`,

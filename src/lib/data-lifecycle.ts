@@ -15,8 +15,12 @@ export interface RetentionPolicy {
 
 const DEFAULT_RETENTION_POLICY: RetentionPolicy = {
   newsletterEvents: parseInt(process.env.RETENTION_NEWSLETTER_EVENTS || '180'), // 6 months
-  campaignSnapshots: parseInt(process.env.RETENTION_CAMPAIGN_SNAPSHOTS || '730'), // 2 years
-  campaignDeliveries: parseInt(process.env.RETENTION_CAMPAIGN_DELIVERIES || '365'), // 1 year
+  campaignSnapshots: parseInt(
+    process.env.RETENTION_CAMPAIGN_SNAPSHOTS || '730'
+  ), // 2 years
+  campaignDeliveries: parseInt(
+    process.env.RETENTION_CAMPAIGN_DELIVERIES || '365'
+  ), // 1 year
   suppressions: parseInt(process.env.RETENTION_SUPPRESSIONS || '0'), // Never delete (compliance)
   auditLogs: parseInt(process.env.RETENTION_AUDIT_LOGS || '2555'), // 7 years
 };
@@ -41,7 +45,8 @@ export async function runDataRetentionCleanup(): Promise<{
     // Clean newsletter events
     if (DEFAULT_RETENTION_POLICY.newsletterEvents > 0) {
       const eventsCutoff = new Date(
-        Date.now() - DEFAULT_RETENTION_POLICY.newsletterEvents * 24 * 60 * 60 * 1000
+        Date.now() -
+          DEFAULT_RETENTION_POLICY.newsletterEvents * 24 * 60 * 60 * 1000
       );
 
       const deletedEvents = await prisma.newsletterEvent.deleteMany({
@@ -51,13 +56,16 @@ export async function runDataRetentionCleanup(): Promise<{
       });
 
       results.cleaned.newsletterEvents = deletedEvents.count;
-      structuredLogger.info('Cleaned newsletter events', { count: deletedEvents.count });
+      structuredLogger.info('Cleaned newsletter events', {
+        count: deletedEvents.count,
+      });
     }
 
     // Clean old campaign snapshots
     if (DEFAULT_RETENTION_POLICY.campaignSnapshots > 0) {
       const snapshotsCutoff = new Date(
-        Date.now() - DEFAULT_RETENTION_POLICY.campaignSnapshots * 24 * 60 * 60 * 1000
+        Date.now() -
+          DEFAULT_RETENTION_POLICY.campaignSnapshots * 24 * 60 * 60 * 1000
       );
 
       const deletedSnapshots = await prisma.campaignSnapshot.deleteMany({
@@ -67,13 +75,16 @@ export async function runDataRetentionCleanup(): Promise<{
       });
 
       results.cleaned.campaignSnapshots = deletedSnapshots.count;
-      structuredLogger.info('Cleaned campaign snapshots', { count: deletedSnapshots.count });
+      structuredLogger.info('Cleaned campaign snapshots', {
+        count: deletedSnapshots.count,
+      });
     }
 
     // Clean old campaign deliveries
     if (DEFAULT_RETENTION_POLICY.campaignDeliveries > 0) {
       const deliveriesCutoff = new Date(
-        Date.now() - DEFAULT_RETENTION_POLICY.campaignDeliveries * 24 * 60 * 60 * 1000
+        Date.now() -
+          DEFAULT_RETENTION_POLICY.campaignDeliveries * 24 * 60 * 60 * 1000
       );
 
       const deletedDeliveries = await prisma.campaignDelivery.deleteMany({
@@ -83,13 +94,17 @@ export async function runDataRetentionCleanup(): Promise<{
       });
 
       results.cleaned.campaignDeliveries = deletedDeliveries.count;
-      structuredLogger.info('Cleaned campaign deliveries', { count: deletedDeliveries.count });
+      structuredLogger.info('Cleaned campaign deliveries', {
+        count: deletedDeliveries.count,
+      });
     }
 
-    structuredLogger.info('Data retention cleanup completed', { results: results.cleaned });
-
+    structuredLogger.info('Data retention cleanup completed', {
+      results: results.cleaned,
+    });
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     results.errors.push(errorMessage);
     structuredLogger.error('Data retention cleanup failed', error as Error);
   }
@@ -164,11 +179,14 @@ export async function processRightToBeForgotten(email: string): Promise<{
     structuredLogger.info('Right to be forgotten processed successfully', {
       deletedRecords: results.deletedRecords,
     });
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     results.errors.push(errorMessage);
-    structuredLogger.error('Right to be forgotten processing failed', error as Error);
+    structuredLogger.error(
+      'Right to be forgotten processing failed',
+      error as Error
+    );
   }
 
   return results;
@@ -234,7 +252,6 @@ export async function exportUserData(email: string): Promise<{
         ...userData,
       },
     };
-
   } catch (error) {
     structuredLogger.error('Data export failed', error as Error);
     return {
@@ -263,7 +280,11 @@ export function sanitizeCSVField(field: string): string {
   sanitized = sanitized.replace(/"/g, '""');
 
   // Wrap in quotes if contains comma, quote, or newline
-  if (sanitized.includes(',') || sanitized.includes('"') || sanitized.includes('\n')) {
+  if (
+    sanitized.includes(',') ||
+    sanitized.includes('"') ||
+    sanitized.includes('\n')
+  ) {
     sanitized = `"${sanitized}"`;
   }
 
@@ -333,7 +354,9 @@ export async function importSuppressionsFromCSV(
     // Process data rows
     for (let i = 1; i < lines.length; i++) {
       try {
-        const values = lines[i].split(',').map((v) => v.trim().replace(/^"|"$/g, ''));
+        const values = lines[i]
+          .split(',')
+          .map((v) => v.trim().replace(/^"|"$/g, ''));
         const email = values[emailIndex];
         const reason = reasonIndex >= 0 ? values[reasonIndex] : 'MANUAL';
 
@@ -344,8 +367,15 @@ export async function importSuppressionsFromCSV(
         }
 
         // Check for CSV injection attempts
-        if (email.startsWith('=') || email.startsWith('+') || email.startsWith('-') || email.startsWith('@')) {
-          results.errors.push(`Potential CSV injection attempt in line ${i + 1}: ${email}`);
+        if (
+          email.startsWith('=') ||
+          email.startsWith('+') ||
+          email.startsWith('-') ||
+          email.startsWith('@')
+        ) {
+          results.errors.push(
+            `Potential CSV injection attempt in line ${i + 1}: ${email}`
+          );
           results.skipped++;
           continue;
         }
@@ -359,9 +389,10 @@ export async function importSuppressionsFromCSV(
         });
 
         results.imported++;
-
       } catch (error) {
-        results.errors.push(`Error processing line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        results.errors.push(
+          `Error processing line ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
         results.skipped++;
       }
     }
@@ -372,10 +403,11 @@ export async function importSuppressionsFromCSV(
       skipped: results.skipped,
       errors: results.errors.length,
     });
-
   } catch (error) {
     structuredLogger.error('CSV import failed', error as Error);
-    results.errors.push(error instanceof Error ? error.message : 'Unknown error');
+    results.errors.push(
+      error instanceof Error ? error.message : 'Unknown error'
+    );
   }
 
   return results;
@@ -438,9 +470,9 @@ export async function anonymizeUserData(email: string): Promise<{
     structuredLogger.info('Data anonymization completed successfully', {
       anonymizedRecords: results.anonymizedRecords,
     });
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
     results.errors.push(errorMessage);
     structuredLogger.error('Data anonymization failed', error as Error);
   }
@@ -457,12 +489,16 @@ export async function scheduleDataLifecycleTasks(): Promise<void> {
   try {
     // Run retention cleanup (daily)
     const now = new Date();
-    if (now.getHours() === 2 && now.getMinutes() < 5) { // Run at 2 AM
+    if (now.getHours() === 2 && now.getMinutes() < 5) {
+      // Run at 2 AM
       await runDataRetentionCleanup();
     }
 
     structuredLogger.info('Data lifecycle tasks scheduled');
   } catch (error) {
-    structuredLogger.error('Failed to schedule data lifecycle tasks', error as Error);
+    structuredLogger.error(
+      'Failed to schedule data lifecycle tasks',
+      error as Error
+    );
   }
 }

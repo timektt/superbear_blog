@@ -45,6 +45,15 @@ model Article {
   bookmarks Bookmark[]
   series   ArticleSeries[]
   
+  // Performance indexes for common query patterns
+  @@index([status, publishedAt(sort: Desc)]) // Main article listing queries
+  @@index([categoryId, status, publishedAt(sort: Desc)]) // Category-filtered listings
+  @@index([authorId, status, publishedAt(sort: Desc)]) // Author-filtered listings
+  @@index([status, createdAt(sort: Desc)]) // Admin dashboard queries
+  @@index([publishedAt(sort: Desc)]) // Date-based sorting
+  @@index([slug]) // Individual article lookups (already unique, but explicit)
+  @@index([title]) // Search optimization for title matching
+  @@index([summary]) // Search optimization for summary matching
   @@map("articles")
 }
 
@@ -57,6 +66,7 @@ model Author {
   podcasts PodcastEpisode[]
   newsletterIssues NewsletterIssue[]
   
+  @@index([name]) // Author search and filtering
   @@map("authors")
 }
 
@@ -67,6 +77,8 @@ model Category {
   articles Article[]
   podcasts PodcastEpisode[]
   
+  @@index([name]) // Category search and filtering
+  @@index([slug]) // Category lookup by slug (already unique, but explicit)
   @@map("categories")
 }
 
@@ -77,6 +89,8 @@ model Tag {
   articles Article[]
   podcasts PodcastEpisode[]
   
+  @@index([name]) // Tag search and filtering
+  @@index([slug]) // Tag lookup by slug (already unique, but explicit)
   @@map("tags")
 }
 
@@ -172,6 +186,10 @@ model Newsletter {
   events          NewsletterEvent[]
   newsletterPreferences NewsletterPreferences?
   
+  @@index([status, subscribedAt(sort: Desc)]) // Active subscriber queries
+  @@index([verificationToken]) // Token verification (already unique, but explicit)
+  @@index([email]) // Email lookup (already unique, but explicit)
+  @@index([status, verifiedAt]) // Verified subscriber queries
   @@map("newsletters")
 }
 
@@ -196,6 +214,10 @@ model NewsletterCampaign {
   events      NewsletterEvent[]
   snapshot    CampaignSnapshot?
   
+  @@index([status, scheduledAt]) // Campaign scheduling queries
+  @@index([status, createdAt(sort: Desc)]) // Campaign management queries
+  @@index([templateId]) // Template-based campaign queries
+  @@index([sentAt(sort: Desc)]) // Sent campaign history
   @@map("newsletter_campaigns")
 }
 
@@ -322,9 +344,12 @@ model CampaignDelivery {
   events          NewsletterEvent[]
   
   @@unique([campaignId, recipientId])
-  @@index([status])
-  @@index([campaignId])
-  @@index([recipientEmail])
+  @@index([status, createdAt(sort: Desc)]) // Delivery queue processing
+  @@index([campaignId, status]) // Campaign delivery tracking
+  @@index([recipientEmail]) // Recipient-based queries
+  @@index([deliveredAt(sort: Desc)]) // Delivery performance analytics
+  @@index([openedAt(sort: Desc)]) // Open rate analytics
+  @@index([clickedAt(sort: Desc)]) // Click rate analytics
   @@map("campaign_deliveries")
 }
 
@@ -356,9 +381,11 @@ model NewsletterEvent {
   recipient       Newsletter?         @relation(fields: [recipientId], references: [id], onDelete: SetNull)
   delivery        CampaignDelivery?   @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
   
-  @@index([type, timestamp])
-  @@index([campaignId])
-  @@index([recipientEmail])
+  @@index([type, timestamp(sort: Desc)]) // Event analytics by type
+  @@index([campaignId, type, timestamp]) // Campaign-specific event analytics
+  @@index([recipientEmail, type]) // Recipient behavior analytics
+  @@index([deliveryId]) // Delivery-specific event tracking
+  @@index([timestamp(sort: Desc)]) // Chronological event queries
   @@map("newsletter_events")
 }
 
@@ -378,8 +405,10 @@ model Suppression {
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
   
-  @@index([email])
-  @@index([reason])
+  @@index([email]) // Email suppression checks (already unique, but explicit)
+  @@index([reason, timestamp(sort: Desc)]) // Suppression analytics by reason
+  @@index([source]) // Source-based suppression tracking
+  @@index([timestamp(sort: Desc)]) // Chronological suppression queries
   @@map("suppressions")
 }
 
@@ -521,8 +550,11 @@ model ArticleView {
   article         Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
   interactions    ArticleInteraction[]
   
-  @@index([articleId, timestamp])
-  @@index([sessionId])
+  @@index([articleId, timestamp(sort: Desc)]) // Article analytics queries
+  @@index([sessionId]) // Session-based analytics
+  @@index([timestamp(sort: Desc)]) // Time-based analytics
+  @@index([country, timestamp]) // Geographic analytics
+  @@index([device, timestamp]) // Device analytics
   @@map("article_views")
 }
 
@@ -550,8 +582,10 @@ model ArticleInteraction {
   view            ArticleView       @relation(fields: [viewId], references: [id], onDelete: Cascade)
   article         Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
   
-  @@index([articleId, type])
-  @@index([viewId])
+  @@index([articleId, type, timestamp(sort: Desc)]) // Interaction analytics by type
+  @@index([viewId]) // View-based interaction queries
+  @@index([type, timestamp(sort: Desc)]) // Global interaction analytics
+  @@index([socialPlatform, timestamp]) // Social sharing analytics
   @@map("article_interactions")
 }
 
@@ -696,6 +730,10 @@ model Comment {
   parent  Comment? @relation("CommentReplies", fields: [parentId], references: [id])
   replies Comment[] @relation("CommentReplies")
   
+  @@index([articleId, status, createdAt(sort: Desc)]) // Article comments display
+  @@index([status, createdAt(sort: Desc)]) // Comment moderation
+  @@index([authorEmailHash]) // Author-based comment queries
+  @@index([parentId]) // Reply threading
   @@map("comments")
 }
 
@@ -715,6 +753,9 @@ model Reaction {
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   
   @@unique([articleId, emailHash, type])
+  @@index([articleId, type]) // Article reaction aggregation
+  @@index([emailHash]) // User reaction history
+  @@index([type, createdAt(sort: Desc)]) // Reaction analytics
   @@map("reactions")
 }
 
@@ -727,6 +768,9 @@ model Bookmark {
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   
   @@unique([articleId, emailHash])
+  @@index([emailHash, createdAt(sort: Desc)]) // User bookmark history
+  @@index([articleId]) // Article bookmark count
+  @@index([createdAt(sort: Desc)]) // Recent bookmarks
   @@map("bookmarks")
 }
 

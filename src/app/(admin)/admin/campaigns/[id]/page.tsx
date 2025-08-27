@@ -9,7 +9,9 @@ interface CampaignPageProps {
   };
 }
 
-export async function generateMetadata({ params }: CampaignPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: CampaignPageProps): Promise<Metadata> {
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: params.id },
     select: { title: true },

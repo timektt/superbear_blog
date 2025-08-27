@@ -24,7 +24,8 @@ const MockArticleForm = ({ mode }: { mode: 'create' | 'edit' }) => {
         throw new Error(errorData.message || 'Failed to save article');
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unexpected error occurred';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -52,16 +53,8 @@ const MockArticleForm = ({ mode }: { mode: 'create' | 'edit' }) => {
         <option value="">Select Category</option>
         <option value="cat-1">Technology</option>
       </select>
-      <textarea
-        aria-label="Content"
-        data-testid="article-content"
-        required
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        data-testid="submit-article"
-      >
+      <textarea aria-label="Content" data-testid="article-content" required />
+      <button type="submit" disabled={loading} data-testid="submit-article">
         {loading ? 'Creating...' : 'Create Article'}
       </button>
     </form>
@@ -90,7 +83,8 @@ describe('ArticleForm', () => {
     // Mock failed submission
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
-      json: () => Promise.resolve({ message: 'Validation failed: Invalid slug format' }),
+      json: () =>
+        Promise.resolve({ message: 'Validation failed: Invalid slug format' }),
     });
 
     // Submit form
@@ -98,7 +92,9 @@ describe('ArticleForm', () => {
 
     // Check that error is displayed
     await waitFor(() => {
-      expect(screen.getByText('Validation failed: Invalid slug format')).toBeInTheDocument();
+      expect(
+        screen.getByText('Validation failed: Invalid slug format')
+      ).toBeInTheDocument();
     });
 
     // Check that error has proper styling
@@ -234,7 +230,8 @@ describe('ArticleForm', () => {
     (fetch as jest.Mock).mockResolvedValueOnce({
       ok: false,
       status: 409,
-      json: () => Promise.resolve({ message: 'Article with this slug already exists' }),
+      json: () =>
+        Promise.resolve({ message: 'Article with this slug already exists' }),
     });
 
     // Submit form
@@ -242,7 +239,9 @@ describe('ArticleForm', () => {
 
     // Check that duplicate slug error is displayed
     await waitFor(() => {
-      expect(screen.getByText('Article with this slug already exists')).toBeInTheDocument();
+      expect(
+        screen.getByText('Article with this slug already exists')
+      ).toBeInTheDocument();
     });
   });
 });

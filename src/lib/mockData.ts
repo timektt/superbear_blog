@@ -1,7 +1,8 @@
 // Mock data for TechCrunch-style homepage
 
 export const mockFeaturedArticle = {
-  title: 'Security flaws in a carmaker\'s web portal left thousands of cars vulnerable to remote attacks',
+  title:
+    "Security flaws in a carmaker's web portal left thousands of cars vulnerable to remote attacks",
   summary:
     'Researchers discovered critical vulnerabilities that could allow attackers to remotely unlock doors, start engines, and track vehicle locations across multiple car manufacturers.',
   category: 'Security',
@@ -19,7 +20,7 @@ export const mockTopHeadlines = [
     slug: 'openai-gpt5-announcement',
   },
   {
-    title: 'Meta\'s new AI model outperforms GPT-4 on coding benchmarks',
+    title: "Meta's new AI model outperforms GPT-4 on coding benchmarks",
     timeAgo: '4h ago',
     slug: 'meta-ai-coding-model',
   },
@@ -34,7 +35,7 @@ export const mockTopHeadlines = [
     slug: 'anthropic-funding-round',
   },
   {
-    title: 'Tesla\'s FSD Beta shows 40% improvement in city driving',
+    title: "Tesla's FSD Beta shows 40% improvement in city driving",
     timeAgo: '12h ago',
     slug: 'tesla-fsd-improvement',
   },

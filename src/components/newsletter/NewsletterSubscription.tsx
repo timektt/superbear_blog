@@ -14,10 +14,10 @@ interface NewsletterSubscriptionProps {
   onSuccess?: (email: string) => void;
 }
 
-export function NewsletterSubscription({ 
-  variant = 'inline', 
+export function NewsletterSubscription({
+  variant = 'inline',
   showBenefits = true,
-  onSuccess 
+  onSuccess,
 }: NewsletterSubscriptionProps) {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -26,7 +26,7 @@ export function NewsletterSubscription({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !email.includes('@')) {
       setStatus('error');
       setMessage('Please enter a valid email address');
@@ -69,7 +69,7 @@ export function NewsletterSubscription({
     'Weekly curated tech insights',
     'AI & development updates',
     'Startup ecosystem news',
-    'No spam, unsubscribe anytime'
+    'No spam, unsubscribe anytime',
   ];
 
   const containerClass = cn(
@@ -129,8 +129,8 @@ export function NewsletterSubscription({
               className="flex-1"
               required
             />
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading || status === 'success'}
               className="px-6"
             >
@@ -145,11 +145,15 @@ export function NewsletterSubscription({
           </div>
 
           {message && (
-            <div className={cn(
-              'flex items-center text-sm p-3 rounded-md',
-              status === 'success' && 'bg-green-50 text-green-700 border border-green-200',
-              status === 'error' && 'bg-red-50 text-red-700 border border-red-200'
-            )}>
+            <div
+              className={cn(
+                'flex items-center text-sm p-3 rounded-md',
+                status === 'success' &&
+                  'bg-green-50 text-green-700 border border-green-200',
+                status === 'error' &&
+                  'bg-red-50 text-red-700 border border-red-200'
+              )}
+            >
               {status === 'success' ? (
                 <Check className="w-4 h-4 mr-2 flex-shrink-0" />
               ) : (
@@ -161,7 +165,8 @@ export function NewsletterSubscription({
         </form>
 
         <p className="text-xs text-muted-foreground mt-3">
-          By subscribing, you agree to our privacy policy. Unsubscribe at any time.
+          By subscribing, you agree to our privacy policy. Unsubscribe at any
+          time.
         </p>
       </CardContent>
     </div>

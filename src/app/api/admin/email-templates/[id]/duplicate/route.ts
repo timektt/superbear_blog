@@ -11,7 +11,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -25,13 +25,16 @@ export async function POST(
       include: {
         versions: {
           orderBy: { version: 'desc' },
-          take: 1
-        }
-      }
+          take: 1,
+        },
+      },
     });
 
     if (!originalTemplate) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
     }
 
     const latestVersion = originalTemplate.versions[0];
@@ -48,17 +51,17 @@ export async function POST(
         textContent: originalTemplate.textContent,
         variables: originalTemplate.variables,
         designConfig: originalTemplate.designConfig,
-        createdBy: session.user.id || session.user.email || 'system'
+        createdBy: session.user.id || session.user.email || 'system',
       },
       include: {
         versions: true,
         _count: {
           select: {
             campaigns: true,
-            versions: true
-          }
-        }
-      }
+            versions: true,
+          },
+        },
+      },
     });
 
     // Create initial version for duplicated template
@@ -69,13 +72,12 @@ export async function POST(
           version: 1,
           htmlContent: latestVersion.htmlContent,
           textContent: latestVersion.textContent,
-          designConfig: latestVersion.designConfig
-        }
+          designConfig: latestVersion.designConfig,
+        },
       });
     }
 
     return NextResponse.json(duplicatedTemplate, { status: 201 });
-
   } catch (error) {
     console.error('Error duplicating email template:', error);
     return NextResponse.json(

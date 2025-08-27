@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { collectMetrics, getCurrentAlerts, getMetricsHistory } from '@/lib/observability';
+import {
+  collectMetrics,
+  getCurrentAlerts,
+  getMetricsHistory,
+} from '@/lib/observability';
 import { checkAdminAuth } from '@/lib/security-enhanced';
 import { logger } from '@/lib/logger';
 
@@ -17,14 +21,19 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const includeHistory = searchParams.get('history') === 'true';
     const hours = parseInt(searchParams.get('hours') || '24');
-    const severity = searchParams.get('severity') as 'low' | 'medium' | 'high' | 'critical' | undefined;
+    const severity = searchParams.get('severity') as
+      | 'low'
+      | 'medium'
+      | 'high'
+      | 'critical'
+      | undefined;
 
     // Collect current metrics
     const currentMetrics = await collectMetrics();
-    
+
     // Get current alerts
     const alerts = getCurrentAlerts(severity);
-    
+
     // Get metrics history if requested
     const history = includeHistory ? getMetricsHistory(hours) : undefined;
 
@@ -36,7 +45,6 @@ export async function GET(request: NextRequest) {
         ...(history && { history }),
       },
     });
-
   } catch (error) {
     logger.error('Failed to get metrics', error as Error);
     return NextResponse.json(

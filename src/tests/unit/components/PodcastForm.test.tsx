@@ -60,17 +60,18 @@ describe('PodcastForm', () => {
   });
 
   it('renders create form correctly', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     expect(screen.getByText('Create New Podcast Episode')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Enter podcast title')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('podcast-episode-slug')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('https://example.com/audio.mp3')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Enter podcast title')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('podcast-episode-slug')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('https://example.com/audio.mp3')
+    ).toBeInTheDocument();
     expect(screen.getByText('Create')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
@@ -98,17 +99,14 @@ describe('PodcastForm', () => {
     expect(screen.getByText('Edit Podcast Episode')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Existing Podcast')).toBeInTheDocument();
     expect(screen.getByDisplayValue('existing-podcast')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('https://example.com/existing.mp3')).toBeInTheDocument();
+    expect(
+      screen.getByDisplayValue('https://example.com/existing.mp3')
+    ).toBeInTheDocument();
     expect(screen.getByText('Update')).toBeInTheDocument();
   });
 
   it('validates required fields', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const submitButton = screen.getByText('Create');
     fireEvent.click(submitButton);
@@ -123,32 +121,28 @@ describe('PodcastForm', () => {
   });
 
   it('generates slug automatically when title is entered', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     const titleInput = screen.getByPlaceholderText('Enter podcast title');
     fireEvent.change(titleInput, { target: { value: 'New Podcast Episode' } });
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/admin/slugs', expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'New Podcast Episode', type: 'podcast' }),
-      }));
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/admin/slugs',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'New Podcast Episode',
+            type: 'podcast',
+          }),
+        })
+      );
     });
   });
 
   it('handles form submission with valid data', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Fill in required fields
     fireEvent.change(screen.getByPlaceholderText('Enter podcast title'), {
@@ -157,29 +151,29 @@ describe('PodcastForm', () => {
     fireEvent.change(screen.getByPlaceholderText('podcast-episode-slug'), {
       target: { value: 'test-podcast' },
     });
-    fireEvent.change(screen.getByPlaceholderText('https://example.com/audio.mp3'), {
-      target: { value: 'https://example.com/test.mp3' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('https://example.com/audio.mp3'),
+      {
+        target: { value: 'https://example.com/test.mp3' },
+      }
+    );
 
     const submitButton = screen.getByText('Create');
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        title: 'Test Podcast',
-        slug: 'test-podcast',
-        audioUrl: 'https://example.com/test.mp3',
-      }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Podcast',
+          slug: 'test-podcast',
+          audioUrl: 'https://example.com/test.mp3',
+        })
+      );
     });
   });
 
   it('handles tag selection', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     await waitFor(() => {
       expect(screen.getByText('AI')).toBeInTheDocument();
@@ -196,26 +190,26 @@ describe('PodcastForm', () => {
     fireEvent.change(screen.getByPlaceholderText('podcast-episode-slug'), {
       target: { value: 'test-podcast' },
     });
-    fireEvent.change(screen.getByPlaceholderText('https://example.com/audio.mp3'), {
-      target: { value: 'https://example.com/test.mp3' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('https://example.com/audio.mp3'),
+      {
+        target: { value: 'https://example.com/test.mp3' },
+      }
+    );
 
     fireEvent.click(screen.getByText('Create'));
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        tagIds: ['1'],
-      }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tagIds: ['1'],
+        })
+      );
     });
   });
 
   it('handles cancel button click', () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     fireEvent.click(screen.getByText('Cancel'));
     expect(mockOnCancel).toHaveBeenCalled();
@@ -235,12 +229,7 @@ describe('PodcastForm', () => {
   });
 
   it('validates slug format', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     fireEvent.change(screen.getByPlaceholderText('podcast-episode-slug'), {
       target: { value: 'Invalid Slug With Spaces' },
@@ -249,17 +238,16 @@ describe('PodcastForm', () => {
     fireEvent.click(screen.getByText('Create'));
 
     await waitFor(() => {
-      expect(screen.getByText('Slug must contain only lowercase letters, numbers, and hyphens')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Slug must contain only lowercase letters, numbers, and hyphens'
+        )
+      ).toBeInTheDocument();
     });
   });
 
   it('handles episode and season number inputs', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     fireEvent.change(screen.getByPlaceholderText('1'), {
       target: { value: '5' },
@@ -272,26 +260,26 @@ describe('PodcastForm', () => {
     fireEvent.change(screen.getByPlaceholderText('podcast-episode-slug'), {
       target: { value: 'test-podcast' },
     });
-    fireEvent.change(screen.getByPlaceholderText('https://example.com/audio.mp3'), {
-      target: { value: 'https://example.com/test.mp3' },
-    });
+    fireEvent.change(
+      screen.getByPlaceholderText('https://example.com/audio.mp3'),
+      {
+        target: { value: 'https://example.com/test.mp3' },
+      }
+    );
 
     fireEvent.click(screen.getByText('Create'));
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        episodeNumber: 5,
-      }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          episodeNumber: 5,
+        })
+      );
     });
   });
 
   it('shows publish date field when status is PUBLISHED', async () => {
-    render(
-      <PodcastForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
-    );
+    render(<PodcastForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />);
 
     // Change status to PUBLISHED
     const statusSelect = screen.getByDisplayValue('Draft');

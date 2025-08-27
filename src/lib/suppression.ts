@@ -1,13 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 
-export type SuppressionReason = 
-  | 'HARD_BOUNCE' 
-  | 'SOFT_BOUNCE' 
-  | 'COMPLAINT' 
-  | 'UNSUBSCRIBE' 
-  | 'MANUAL' 
-  | 'INVALID_EMAIL' 
+export type SuppressionReason =
+  | 'HARD_BOUNCE'
+  | 'SOFT_BOUNCE'
+  | 'COMPLAINT'
+  | 'UNSUBSCRIBE'
+  | 'MANUAL'
+  | 'INVALID_EMAIL'
   | 'BLOCKED';
 
 export interface SuppressionEntry {
@@ -51,14 +51,15 @@ export async function addSuppression(entry: SuppressionEntry): Promise<void> {
       },
     });
 
-    logger.info('Email added to suppression list', { 
+    logger.info('Email added to suppression list', {
       email: entry.email,
       reason: entry.reason,
-      source: entry.source 
+      source: entry.source,
     });
-
   } catch (error) {
-    logger.error('Failed to add suppression', error as Error, { email: entry.email });
+    logger.error('Failed to add suppression', error as Error, {
+      email: entry.email,
+    });
     throw error;
   }
 }
@@ -80,7 +81,6 @@ export async function removeSuppression(email: string): Promise<void> {
     });
 
     logger.info('Email removed from suppression list', { email });
-
   } catch (error) {
     logger.error('Failed to remove suppression', error as Error, { email });
     throw error;
@@ -104,19 +104,21 @@ export async function getSuppressionDetails(email: string) {
 }
 
 // Filter out suppressed emails from recipient list
-export async function filterSuppressedEmails(emails: string[]): Promise<string[]> {
+export async function filterSuppressedEmails(
+  emails: string[]
+): Promise<string[]> {
   const suppressions = await prisma.suppression.findMany({
     where: {
       email: {
-        in: emails.map(email => email.toLowerCase()),
+        in: emails.map((email) => email.toLowerCase()),
       },
     },
     select: { email: true },
   });
 
-  const suppressedEmails = new Set(suppressions.map(s => s.email));
-  
-  return emails.filter(email => !suppressedEmails.has(email.toLowerCase()));
+  const suppressedEmails = new Set(suppressions.map((s) => s.email));
+
+  return emails.filter((email) => !suppressedEmails.has(email.toLowerCase()));
 }
 
 // Get suppression statistics
@@ -145,7 +147,7 @@ export async function getSuppressionStats() {
   return {
     total: totalSuppressed,
     recent: recentSuppressed,
-    byReason: stats.map(stat => ({
+    byReason: stats.map((stat) => ({
       reason: stat.reason,
       count: stat._count.email,
     })),
@@ -153,7 +155,9 @@ export async function getSuppressionStats() {
 }
 
 // Bulk add suppressions (for importing bounce lists)
-export async function bulkAddSuppressions(entries: SuppressionEntry[]): Promise<void> {
+export async function bulkAddSuppressions(
+  entries: SuppressionEntry[]
+): Promise<void> {
   logger.info(`Bulk adding ${entries.length} suppressions`);
 
   const batchSize = 100;
@@ -161,24 +165,23 @@ export async function bulkAddSuppressions(entries: SuppressionEntry[]): Promise<
 
   for (let i = 0; i < entries.length; i += batchSize) {
     const batch = entries.slice(i, i + batchSize);
-    
+
     try {
-      await Promise.all(batch.map(entry => addSuppression(entry)));
+      await Promise.all(batch.map((entry) => addSuppression(entry)));
       processed += batch.length;
-      
+
       logger.info(`Processed ${processed}/${entries.length} suppressions`);
-      
     } catch (error) {
-      logger.error('Batch suppression failed', error as Error, { 
+      logger.error('Batch suppression failed', error as Error, {
         batchStart: i,
-        batchSize: batch.length 
+        batchSize: batch.length,
       });
     }
   }
 
-  logger.info('Bulk suppression completed', { 
+  logger.info('Bulk suppression completed', {
     total: entries.length,
-    processed 
+    processed,
   });
 }
 
@@ -201,7 +204,7 @@ export async function cleanupSoftBounces(): Promise<void> {
 // Export suppression list (for compliance)
 export async function exportSuppressionList(reason?: SuppressionReason) {
   const where = reason ? { reason } : {};
-  
+
   const suppressions = await prisma.suppression.findMany({
     where,
     select: {
@@ -227,10 +230,11 @@ export async function handleWebhookEvent(event: {
   campaignId?: string;
 }): Promise<void> {
   let suppressionReason: SuppressionReason;
-  
+
   switch (event.type) {
     case 'bounce':
-      suppressionReason = event.bounceType === 'hard' ? 'HARD_BOUNCE' : 'SOFT_BOUNCE';
+      suppressionReason =
+        event.bounceType === 'hard' ? 'HARD_BOUNCE' : 'SOFT_BOUNCE';
       break;
     case 'complaint':
       suppressionReason = 'COMPLAINT';
@@ -261,9 +265,9 @@ export async function handleWebhookEvent(event: {
     },
   });
 
-  logger.info('Webhook event processed', { 
+  logger.info('Webhook event processed', {
     email: event.email,
     type: event.type,
-    reason: suppressionReason 
+    reason: suppressionReason,
   });
 }

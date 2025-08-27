@@ -1,14 +1,17 @@
 // Email compliance utilities
 export class EmailCompliance {
   // Generate required email headers
-  static generateHeaders(campaignId: string, subscriberEmail: string): Record<string, string> {
+  static generateHeaders(
+    campaignId: string,
+    subscriberEmail: string
+  ): Record<string, string> {
     const unsubscribeUrl = `${process.env.NEXTAUTH_URL}/newsletter/unsubscribe?token=${this.generateUnsubscribeToken(subscriberEmail)}`;
-    
+
     return {
       'List-Unsubscribe': `<${unsubscribeUrl}>, <mailto:unsubscribe@${this.getDomain()}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
       'List-ID': `SuperBear Blog Newsletter <newsletter.${this.getDomain()}>`,
-      'Precedence': 'bulk',
+      Precedence: 'bulk',
       'X-Campaign-ID': campaignId,
       'X-Mailer': 'SuperBear Blog Email System',
     };
@@ -30,7 +33,7 @@ export class EmailCompliance {
   static addComplianceFooter(html: string, subscriberEmail: string): string {
     const domain = this.getDomain();
     const unsubscribeUrl = `${process.env.NEXTAUTH_URL}/newsletter/unsubscribe?token=${this.generateUnsubscribeToken(subscriberEmail)}`;
-    
+
     const complianceFooter = `
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin-top:40px;padding-top:20px;border-top:1px solid #e2e8f0;">
         <tr>
@@ -81,7 +84,10 @@ export class EmailCompliance {
     }
 
     // Check for company address/contact info
-    if (!html.toLowerCase().includes('superbear blog') && !html.toLowerCase().includes('company')) {
+    if (
+      !html.toLowerCase().includes('superbear blog') &&
+      !html.toLowerCase().includes('company')
+    ) {
       warnings.push('Consider adding company name and address for compliance');
     }
 
@@ -98,7 +104,7 @@ export class EmailCompliance {
     return {
       isCompliant: missing.length === 0,
       missing,
-      warnings
+      warnings,
     };
   }
 }
@@ -116,7 +122,7 @@ export class EmailAuthValidation {
     return {
       spf: { valid: false, error: 'SPF validation not implemented' },
       dkim: { valid: false, error: 'DKIM validation not implemented' },
-      dmarc: { valid: false, error: 'DMARC validation not implemented' }
+      dmarc: { valid: false, error: 'DMARC validation not implemented' },
     };
   }
 
@@ -129,7 +135,7 @@ export class EmailAuthValidation {
     return {
       spf: `v=spf1 include:_spf.${domain} ~all`,
       dkim: `Add DKIM selector record for your email service provider`,
-      dmarc: `v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}; ruf=mailto:dmarc@${domain}; fo=1`
+      dmarc: `v=DMARC1; p=quarantine; rua=mailto:dmarc@${domain}; ruf=mailto:dmarc@${domain}; fo=1`,
     };
   }
 }
@@ -155,7 +161,9 @@ export class EmailBounceHandler {
       }
 
       // Log bounce for analysis
-      console.log(`Email bounce processed: ${email} (${bounceType}) - ${reason}`);
+      console.log(
+        `Email bounce processed: ${email} (${bounceType}) - ${reason}`
+      );
     } catch (error) {
       console.error('Failed to process bounce:', error);
     }
@@ -172,7 +180,7 @@ export class EmailBounceHandler {
     try {
       // Immediately unsubscribe on spam complaint
       await this.updateSubscriberStatus(email, 'UNSUBSCRIBED');
-      
+
       // Log complaint for analysis
       console.log(`Spam complaint processed: ${email}`);
     } catch (error) {
@@ -181,7 +189,10 @@ export class EmailBounceHandler {
   }
 
   // Update subscriber status
-  private static async updateSubscriberStatus(email: string, status: 'BOUNCED' | 'UNSUBSCRIBED'): Promise<void> {
+  private static async updateSubscriberStatus(
+    email: string,
+    status: 'BOUNCED' | 'UNSUBSCRIBED'
+  ): Promise<void> {
     // This would update the database
     // Implementation depends on your database setup
     console.log(`Would update ${email} status to ${status}`);

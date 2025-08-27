@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // Process different types of bounce events
     switch (body.eventType) {
       case 'bounce':
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
           email: body.recipient,
           bounceType: body.bounceType === 'Permanent' ? 'hard' : 'soft',
           reason: body.reason || 'Unknown',
-          timestamp: body.timestamp
+          timestamp: body.timestamp,
         });
         break;
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         await EmailBounceHandler.processComplaint({
           email: body.recipient,
           timestamp: body.timestamp,
-          feedbackType: body.feedbackType
+          feedbackType: body.feedbackType,
         });
         break;
 
@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ status: 'processed' });
-
   } catch (error) {
     console.error('Error processing email webhook:', error);
     return NextResponse.json(

@@ -30,7 +30,7 @@ export class ArticleAnalytics {
     this.config = config;
     this.startTime = Date.now();
     this.lastVisibilityChange = this.startTime;
-    
+
     this.init();
   }
 
@@ -121,16 +121,23 @@ export class ArticleAnalytics {
     const handleScroll = () => {
       if (!ticking) {
         requestAnimationFrame(() => {
-          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-          const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-          const scrollPercentage = Math.round((scrollTop / documentHeight) * 100);
+          const scrollTop =
+            window.pageYOffset || document.documentElement.scrollTop;
+          const documentHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+          const scrollPercentage = Math.round(
+            (scrollTop / documentHeight) * 100
+          );
 
           // Update max scroll depth
           this.maxScrollDepth = Math.max(this.maxScrollDepth, scrollPercentage);
 
           // Check for milestone achievements
-          this.config.scrollMilestones.forEach(milestone => {
-            if (scrollPercentage >= milestone && !this.scrollMilestones.has(milestone)) {
+          this.config.scrollMilestones.forEach((milestone) => {
+            if (
+              scrollPercentage >= milestone &&
+              !this.scrollMilestones.has(milestone)
+            ) {
               this.scrollMilestones.add(milestone);
               this.trackInteraction('SCROLL_MILESTONE', {
                 scrollPosition: milestone,
@@ -151,7 +158,7 @@ export class ArticleAnalytics {
   private setupTimeTracking(): void {
     if (!this.config.enableTimeTracking) return;
 
-    this.config.timeMilestones.forEach(milestone => {
+    this.config.timeMilestones.forEach((milestone) => {
       setTimeout(() => {
         if (this.isVisible && !this.timeMilestones.has(milestone)) {
           this.timeMilestones.add(milestone);
@@ -173,7 +180,7 @@ export class ArticleAnalytics {
 
       if (link && link.href) {
         this.linkClickCount++;
-        
+
         // Determine link type
         let linkType = 'external';
         if (link.href.includes(window.location.hostname)) {
@@ -193,7 +200,7 @@ export class ArticleAnalytics {
   private setupVisibilityTracking(): void {
     const handleVisibilityChange = () => {
       const now = Date.now();
-      
+
       if (document.hidden) {
         // Page became hidden
         if (this.isVisible) {
@@ -247,7 +254,7 @@ export class ArticleAnalytics {
     // Handle various unload events
     window.addEventListener('beforeunload', handleUnload);
     window.addEventListener('pagehide', handleUnload);
-    
+
     // Handle visibility change to hidden as potential exit
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -271,7 +278,10 @@ export class ArticleAnalytics {
   }
 
   // Public method to track custom events
-  public trackCustomEvent(eventType: string, data: Record<string, any> = {}): void {
+  public trackCustomEvent(
+    eventType: string,
+    data: Record<string, any> = {}
+  ): void {
     this.trackInteraction(eventType, data);
   }
 
@@ -283,7 +293,7 @@ export class ArticleAnalytics {
     socialShares: number;
   } {
     const now = Date.now();
-    const currentTimeOnPage = this.isVisible 
+    const currentTimeOnPage = this.isVisible
       ? this.timeOnPage + (now - this.lastVisibilityChange)
       : this.timeOnPage;
 
@@ -297,7 +307,9 @@ export class ArticleAnalytics {
 }
 
 // Utility function to initialize analytics
-export function initializeAnalytics(config: Partial<AnalyticsConfig>): ArticleAnalytics | null {
+export function initializeAnalytics(
+  config: Partial<AnalyticsConfig>
+): ArticleAnalytics | null {
   // Check if we're in a browser environment
   if (typeof window === 'undefined') return null;
 
@@ -340,7 +352,10 @@ function generateClientSessionId(): string {
 }
 
 // React hook for analytics
-export function useArticleAnalytics(articleId: string, config?: Partial<AnalyticsConfig>) {
+export function useArticleAnalytics(
+  articleId: string,
+  config?: Partial<AnalyticsConfig>
+) {
   const analytics = initializeAnalytics({
     articleId,
     ...config,
@@ -348,9 +363,11 @@ export function useArticleAnalytics(articleId: string, config?: Partial<Analytic
 
   return {
     analytics,
-    trackSocialShare: (platform: string, url?: string) => analytics?.trackSocialShare(platform, url),
+    trackSocialShare: (platform: string, url?: string) =>
+      analytics?.trackSocialShare(platform, url),
     trackNewsletterSignup: () => analytics?.trackNewsletterSignup(),
-    trackCustomEvent: (eventType: string, data?: Record<string, any>) => analytics?.trackCustomEvent(eventType, data),
+    trackCustomEvent: (eventType: string, data?: Record<string, any>) =>
+      analytics?.trackCustomEvent(eventType, data),
     getSessionStats: () => analytics?.getSessionStats(),
   };
 }

@@ -68,15 +68,16 @@ export class ErrorBoundary extends Component<Props, State> {
                   <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
                 </div>
               </div>
-              
+
               <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Something went wrong
               </h1>
-              
+
               <p className="text-gray-600 dark:text-gray-300 mb-6">
-                An unexpected error occurred. Please try refreshing the page or go back to the homepage.
+                An unexpected error occurred. Please try refreshing the page or
+                go back to the homepage.
               </p>
-              
+
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mb-6 text-left">
                   <summary className="cursor-pointer text-sm text-gray-500 dark:text-gray-400 mb-2">
@@ -88,13 +89,15 @@ export class ErrorBoundary extends Component<Props, State> {
                     {this.state.error.stack && (
                       <>
                         <div className="font-semibold mb-1">Stack:</div>
-                        <div className="whitespace-pre-wrap">{this.state.error.stack}</div>
+                        <div className="whitespace-pre-wrap">
+                          {this.state.error.stack}
+                        </div>
                       </>
                     )}
                   </div>
                 </details>
               )}
-              
+
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <button
                   onClick={this.handleRetry}
@@ -103,7 +106,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </button>
-                
+
                 <button
                   onClick={this.handleGoHome}
                   className="inline-flex items-center justify-center px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
@@ -137,6 +140,6 @@ export function withErrorBoundary<P extends object>(
   );
 
   WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
+
   return WrappedComponent;
 }

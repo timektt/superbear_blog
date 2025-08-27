@@ -17,7 +17,13 @@ interface PodcastListProps {
   onRefresh: () => void;
 }
 
-export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefresh }: PodcastListProps) {
+export function PodcastList({
+  podcasts,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  onRefresh,
+}: PodcastListProps) {
   const { toast } = useToast();
   const [selectedPodcasts, setSelectedPodcasts] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>('');
@@ -25,13 +31,15 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const filteredPodcasts = podcasts.filter(podcast => {
+  const filteredPodcasts = podcasts.filter((podcast) => {
     const matchesStatus = !filterStatus || podcast.status === filterStatus;
-    const matchesCategory = !filterCategory || podcast.category?.id === filterCategory;
-    const matchesSearch = !searchQuery || 
+    const matchesCategory =
+      !filterCategory || podcast.category?.id === filterCategory;
+    const matchesSearch =
+      !searchQuery ||
       podcast.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       podcast.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    
+
     return matchesStatus && matchesCategory && matchesSearch;
   });
 
@@ -39,14 +47,14 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
     if (selectedPodcasts.length === filteredPodcasts.length) {
       setSelectedPodcasts([]);
     } else {
-      setSelectedPodcasts(filteredPodcasts.map(p => p.id));
+      setSelectedPodcasts(filteredPodcasts.map((p) => p.id));
     }
   };
 
   const handleSelectPodcast = (podcastId: string) => {
-    setSelectedPodcasts(prev => 
+    setSelectedPodcasts((prev) =>
       prev.includes(podcastId)
-        ? prev.filter(id => id !== podcastId)
+        ? prev.filter((id) => id !== podcastId)
         : [...prev, podcastId]
     );
   };
@@ -60,7 +68,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
     setIsLoading(true);
     try {
       await Promise.all(
-        selectedPodcasts.map(id => onStatusChange(id, status))
+        selectedPodcasts.map((id) => onStatusChange(id, status))
       );
       setSelectedPodcasts([]);
       toast({ title: `Updated ${selectedPodcasts.length} podcast(s)` });
@@ -78,15 +86,17 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete ${selectedPodcasts.length} podcast(s)?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete ${selectedPodcasts.length} podcast(s)?`
+      )
+    ) {
       return;
     }
 
     setIsLoading(true);
     try {
-      await Promise.all(
-        selectedPodcasts.map(id => onDelete(id))
-      );
+      await Promise.all(selectedPodcasts.map((id) => onDelete(id)));
       setSelectedPodcasts([]);
       toast({ title: `Deleted ${selectedPodcasts.length} podcast(s)` });
       onRefresh();
@@ -102,7 +112,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
@@ -111,14 +121,20 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED': return 'bg-green-100 text-green-800';
-      case 'DRAFT': return 'bg-yellow-100 text-yellow-800';
-      case 'ARCHIVED': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'PUBLISHED':
+        return 'bg-green-100 text-green-800';
+      case 'DRAFT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ARCHIVED':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const categories = Array.from(new Set(podcasts.map(p => p.category).filter(Boolean)));
+  const categories = Array.from(
+    new Set(podcasts.map((p) => p.category).filter(Boolean))
+  );
 
   return (
     <div className="space-y-6">
@@ -143,7 +159,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          
+
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <option value="">All Statuses</option>
             <option value="DRAFT">Draft</option>
@@ -173,7 +189,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
             <span className="text-sm font-medium">
               {selectedPodcasts.length} podcast(s) selected
             </span>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -221,7 +237,10 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                 <th className="text-left p-4">
                   <input
                     type="checkbox"
-                    checked={selectedPodcasts.length === filteredPodcasts.length && filteredPodcasts.length > 0}
+                    checked={
+                      selectedPodcasts.length === filteredPodcasts.length &&
+                      filteredPodcasts.length > 0
+                    }
                     onChange={handleSelectAll}
                     className="rounded"
                   />
@@ -245,7 +264,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                       className="rounded"
                     />
                   </td>
-                  
+
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {podcast.coverImage && (
@@ -258,8 +277,10 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                       <div>
                         <h3 className="font-medium">{podcast.title}</h3>
                         <p className="text-sm text-gray-600">
-                          {podcast.episodeNumber && `Episode ${podcast.episodeNumber}`}
-                          {podcast.seasonNumber && ` • Season ${podcast.seasonNumber}`}
+                          {podcast.episodeNumber &&
+                            `Episode ${podcast.episodeNumber}`}
+                          {podcast.seasonNumber &&
+                            ` • Season ${podcast.seasonNumber}`}
                         </p>
                         <p className="text-sm text-gray-500">
                           by {podcast.author?.name}
@@ -267,13 +288,13 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                       </div>
                     </div>
                   </td>
-                  
+
                   <td className="p-4">
                     <Badge className={getStatusColor(podcast.status)}>
                       {podcast.status}
                     </Badge>
                   </td>
-                  
+
                   <td className="p-4">
                     {podcast.category ? (
                       <Badge variant="outline">{podcast.category.name}</Badge>
@@ -281,20 +302,21 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                       <span className="text-gray-400">No category</span>
                     )}
                   </td>
-                  
-                  <td className="p-4">
-                    <span className="text-sm">{formatDuration(podcast.duration)}</span>
-                  </td>
-                  
+
                   <td className="p-4">
                     <span className="text-sm">
-                      {podcast.publishedAt 
-                        ? new Date(podcast.publishedAt).toLocaleDateString()
-                        : 'Not published'
-                      }
+                      {formatDuration(podcast.duration)}
                     </span>
                   </td>
-                  
+
+                  <td className="p-4">
+                    <span className="text-sm">
+                      {podcast.publishedAt
+                        ? new Date(podcast.publishedAt).toLocaleDateString()
+                        : 'Not published'}
+                    </span>
+                  </td>
+
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       <Button
@@ -304,21 +326,27 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
                       >
                         Edit
                       </Button>
-                      
+
                       <Select
                         value={podcast.status}
-                        onValueChange={(status) => onStatusChange(podcast.id, status)}
+                        onValueChange={(status) =>
+                          onStatusChange(podcast.id, status)
+                        }
                       >
                         <option value="DRAFT">Draft</option>
                         <option value="PUBLISHED">Published</option>
                         <option value="ARCHIVED">Archived</option>
                       </Select>
-                      
+
                       <Button
                         variant="destructive"
                         size="sm"
                         onClick={() => {
-                          if (confirm('Are you sure you want to delete this podcast?')) {
+                          if (
+                            confirm(
+                              'Are you sure you want to delete this podcast?'
+                            )
+                          ) {
                             onDelete(podcast.id);
                           }
                         }}
@@ -331,7 +359,7 @@ export function PodcastList({ podcasts, onEdit, onDelete, onStatusChange, onRefr
               ))}
             </tbody>
           </table>
-          
+
           {filteredPodcasts.length === 0 && (
             <div className="text-center py-8">
               <p className="text-gray-500">No podcasts found</p>

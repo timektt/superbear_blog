@@ -21,13 +21,15 @@ function VerifiedContent() {
               />
             </svg>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Subscription Confirmed! 🎉
           </h1>
-          
+
           <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-            Thank you for subscribing to the SuperBear Blog newsletter. You'll now receive our latest tech news, AI insights, and developer tools updates.
+            Thank you for subscribing to the SuperBear Blog newsletter. You'll
+            now receive our latest tech news, AI insights, and developer tools
+            updates.
           </p>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 mb-8">
@@ -37,7 +39,9 @@ function VerifiedContent() {
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2 text-left">
               <li className="flex items-start">
                 <span className="mr-2">📧</span>
-                <span>You'll receive our weekly newsletter with curated content</span>
+                <span>
+                  You'll receive our weekly newsletter with curated content
+                </span>
               </li>
               <li className="flex items-start">
                 <span className="mr-2">🚨</span>
@@ -57,7 +61,7 @@ function VerifiedContent() {
             >
               Explore Latest Articles
             </Link>
-            
+
             <Link
               href="/"
               className="w-full inline-flex justify-center items-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
@@ -74,15 +78,15 @@ function VerifiedContent() {
                 className="text-blue-600 dark:text-blue-400 hover:underline"
               >
                 manage your preferences
-              </Link>
-              {' '}or{' '}
+              </Link>{' '}
+              or{' '}
               <Link
                 href="/api/newsletter/unsubscribe"
                 className="text-gray-600 dark:text-gray-400 hover:underline"
               >
                 unsubscribe
-              </Link>
-              {' '}at any time.
+              </Link>{' '}
+              at any time.
             </p>
           </div>
         </div>
@@ -93,11 +97,13 @@ function VerifiedContent() {
 
 export default function NewsletterVerifiedPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      }
+    >
       <VerifiedContent />
     </Suspense>
   );
@@ -105,5 +111,6 @@ export default function NewsletterVerifiedPage() {
 
 export const metadata = {
   title: 'Newsletter Subscription Confirmed | SuperBear Blog',
-  description: 'Your newsletter subscription has been confirmed. Thank you for joining the SuperBear Blog community!',
+  description:
+    'Your newsletter subscription has been confirmed. Thank you for joining the SuperBear Blog community!',
 };

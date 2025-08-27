@@ -56,8 +56,9 @@ export function Toast({
   };
 
   const getVariantStyles = () => {
-    const baseStyles = 'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all';
-    const animationStyles = isExiting 
+    const baseStyles =
+      'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all';
+    const animationStyles = isExiting
       ? 'data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full opacity-0 translate-x-full'
       : 'data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full opacity-100 translate-x-0';
 
@@ -74,15 +75,25 @@ export function Toast({
   };
 
   const getIcon = () => {
-    const iconClass = "h-4 w-4 flex-shrink-0";
-    
+    const iconClass = 'h-4 w-4 flex-shrink-0';
+
     switch (variant) {
       case 'success':
-        return <CheckCircle className={`${iconClass} text-green-600 dark:text-green-400`} />;
+        return (
+          <CheckCircle
+            className={`${iconClass} text-green-600 dark:text-green-400`}
+          />
+        );
       case 'destructive':
-        return <XCircle className={`${iconClass} text-destructive-foreground`} />;
+        return (
+          <XCircle className={`${iconClass} text-destructive-foreground`} />
+        );
       case 'warning':
-        return <AlertCircle className={`${iconClass} text-yellow-600 dark:text-yellow-400`} />;
+        return (
+          <AlertCircle
+            className={`${iconClass} text-yellow-600 dark:text-yellow-400`}
+          />
+        );
       default:
         return <Info className={`${iconClass} text-foreground`} />;
     }
@@ -91,7 +102,12 @@ export function Toast({
   if (!isVisible) return null;
 
   return (
-    <div className={getVariantStyles()} role="alert" aria-live="assertive" aria-atomic="true">
+    <div
+      className={getVariantStyles()}
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
       <div className="flex items-start space-x-3">
         {getIcon()}
         <div className="grid gap-1 flex-1">
@@ -101,7 +117,7 @@ export function Toast({
           )}
         </div>
       </div>
-      
+
       <div className="flex items-center space-x-2">
         {action && (
           <button
@@ -112,7 +128,7 @@ export function Toast({
             {action.label}
           </button>
         )}
-        
+
         <button
           type="button"
           onClick={handleClose}
@@ -127,9 +143,12 @@ export function Toast({
 }
 
 // Toast Container Component
-export function ToastContainer({ toasts, onRemove }: { 
-  toasts: ToastProps[]; 
-  onRemove: (id: string) => void; 
+export function ToastContainer({
+  toasts,
+  onRemove,
+}: {
+  toasts: ToastProps[];
+  onRemove: (id: string) => void;
 }) {
   if (toasts.length === 0) return null;
 

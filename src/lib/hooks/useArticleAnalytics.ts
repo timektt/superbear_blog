@@ -8,11 +8,13 @@ interface UseArticleAnalyticsProps {
   enabled?: boolean;
 }
 
-export function useArticleAnalyticsTracking({ 
-  articleId, 
-  enabled = true 
+export function useArticleAnalyticsTracking({
+  articleId,
+  enabled = true,
 }: UseArticleAnalyticsProps) {
-  const analyticsRef = useRef<ReturnType<typeof useArticleAnalytics> | null>(null);
+  const analyticsRef = useRef<ReturnType<typeof useArticleAnalytics> | null>(
+    null
+  );
 
   useEffect(() => {
     if (!enabled || !articleId || typeof window === 'undefined') {

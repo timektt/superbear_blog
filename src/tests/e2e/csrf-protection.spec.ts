@@ -51,12 +51,13 @@ test.describe('CSRF Protection', () => {
     await page.route('**/api/admin/articles', async (route) => {
       const request = route.request();
       requestHeaders = request.headers();
-      
+
       // Check for CSRF token in headers or body
       const body = request.postData();
       if (body) {
         const parsedBody = JSON.parse(body);
-        csrfTokenPresent = !!parsedBody.csrfToken || !!requestHeaders['x-csrf-token'];
+        csrfTokenPresent =
+          !!parsedBody.csrfToken || !!requestHeaders['x-csrf-token'];
       }
 
       await route.fulfill({
@@ -67,19 +68,19 @@ test.describe('CSRF Protection', () => {
     });
 
     await page.goto('/admin/articles/new');
-    
+
     // Fill out the article form
     await page.fill('[data-testid="article-title"]', 'Test Article');
     await page.fill('[data-testid="article-content"]', 'Test content');
     await page.selectOption('[data-testid="article-author"]', 'author-1');
     await page.selectOption('[data-testid="article-category"]', 'cat-1');
-    
+
     // Submit the form
     await page.click('[data-testid="submit-article"]');
-    
+
     // Wait for the request to complete
     await page.waitForTimeout(1000);
-    
+
     // Verify CSRF token was included (this would be implemented in the actual form)
     // For now, we'll check that the request was made with proper headers
     expect(requestHeaders['content-type']).toContain('application/json');
@@ -90,7 +91,7 @@ test.describe('CSRF Protection', () => {
     await page.route('**/api/admin/articles', async (route) => {
       const request = route.request();
       const headers = request.headers();
-      
+
       // Simulate CSRF validation failure
       if (!headers['x-csrf-token']) {
         await route.fulfill({
@@ -109,7 +110,7 @@ test.describe('CSRF Protection', () => {
     });
 
     await page.goto('/admin/articles/new');
-    
+
     // Try to submit form via direct API call (simulating CSRF attack)
     const response = await page.evaluate(async () => {
       return fetch('/api/admin/articles', {
@@ -131,20 +132,24 @@ test.describe('CSRF Protection', () => {
     expect(response.status).toBe(403);
   });
 
-  test('should validate CSRF token on sensitive operations', async ({ page }) => {
+  test('should validate CSRF token on sensitive operations', async ({
+    page,
+  }) => {
     let deleteRequestMade = false;
-    
+
     // Mock delete API with CSRF validation
     await page.route('**/api/admin/articles/*', async (route) => {
       if (route.request().method() === 'DELETE') {
         deleteRequestMade = true;
         const headers = route.request().headers();
-        
+
         if (!headers['x-csrf-token']) {
           await route.fulfill({
             status: 403,
             contentType: 'application/json',
-            body: JSON.stringify({ error: 'CSRF token required for delete operations' }),
+            body: JSON.stringify({
+              error: 'CSRF token required for delete operations',
+            }),
           });
           return;
         }
@@ -164,23 +169,23 @@ test.describe('CSRF Protection', () => {
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify([
-            { id: 'article-1', title: 'Test Article', status: 'DRAFT' }
+            { id: 'article-1', title: 'Test Article', status: 'DRAFT' },
           ]),
         });
       }
     });
 
     await page.goto('/admin/articles');
-    
+
     // Try to delete an article
     await page.click('[data-testid="delete-article-article-1"]');
-    
+
     // Confirm deletion in modal
     await page.click('[data-testid="confirm-delete"]');
-    
+
     // Wait for request
     await page.waitForTimeout(1000);
-    
+
     expect(deleteRequestMade).toBe(true);
   });
 });

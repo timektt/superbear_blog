@@ -22,13 +22,16 @@ export interface DeliverabilityConfig {
     incrementPerDay: number;
     maxLimit: number;
   };
-  domainLimits: Record<string, {
-    dailyLimit: number;
-    hourlyLimit: number;
-    currentDaily: number;
-    currentHourly: number;
-    lastReset: Date;
-  }>;
+  domainLimits: Record<
+    string,
+    {
+      dailyLimit: number;
+      hourlyLimit: number;
+      currentDaily: number;
+      currentHourly: number;
+      lastReset: Date;
+    }
+  >;
 }
 
 const defaultDeliverabilityConfig: DeliverabilityConfig = {
@@ -78,7 +81,8 @@ export function generateDeliverabilityHeaders(
   headers['List-ID'] = `<${config.headers.listId}>`;
 
   // Message-ID for tracking
-  headers['Message-ID'] = `<${campaignId}.${Date.now()}@${config.headers.listId}>`;
+  headers['Message-ID'] =
+    `<${campaignId}.${Date.now()}@${config.headers.listId}>`;
 
   // Auto-Submitted header
   headers['Auto-Submitted'] = 'auto-generated';
@@ -133,13 +137,19 @@ export function enhanceLinksWithTracking(
         const originalUrl = new URL(url);
 
         // Skip if already has UTM parameters or is unsubscribe link
-        if (originalUrl.searchParams.has('utm_source') || url.includes('unsubscribe')) {
+        if (
+          originalUrl.searchParams.has('utm_source') ||
+          url.includes('unsubscribe')
+        ) {
           return match;
         }
 
         // Determine link type
         let linkType: 'article' | 'cta' | 'footer' | 'header' = 'article';
-        if (text.toLowerCase().includes('read more') || text.toLowerCase().includes('continue reading')) {
+        if (
+          text.toLowerCase().includes('read more') ||
+          text.toLowerCase().includes('continue reading')
+        ) {
           linkType = 'cta';
         } else if (match.toLowerCase().includes('footer')) {
           linkType = 'footer';
@@ -167,9 +177,11 @@ export function enhanceLinksWithTracking(
 
     structuredLogger.info('Links enhanced with tracking');
     return enhancedContent;
-
   } catch (error) {
-    structuredLogger.error('Failed to enhance links with tracking', error as Error);
+    structuredLogger.error(
+      'Failed to enhance links with tracking',
+      error as Error
+    );
     return htmlContent;
   }
 }
@@ -199,7 +211,9 @@ export class WarmupManager {
 
     domains.forEach((domain) => {
       const envKey = `WARMUP_LIMIT_${domain.replace('.', '_').toUpperCase()}`;
-      const limit = parseInt(process.env[envKey] || this.config.initialLimit.toString());
+      const limit = parseInt(
+        process.env[envKey] || this.config.initialLimit.toString()
+      );
       this.currentLimits.set(domain, limit);
     });
   }
@@ -241,8 +255,14 @@ export class WarmupManager {
     });
   }
 
-  getWarmupStatus(): Record<string, { current: number; max: number; progress: number }> {
-    const status: Record<string, { current: number; max: number; progress: number }> = {};
+  getWarmupStatus(): Record<
+    string,
+    { current: number; max: number; progress: number }
+  > {
+    const status: Record<
+      string,
+      { current: number; max: number; progress: number }
+    > = {};
 
     for (const [domain, current] of this.currentLimits.entries()) {
       status[domain] = {
@@ -259,7 +279,8 @@ export class WarmupManager {
 // Domain-specific sending limits
 export class DomainLimitManager {
   private static instance: DomainLimitManager;
-  private limits: Map<string, DeliverabilityConfig['domainLimits'][string]> = new Map();
+  private limits: Map<string, DeliverabilityConfig['domainLimits'][string]> =
+    new Map();
 
   private constructor() {
     this.initializeLimits();
@@ -311,7 +332,10 @@ export class DomainLimitManager {
 
     this.resetCountersIfNeeded(domain, limit);
 
-    return limit.currentDaily < limit.dailyLimit && limit.currentHourly < limit.hourlyLimit;
+    return (
+      limit.currentDaily < limit.dailyLimit &&
+      limit.currentHourly < limit.hourlyLimit
+    );
   }
 
   recordSend(domain: string): void {
@@ -331,7 +355,8 @@ export class DomainLimitManager {
     limit: DeliverabilityConfig['domainLimits'][string]
   ): void {
     const now = new Date();
-    const hoursSinceReset = (now.getTime() - limit.lastReset.getTime()) / (1000 * 60 * 60);
+    const hoursSinceReset =
+      (now.getTime() - limit.lastReset.getTime()) / (1000 * 60 * 60);
 
     if (hoursSinceReset >= 24) {
       // Reset daily counter
@@ -392,8 +417,11 @@ export function optimizeEmailContent(htmlContent: string): {
 
   // Check email size
   const size = new Blob([optimized]).size;
-  if (size > 102400) { // 100KB
-    warnings.push(`Email size (${Math.round(size / 1024)}KB) exceeds recommended 100KB`);
+  if (size > 102400) {
+    // 100KB
+    warnings.push(
+      `Email size (${Math.round(size / 1024)}KB) exceeds recommended 100KB`
+    );
   }
 
   // Count images and links
@@ -424,9 +452,19 @@ export function calculateDeliverabilityScore(emailData: {
   replyTo?: string;
 }): {
   score: number;
-  factors: Array<{ factor: string; score: number; impact: 'positive' | 'negative' | 'neutral'; description: string }>;
+  factors: Array<{
+    factor: string;
+    score: number;
+    impact: 'positive' | 'negative' | 'neutral';
+    description: string;
+  }>;
 } {
-  const factors: Array<{ factor: string; score: number; impact: 'positive' | 'negative' | 'neutral'; description: string }> = [];
+  const factors: Array<{
+    factor: string;
+    score: number;
+    impact: 'positive' | 'negative' | 'neutral';
+    description: string;
+  }> = [];
   let totalScore = 0;
 
   // Subject line analysis
@@ -450,10 +488,18 @@ export function calculateDeliverabilityScore(emailData: {
   }
 
   // Spam words check
-  const spamWords = ['free', 'urgent', 'act now', 'limited time', 'click here', 'buy now'];
-  const spamWordsFound = spamWords.filter((word) =>
-    emailData.subject.toLowerCase().includes(word) ||
-    emailData.htmlContent.toLowerCase().includes(word)
+  const spamWords = [
+    'free',
+    'urgent',
+    'act now',
+    'limited time',
+    'click here',
+    'buy now',
+  ];
+  const spamWordsFound = spamWords.filter(
+    (word) =>
+      emailData.subject.toLowerCase().includes(word) ||
+      emailData.htmlContent.toLowerCase().includes(word)
   );
 
   if (spamWordsFound.length === 0) {

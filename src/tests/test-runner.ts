@@ -2,10 +2,10 @@
 
 /**
  * Comprehensive Test Runner for CMS Platform Fixes
- * 
+ *
  * This script orchestrates all testing phases for MEGA TASK 4:
  * - Unit Tests
- * - Integration Tests  
+ * - Integration Tests
  * - E2E Tests
  * - Security Audits
  * - Performance Tests
@@ -97,21 +97,21 @@ class TestRunner {
 
   async runSuite(suite: TestSuite): Promise<TestResults> {
     const startTime = Date.now();
-    
+
     console.log(`\n🧪 Running ${suite.name}...`);
     console.log(`   ${suite.description}`);
-    
+
     try {
       const output = execSync(suite.command, {
         encoding: 'utf8',
         timeout: suite.timeout || 60000,
         stdio: 'pipe',
       });
-      
+
       const duration = Date.now() - startTime;
-      
+
       console.log(`✅ ${suite.name} passed (${duration}ms)`);
-      
+
       return {
         suite: suite.name,
         passed: true,
@@ -120,7 +120,7 @@ class TestRunner {
       };
     } catch (error: any) {
       const duration = Date.now() - startTime;
-      
+
       console.log(`❌ ${suite.name} failed (${duration}ms)`);
       if (error.stdout) {
         console.log('STDOUT:', error.stdout);
@@ -128,7 +128,7 @@ class TestRunner {
       if (error.stderr) {
         console.log('STDERR:', error.stderr);
       }
-      
+
       return {
         suite: suite.name,
         passed: false,
@@ -139,28 +139,34 @@ class TestRunner {
     }
   }
 
-  async runAll(options: { 
-    skipOptional?: boolean;
-    failFast?: boolean;
-    parallel?: boolean;
-  } = {}): Promise<void> {
+  async runAll(
+    options: {
+      skipOptional?: boolean;
+      failFast?: boolean;
+      parallel?: boolean;
+    } = {}
+  ): Promise<void> {
     console.log('🚀 Starting Comprehensive Test Suite');
     console.log('=====================================\n');
 
-    const suitesToRun = options.skipOptional 
-      ? this.testSuites.filter(suite => suite.required)
+    const suitesToRun = options.skipOptional
+      ? this.testSuites.filter((suite) => suite.required)
       : this.testSuites;
 
     if (options.parallel) {
       // Run non-E2E tests in parallel for speed
-      const parallelSuites = suitesToRun.filter(suite => suite.name !== 'E2E Tests');
-      const e2eSuites = suitesToRun.filter(suite => suite.name === 'E2E Tests');
+      const parallelSuites = suitesToRun.filter(
+        (suite) => suite.name !== 'E2E Tests'
+      );
+      const e2eSuites = suitesToRun.filter(
+        (suite) => suite.name === 'E2E Tests'
+      );
 
       // Run parallel suites
       if (parallelSuites.length > 0) {
         console.log('🔄 Running tests in parallel...\n');
         const parallelResults = await Promise.all(
-          parallelSuites.map(suite => this.runSuite(suite))
+          parallelSuites.map((suite) => this.runSuite(suite))
         );
         this.results.push(...parallelResults);
       }
@@ -169,7 +175,7 @@ class TestRunner {
       for (const suite of e2eSuites) {
         const result = await this.runSuite(suite);
         this.results.push(result);
-        
+
         if (!result.passed && options.failFast) {
           break;
         }
@@ -179,7 +185,7 @@ class TestRunner {
       for (const suite of suitesToRun) {
         const result = await this.runSuite(suite);
         this.results.push(result);
-        
+
         if (!result.passed && options.failFast) {
           break;
         }
@@ -191,8 +197,8 @@ class TestRunner {
 
   private printSummary(): void {
     const totalDuration = Date.now() - this.startTime;
-    const passed = this.results.filter(r => r.passed).length;
-    const failed = this.results.filter(r => !r.passed).length;
+    const passed = this.results.filter((r) => r.passed).length;
+    const failed = this.results.filter((r) => !r.passed).length;
     const total = this.results.length;
 
     console.log('\n📊 Test Summary');
@@ -205,20 +211,22 @@ class TestRunner {
     if (failed > 0) {
       console.log('\n❌ Failed Tests:');
       this.results
-        .filter(r => !r.passed)
-        .forEach(result => {
-          console.log(`   • ${result.suite}: ${result.error || 'Unknown error'}`);
+        .filter((r) => !r.passed)
+        .forEach((result) => {
+          console.log(
+            `   • ${result.suite}: ${result.error || 'Unknown error'}`
+          );
         });
     }
 
     // Performance metrics
     const slowTests = this.results
-      .filter(r => r.duration > 30000)
+      .filter((r) => r.duration > 30000)
       .sort((a, b) => b.duration - a.duration);
 
     if (slowTests.length > 0) {
       console.log('\n⚠️  Slow Tests (>30s):');
-      slowTests.forEach(result => {
+      slowTests.forEach((result) => {
         console.log(`   • ${result.suite}: ${result.duration}ms`);
       });
     }
@@ -231,19 +239,23 @@ class TestRunner {
   }
 
   private printCoverageSummary(): void {
-    const coverageFile = path.join(process.cwd(), 'coverage', 'coverage-summary.json');
-    
+    const coverageFile = path.join(
+      process.cwd(),
+      'coverage',
+      'coverage-summary.json'
+    );
+
     if (existsSync(coverageFile)) {
       try {
         const coverage = require(coverageFile);
         const total = coverage.total;
-        
+
         console.log('\n📈 Coverage Summary:');
         console.log(`   Lines: ${total.lines.pct}%`);
         console.log(`   Functions: ${total.functions.pct}%`);
         console.log(`   Branches: ${total.branches.pct}%`);
         console.log(`   Statements: ${total.statements.pct}%`);
-        
+
         if (total.lines.pct < 80) {
           console.log('⚠️  Line coverage below 80%');
         }
@@ -255,9 +267,9 @@ class TestRunner {
 
   async runSpecific(suiteNames: string[]): Promise<void> {
     console.log(`🎯 Running specific test suites: ${suiteNames.join(', ')}`);
-    
-    const suitesToRun = this.testSuites.filter(suite => 
-      suiteNames.some(name => 
+
+    const suitesToRun = this.testSuites.filter((suite) =>
+      suiteNames.some((name) =>
         suite.name.toLowerCase().includes(name.toLowerCase())
       )
     );
@@ -265,7 +277,7 @@ class TestRunner {
     if (suitesToRun.length === 0) {
       console.log('❌ No matching test suites found');
       console.log('Available suites:');
-      this.testSuites.forEach(suite => {
+      this.testSuites.forEach((suite) => {
         console.log(`   • ${suite.name}`);
       });
       process.exit(1);
@@ -282,8 +294,8 @@ class TestRunner {
   listSuites(): void {
     console.log('📋 Available Test Suites:');
     console.log('=========================\n');
-    
-    this.testSuites.forEach(suite => {
+
+    this.testSuites.forEach((suite) => {
       const required = suite.required ? '(Required)' : '(Optional)';
       console.log(`${suite.name} ${required}`);
       console.log(`   Command: ${suite.command}`);
@@ -304,9 +316,15 @@ async function main() {
     console.log('Usage:');
     console.log('  npm run test:all                    # Run all tests');
     console.log('  npm run test:all -- --skip-optional # Skip optional tests');
-    console.log('  npm run test:all -- --fail-fast     # Stop on first failure');
-    console.log('  npm run test:all -- --parallel      # Run tests in parallel');
-    console.log('  npm run test:all -- --list          # List available test suites');
+    console.log(
+      '  npm run test:all -- --fail-fast     # Stop on first failure'
+    );
+    console.log(
+      '  npm run test:all -- --parallel      # Run tests in parallel'
+    );
+    console.log(
+      '  npm run test:all -- --list          # List available test suites'
+    );
     console.log('  npm run test:all -- unit integration # Run specific suites');
     console.log('');
     return;
@@ -324,7 +342,7 @@ async function main() {
   };
 
   // Filter out option flags to get suite names
-  const suiteNames = args.filter(arg => !arg.startsWith('--'));
+  const suiteNames = args.filter((arg) => !arg.startsWith('--'));
 
   if (suiteNames.length > 0) {
     await runner.runSpecific(suiteNames);
@@ -335,7 +353,7 @@ async function main() {
 
 // Run if called directly
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error('❌ Test runner failed:', error);
     process.exit(1);
   });

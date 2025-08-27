@@ -131,7 +131,7 @@ describe('AudioPlayer', () => {
 
     const playButton = screen.getByLabelText('Play');
     expect(playButton).toBeDisabled();
-    
+
     // Should show loading spinner
     const spinner = playButton.querySelector('.animate-spin');
     expect(spinner).toBeInTheDocument();
@@ -148,9 +148,10 @@ describe('AudioPlayer', () => {
 
     // Simulate time update
     mockAudio.currentTime = 600;
-    const timeUpdateCallback = mockAudio.addEventListener.mock.calls
-      .find(call => call[0] === 'timeupdate')?.[1];
-    
+    const timeUpdateCallback = mockAudio.addEventListener.mock.calls.find(
+      (call) => call[0] === 'timeupdate'
+    )?.[1];
+
     if (timeUpdateCallback) {
       timeUpdateCallback();
     }
@@ -168,9 +169,10 @@ describe('AudioPlayer', () => {
     );
 
     // Simulate audio end
-    const endedCallback = mockAudio.addEventListener.mock.calls
-      .find(call => call[0] === 'ended')?.[1];
-    
+    const endedCallback = mockAudio.addEventListener.mock.calls.find(
+      (call) => call[0] === 'ended'
+    )?.[1];
+
     if (endedCallback) {
       endedCallback();
     }
@@ -202,9 +204,10 @@ describe('AudioPlayer', () => {
 
     // Simulate metadata loaded
     mockAudio.duration = 2400;
-    const metadataCallback = mockAudio.addEventListener.mock.calls
-      .find(call => call[0] === 'loadedmetadata')?.[1];
-    
+    const metadataCallback = mockAudio.addEventListener.mock.calls.find(
+      (call) => call[0] === 'loadedmetadata'
+    )?.[1];
+
     if (metadataCallback) {
       metadataCallback();
     }

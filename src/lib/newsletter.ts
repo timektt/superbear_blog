@@ -44,7 +44,10 @@ export async function sendVerificationEmail(
     const mailOptions = {
       from: {
         name: 'SuperBear Blog',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@superbear.blog',
+        address:
+          process.env.SMTP_FROM ||
+          process.env.SMTP_USER ||
+          'noreply@superbear.blog',
       },
       to: email,
       subject: 'Confirm your SuperBear Blog newsletter subscription',
@@ -66,7 +69,9 @@ export async function sendVerificationEmail(
     const result = await transporter.sendMail(mailOptions);
     console.log('Verification email sent successfully:', result.messageId);
   } catch (error) {
-    logger.error('Failed to send verification email', error as Error, { email });
+    logger.error('Failed to send verification email', error as Error, {
+      email,
+    });
     // reportError(error as Error, { context: 'send_verification_email', email });
     throw new Error('Failed to send verification email');
   }
@@ -78,7 +83,10 @@ export async function sendWelcomeEmail(email: string): Promise<void> {
     const mailOptions = {
       from: {
         name: 'SuperBear Blog',
-        address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@superbear.blog',
+        address:
+          process.env.SMTP_FROM ||
+          process.env.SMTP_USER ||
+          'noreply@superbear.blog',
       },
       to: email,
       subject: 'Welcome to SuperBear Blog Newsletter! 🎉',
@@ -248,11 +256,11 @@ The SuperBear Blog Team
 // Newsletter statistics
 export async function getNewsletterStats() {
   const { prisma } = await import('@/lib/prisma');
-  
+
   if (!prisma) {
     throw new Error('Database not available');
   }
-  
+
   try {
     const stats = await prisma.newsletter.groupBy({
       by: ['status'],
@@ -283,7 +291,6 @@ export async function getNewsletterStats() {
         return acc;
       }, {}),
     };
-
   } catch (error) {
     logger.error('Failed to get newsletter stats', error as Error);
     throw new Error('Failed to get newsletter statistics');

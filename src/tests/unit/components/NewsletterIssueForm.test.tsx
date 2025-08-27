@@ -55,18 +55,21 @@ describe('NewsletterIssueForm', () => {
 
   it('renders create form correctly', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Create Newsletter Issue #6')).toBeInTheDocument();
+      expect(
+        screen.getByText('Create Newsletter Issue #6')
+      ).toBeInTheDocument();
     });
 
-    expect(screen.getByPlaceholderText('Enter newsletter title')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('newsletter-issue-slug')).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('Enter newsletter title')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText('newsletter-issue-slug')
+    ).toBeInTheDocument();
     expect(screen.getByTestId('editor')).toBeInTheDocument();
     expect(screen.getByText('Create')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
@@ -100,10 +103,7 @@ describe('NewsletterIssueForm', () => {
 
   it('validates required fields', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     const submitButton = screen.getByText('Create');
@@ -119,30 +119,30 @@ describe('NewsletterIssueForm', () => {
 
   it('generates slug automatically when title is entered', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     const titleInput = screen.getByPlaceholderText('Enter newsletter title');
     fireEvent.change(titleInput, { target: { value: 'New Newsletter Issue' } });
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/admin/slugs', expect.objectContaining({
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'New Newsletter Issue', type: 'newsletter' }),
-      }));
+      expect(fetch).toHaveBeenCalledWith(
+        '/api/admin/slugs',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: 'New Newsletter Issue',
+            type: 'newsletter',
+          }),
+        })
+      );
     });
   });
 
   it('handles form submission with valid data', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     // Fill in required fields
@@ -160,25 +160,26 @@ describe('NewsletterIssueForm', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        title: 'Test Newsletter',
-        slug: 'test-newsletter',
-        content: 'Test content',
-      }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Test Newsletter',
+          slug: 'test-newsletter',
+          content: 'Test content',
+        })
+      );
     });
   });
 
   it('handles summary character limit', () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
-    const summaryTextarea = screen.getByPlaceholderText('Brief newsletter summary (max 500 characters)');
+    const summaryTextarea = screen.getByPlaceholderText(
+      'Brief newsletter summary (max 500 characters)'
+    );
     const testSummary = 'A'.repeat(100);
-    
+
     fireEvent.change(summaryTextarea, { target: { value: testSummary } });
 
     expect(screen.getByText('100/500 characters')).toBeInTheDocument();
@@ -186,10 +187,7 @@ describe('NewsletterIssueForm', () => {
 
   it('shows publish now button for draft status', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     await waitFor(() => {
@@ -220,10 +218,7 @@ describe('NewsletterIssueForm', () => {
 
   it('handles publish now button click', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     await waitFor(() => {
@@ -242,19 +237,18 @@ describe('NewsletterIssueForm', () => {
     fireEvent.click(screen.getByText('Create'));
 
     await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith(expect.objectContaining({
-        status: 'PUBLISHED',
-        publishedAt: expect.any(Date),
-      }));
+      expect(mockOnSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'PUBLISHED',
+          publishedAt: expect.any(Date),
+        })
+      );
     });
   });
 
   it('handles cancel button click', () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     fireEvent.click(screen.getByText('Cancel'));
@@ -276,10 +270,7 @@ describe('NewsletterIssueForm', () => {
 
   it('validates slug format', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     fireEvent.change(screen.getByPlaceholderText('newsletter-issue-slug'), {
@@ -289,16 +280,17 @@ describe('NewsletterIssueForm', () => {
     fireEvent.click(screen.getByText('Create'));
 
     await waitFor(() => {
-      expect(screen.getByText('Slug must contain only lowercase letters, numbers, and hyphens')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Slug must contain only lowercase letters, numbers, and hyphens'
+        )
+      ).toBeInTheDocument();
     });
   });
 
   it('shows publish date field when status is PUBLISHED', async () => {
     render(
-      <NewsletterIssueForm
-        onSubmit={mockOnSubmit}
-        onCancel={mockOnCancel}
-      />
+      <NewsletterIssueForm onSubmit={mockOnSubmit} onCancel={mockOnCancel} />
     );
 
     // Change status to PUBLISHED

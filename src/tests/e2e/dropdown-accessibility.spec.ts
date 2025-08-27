@@ -6,7 +6,9 @@ test.describe('Dropdown Menu Accessibility', () => {
     await page.goto('/');
   });
 
-  test('dropdown panel has proper contrast and visibility', async ({ page }) => {
+  test('dropdown panel has proper contrast and visibility', async ({
+    page,
+  }) => {
     // Open the More dropdown
     const moreButton = page.getByRole('button', { name: /more/i });
     await expect(moreButton).toBeVisible();
@@ -69,7 +71,9 @@ test.describe('Dropdown Menu Accessibility', () => {
     expect(lightTextColor).not.toBe(darkTextColor);
   });
 
-  test('dropdown has proper z-index and appears above content', async ({ page }) => {
+  test('dropdown has proper z-index and appears above content', async ({
+    page,
+  }) => {
     const moreButton = page.getByRole('button', { name: /more/i });
     await moreButton.click();
 
@@ -103,14 +107,14 @@ test.describe('Dropdown Menu Accessibility', () => {
 
   test('dropdown keyboard navigation works correctly', async ({ page }) => {
     const moreButton = page.getByRole('button', { name: /more/i });
-    
+
     // Focus the More button
     await moreButton.focus();
     await expect(moreButton).toBeFocused();
 
     // Open dropdown with Enter key
     await page.keyboard.press('Enter');
-    
+
     const dropdown = page.getByRole('menu');
     await expect(dropdown).toBeVisible();
 
@@ -142,7 +146,7 @@ test.describe('Dropdown Menu Accessibility', () => {
 
   test('dropdown has proper ARIA attributes', async ({ page }) => {
     const moreButton = page.getByRole('button', { name: /more/i });
-    
+
     // Check initial ARIA attributes
     await expect(moreButton).toHaveAttribute('aria-expanded', 'false');
     await expect(moreButton).toHaveAttribute('aria-haspopup', 'true');
@@ -168,7 +172,7 @@ test.describe('Dropdown Menu Accessibility', () => {
     // Check that menu items have proper role
     const menuItems = page.getByRole('menuitem');
     const itemCount = await menuItems.count();
-    
+
     expect(itemCount).toBeGreaterThan(0);
 
     // Each menu item should have the menuitem role

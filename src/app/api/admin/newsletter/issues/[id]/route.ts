@@ -68,7 +68,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = updateNewsletterIssueSchema.safeParse(body);
     if (!validationResult.success) {
@@ -112,21 +112,26 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Prevent editing critical fields if already sent
     if (existingIssue.sentAt && (data.title || data.content)) {
       return NextResponse.json(
-        { error: 'Cannot edit title or content of a newsletter that has already been sent' },
+        {
+          error:
+            'Cannot edit title or content of a newsletter that has already been sent',
+        },
         { status: 400 }
       );
     }
 
     // Prepare update data
     const updateData: any = {};
-    
+
     if (data.title !== undefined) updateData.title = data.title;
     if (data.slug !== undefined) updateData.slug = data.slug;
     if (data.summary !== undefined) updateData.summary = data.summary;
     if (data.content !== undefined) updateData.content = data.content;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.publishedAt !== undefined) {
-      updateData.publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
+      updateData.publishedAt = data.publishedAt
+        ? new Date(data.publishedAt)
+        : null;
     }
     if (data.authorId !== undefined) updateData.authorId = data.authorId;
 
@@ -190,7 +195,9 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Prevent deletion if already sent
     if (existingIssue.sentAt) {
       return NextResponse.json(
-        { error: 'Cannot delete a newsletter issue that has already been sent' },
+        {
+          error: 'Cannot delete a newsletter issue that has already been sent',
+        },
         { status: 400 }
       );
     }

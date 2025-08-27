@@ -17,7 +17,7 @@ const mockPodcast = {
 describe('PodcastCard', () => {
   it('renders podcast information correctly', () => {
     render(<PodcastCard podcast={mockPodcast} />);
-    
+
     expect(screen.getByText('Test Podcast Episode')).toBeInTheDocument();
     expect(screen.getByText('Episode 5')).toBeInTheDocument();
     expect(screen.getByText('Technology')).toBeInTheDocument();
@@ -36,7 +36,7 @@ describe('PodcastCard', () => {
     };
 
     render(<PodcastCard podcast={minimalPodcast} />);
-    
+
     expect(screen.getByText('Test Podcast Episode')).toBeInTheDocument();
     expect(screen.getByText('By John Doe')).toBeInTheDocument();
     expect(screen.queryByText('Episode')).not.toBeInTheDocument();
@@ -50,28 +50,36 @@ describe('PodcastCard', () => {
     };
 
     render(<PodcastCard podcast={podcastWithoutImage} />);
-    
+
     const image = screen.getByAltText('Test Podcast Episode cover');
-    expect(image).toHaveAttribute('src', expect.stringContaining('placeholder-image.svg'));
+    expect(image).toHaveAttribute(
+      'src',
+      expect.stringContaining('placeholder-image.svg')
+    );
   });
 
   it('creates correct link to podcast detail page', () => {
     render(<PodcastCard podcast={mockPodcast} />);
-    
+
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/podcasts/test-podcast-episode');
   });
 
   it('applies hover effects with correct classes', () => {
     render(<PodcastCard podcast={mockPodcast} />);
-    
+
     const card = screen.getByRole('link').closest('.group');
-    expect(card).toHaveClass('group', 'hover:shadow-lg', 'transition-all', 'duration-200');
+    expect(card).toHaveClass(
+      'group',
+      'hover:shadow-lg',
+      'transition-all',
+      'duration-200'
+    );
   });
 
   it('formats date correctly', () => {
     render(<PodcastCard podcast={mockPodcast} />);
-    
+
     const dateElement = screen.getByText('Jan 15, 2024');
     expect(dateElement).toBeInTheDocument();
   });
@@ -79,11 +87,12 @@ describe('PodcastCard', () => {
   it('truncates long descriptions with line-clamp', () => {
     const longDescriptionPodcast = {
       ...mockPodcast,
-      description: 'This is a very long description that should be truncated after three lines to prevent the card from becoming too tall and maintain consistent layout across the podcast grid.',
+      description:
+        'This is a very long description that should be truncated after three lines to prevent the card from becoming too tall and maintain consistent layout across the podcast grid.',
     };
 
     render(<PodcastCard podcast={longDescriptionPodcast} />);
-    
+
     const description = screen.getByText(longDescriptionPodcast.description);
     expect(description).toHaveClass('line-clamp-3');
   });

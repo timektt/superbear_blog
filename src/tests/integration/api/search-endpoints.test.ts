@@ -18,7 +18,9 @@ jest.mock('next-auth', () => ({
 }));
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockGetServerSession = getServerSession as jest.MockedFunction<
+  typeof getServerSession
+>;
 
 describe('/api/search', () => {
   beforeEach(() => {
@@ -58,7 +60,7 @@ describe('/api/search', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(200);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData).toEqual({
         articles: expect.arrayContaining([
@@ -172,7 +174,7 @@ describe('/api/search', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(400);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toContain('Invalid parameters');
     });
@@ -187,13 +189,15 @@ describe('/api/search', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(400);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toContain('Search query is required');
     });
 
     it('should handle database errors gracefully', async () => {
-      mockPrisma.article.findMany.mockRejectedValue(new Error('Database connection failed'));
+      mockPrisma.article.findMany.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       const { req, res } = createMocks({
         method: 'GET',
@@ -204,7 +208,7 @@ describe('/api/search', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(500);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toBe('Internal server error');
     });
@@ -290,8 +294,8 @@ describe('/api/search', () => {
       );
 
       // Some requests should be rate limited
-      const rateLimitedResponses = responses.filter(res => 
-        res && res.status === 429
+      const rateLimitedResponses = responses.filter(
+        (res) => res && res.status === 429
       );
 
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
@@ -301,7 +305,7 @@ describe('/api/search', () => {
   describe('Security', () => {
     it('should sanitize search queries to prevent injection', async () => {
       const maliciousQuery = "'; DROP TABLE articles; --";
-      
+
       const { req, res } = createMocks({
         method: 'GET',
         url: `/api/search?q=${encodeURIComponent(maliciousQuery)}`,
@@ -379,7 +383,7 @@ describe('/api/search', () => {
 
     it('should cache search results for common queries', async () => {
       const commonQuery = 'artificial intelligence';
-      
+
       mockPrisma.article.findMany.mockResolvedValue([]);
       mockPrisma.article.count.mockResolvedValue(0);
 

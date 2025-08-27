@@ -10,7 +10,9 @@ const envSchema = z.object({
   DIRECT_URL: z.string().optional(),
 
   // Authentication
-  NEXTAUTH_SECRET: z.string().min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
+  NEXTAUTH_SECRET: z
+    .string()
+    .min(32, 'NEXTAUTH_SECRET must be at least 32 characters'),
   NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL'),
 
   // Email Configuration
@@ -22,11 +24,18 @@ const envSchema = z.object({
 
   // Security
   CRON_SECRET: z.string().min(16, 'CRON_SECRET must be at least 16 characters'),
-  EMAIL_WEBHOOK_SECRET: z.string().min(16, 'EMAIL_WEBHOOK_SECRET must be at least 16 characters'),
-  WEBHOOK_SECRET: z.string().min(16, 'WEBHOOK_SECRET must be at least 16 characters').optional(),
+  EMAIL_WEBHOOK_SECRET: z
+    .string()
+    .min(16, 'EMAIL_WEBHOOK_SECRET must be at least 16 characters'),
+  WEBHOOK_SECRET: z
+    .string()
+    .min(16, 'WEBHOOK_SECRET must be at least 16 characters')
+    .optional(),
 
   // Email Provider Settings
-  MAIL_PROVIDER: z.enum(['smtp', 'sendgrid', 'mailgun', 'postmark', 'resend']).optional(),
+  MAIL_PROVIDER: z
+    .enum(['smtp', 'sendgrid', 'mailgun', 'postmark', 'resend'])
+    .optional(),
   SENDGRID_API_KEY: z.string().optional(),
   MAILGUN_API_KEY: z.string().optional(),
   MAILGUN_DOMAIN: z.string().optional(),
@@ -34,62 +43,155 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
 
   // Email Limits and Throttling
-  EMAIL_BATCH_SIZE: z.string().regex(/^\d+$/, 'EMAIL_BATCH_SIZE must be a number').optional(),
-  EMAIL_SEND_THROTTLE_MS: z.string().regex(/^\d+$/, 'EMAIL_SEND_THROTTLE_MS must be a number').optional(),
-  
+  EMAIL_BATCH_SIZE: z
+    .string()
+    .regex(/^\d+$/, 'EMAIL_BATCH_SIZE must be a number')
+    .optional(),
+  EMAIL_SEND_THROTTLE_MS: z
+    .string()
+    .regex(/^\d+$/, 'EMAIL_SEND_THROTTLE_MS must be a number')
+    .optional(),
+
   // Domain-specific throttling
-  GMAIL_THROTTLE_LIMIT: z.string().regex(/^\d+$/, 'GMAIL_THROTTLE_LIMIT must be a number').optional(),
-  GMAIL_DAILY_LIMIT: z.string().regex(/^\d+$/, 'GMAIL_DAILY_LIMIT must be a number').optional(),
-  GMAIL_HOURLY_LIMIT: z.string().regex(/^\d+$/, 'GMAIL_HOURLY_LIMIT must be a number').optional(),
-  
-  OUTLOOK_THROTTLE_LIMIT: z.string().regex(/^\d+$/, 'OUTLOOK_THROTTLE_LIMIT must be a number').optional(),
-  OUTLOOK_DAILY_LIMIT: z.string().regex(/^\d+$/, 'OUTLOOK_DAILY_LIMIT must be a number').optional(),
-  OUTLOOK_HOURLY_LIMIT: z.string().regex(/^\d+$/, 'OUTLOOK_HOURLY_LIMIT must be a number').optional(),
-  
-  YAHOO_DAILY_LIMIT: z.string().regex(/^\d+$/, 'YAHOO_DAILY_LIMIT must be a number').optional(),
-  YAHOO_HOURLY_LIMIT: z.string().regex(/^\d+$/, 'YAHOO_HOURLY_LIMIT must be a number').optional(),
-  
-  HOTMAIL_DAILY_LIMIT: z.string().regex(/^\d+$/, 'HOTMAIL_DAILY_LIMIT must be a number').optional(),
-  HOTMAIL_HOURLY_LIMIT: z.string().regex(/^\d+$/, 'HOTMAIL_HOURLY_LIMIT must be a number').optional(),
+  GMAIL_THROTTLE_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'GMAIL_THROTTLE_LIMIT must be a number')
+    .optional(),
+  GMAIL_DAILY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'GMAIL_DAILY_LIMIT must be a number')
+    .optional(),
+  GMAIL_HOURLY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'GMAIL_HOURLY_LIMIT must be a number')
+    .optional(),
+
+  OUTLOOK_THROTTLE_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'OUTLOOK_THROTTLE_LIMIT must be a number')
+    .optional(),
+  OUTLOOK_DAILY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'OUTLOOK_DAILY_LIMIT must be a number')
+    .optional(),
+  OUTLOOK_HOURLY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'OUTLOOK_HOURLY_LIMIT must be a number')
+    .optional(),
+
+  YAHOO_DAILY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'YAHOO_DAILY_LIMIT must be a number')
+    .optional(),
+  YAHOO_HOURLY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'YAHOO_HOURLY_LIMIT must be a number')
+    .optional(),
+
+  HOTMAIL_DAILY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'HOTMAIL_DAILY_LIMIT must be a number')
+    .optional(),
+  HOTMAIL_HOURLY_LIMIT: z
+    .string()
+    .regex(/^\d+$/, 'HOTMAIL_HOURLY_LIMIT must be a number')
+    .optional(),
 
   // Email Warmup
   EMAIL_WARMUP_ENABLED: z.string().optional(),
-  EMAIL_WARMUP_INITIAL: z.string().regex(/^\d+$/, 'EMAIL_WARMUP_INITIAL must be a number').optional(),
-  EMAIL_WARMUP_INCREMENT: z.string().regex(/^\d+$/, 'EMAIL_WARMUP_INCREMENT must be a number').optional(),
-  EMAIL_WARMUP_MAX: z.string().regex(/^\d+$/, 'EMAIL_WARMUP_MAX must be a number').optional(),
+  EMAIL_WARMUP_INITIAL: z
+    .string()
+    .regex(/^\d+$/, 'EMAIL_WARMUP_INITIAL must be a number')
+    .optional(),
+  EMAIL_WARMUP_INCREMENT: z
+    .string()
+    .regex(/^\d+$/, 'EMAIL_WARMUP_INCREMENT must be a number')
+    .optional(),
+  EMAIL_WARMUP_MAX: z
+    .string()
+    .regex(/^\d+$/, 'EMAIL_WARMUP_MAX must be a number')
+    .optional(),
 
   // Deliverability
   EMAIL_LIST_ID: z.string().optional(),
   EMAIL_TRACKING_DOMAIN: z.string().optional(),
 
   // Data Retention (GDPR)
-  RETENTION_NEWSLETTER_EVENTS: z.string().regex(/^\d+$/, 'RETENTION_NEWSLETTER_EVENTS must be a number').optional(),
-  RETENTION_CAMPAIGN_SNAPSHOTS: z.string().regex(/^\d+$/, 'RETENTION_CAMPAIGN_SNAPSHOTS must be a number').optional(),
-  RETENTION_CAMPAIGN_DELIVERIES: z.string().regex(/^\d+$/, 'RETENTION_CAMPAIGN_DELIVERIES must be a number').optional(),
-  RETENTION_SUPPRESSIONS: z.string().regex(/^\d+$/, 'RETENTION_SUPPRESSIONS must be a number').optional(),
-  RETENTION_AUDIT_LOGS: z.string().regex(/^\d+$/, 'RETENTION_AUDIT_LOGS must be a number').optional(),
+  RETENTION_NEWSLETTER_EVENTS: z
+    .string()
+    .regex(/^\d+$/, 'RETENTION_NEWSLETTER_EVENTS must be a number')
+    .optional(),
+  RETENTION_CAMPAIGN_SNAPSHOTS: z
+    .string()
+    .regex(/^\d+$/, 'RETENTION_CAMPAIGN_SNAPSHOTS must be a number')
+    .optional(),
+  RETENTION_CAMPAIGN_DELIVERIES: z
+    .string()
+    .regex(/^\d+$/, 'RETENTION_CAMPAIGN_DELIVERIES must be a number')
+    .optional(),
+  RETENTION_SUPPRESSIONS: z
+    .string()
+    .regex(/^\d+$/, 'RETENTION_SUPPRESSIONS must be a number')
+    .optional(),
+  RETENTION_AUDIT_LOGS: z
+    .string()
+    .regex(/^\d+$/, 'RETENTION_AUDIT_LOGS must be a number')
+    .optional(),
 
   // Timezone and Quiet Hours
   DEFAULT_TIMEZONE: z.string().optional(),
-  QUIET_HOURS_START: z.string().regex(/^\d+$/, 'QUIET_HOURS_START must be a number (0-23)').optional(),
-  QUIET_HOURS_END: z.string().regex(/^\d+$/, 'QUIET_HOURS_END must be a number (0-23)').optional(),
+  QUIET_HOURS_START: z
+    .string()
+    .regex(/^\d+$/, 'QUIET_HOURS_START must be a number (0-23)')
+    .optional(),
+  QUIET_HOURS_END: z
+    .string()
+    .regex(/^\d+$/, 'QUIET_HOURS_END must be a number (0-23)')
+    .optional(),
   QUIET_HOURS_TIMEZONE: z.string().optional(),
   ENABLE_QUIET_HOURS: z.string().optional(),
 
   // Monitoring and Alerts
-  ALERT_QUEUE_DEPTH_HIGH: z.string().regex(/^\d+$/, 'ALERT_QUEUE_DEPTH_HIGH must be a number').optional(),
-  ALERT_QUEUE_DEPTH_CRITICAL: z.string().regex(/^\d+$/, 'ALERT_QUEUE_DEPTH_CRITICAL must be a number').optional(),
-  ALERT_BOUNCE_RATE_HIGH: z.string().regex(/^\d*\.?\d+$/, 'ALERT_BOUNCE_RATE_HIGH must be a number').optional(),
-  ALERT_BOUNCE_RATE_CRITICAL: z.string().regex(/^\d*\.?\d+$/, 'ALERT_BOUNCE_RATE_CRITICAL must be a number').optional(),
-  ALERT_COMPLAINT_RATE_HIGH: z.string().regex(/^\d*\.?\d+$/, 'ALERT_COMPLAINT_RATE_HIGH must be a number').optional(),
-  ALERT_COMPLAINT_RATE_CRITICAL: z.string().regex(/^\d*\.?\d+$/, 'ALERT_COMPLAINT_RATE_CRITICAL must be a number').optional(),
-  ALERT_WEBHOOK_LAG_HIGH: z.string().regex(/^\d+$/, 'ALERT_WEBHOOK_LAG_HIGH must be a number').optional(),
-  ALERT_SEND_RATE_LOW: z.string().regex(/^\d*\.?\d+$/, 'ALERT_SEND_RATE_LOW must be a number').optional(),
+  ALERT_QUEUE_DEPTH_HIGH: z
+    .string()
+    .regex(/^\d+$/, 'ALERT_QUEUE_DEPTH_HIGH must be a number')
+    .optional(),
+  ALERT_QUEUE_DEPTH_CRITICAL: z
+    .string()
+    .regex(/^\d+$/, 'ALERT_QUEUE_DEPTH_CRITICAL must be a number')
+    .optional(),
+  ALERT_BOUNCE_RATE_HIGH: z
+    .string()
+    .regex(/^\d*\.?\d+$/, 'ALERT_BOUNCE_RATE_HIGH must be a number')
+    .optional(),
+  ALERT_BOUNCE_RATE_CRITICAL: z
+    .string()
+    .regex(/^\d*\.?\d+$/, 'ALERT_BOUNCE_RATE_CRITICAL must be a number')
+    .optional(),
+  ALERT_COMPLAINT_RATE_HIGH: z
+    .string()
+    .regex(/^\d*\.?\d+$/, 'ALERT_COMPLAINT_RATE_HIGH must be a number')
+    .optional(),
+  ALERT_COMPLAINT_RATE_CRITICAL: z
+    .string()
+    .regex(/^\d*\.?\d+$/, 'ALERT_COMPLAINT_RATE_CRITICAL must be a number')
+    .optional(),
+  ALERT_WEBHOOK_LAG_HIGH: z
+    .string()
+    .regex(/^\d+$/, 'ALERT_WEBHOOK_LAG_HIGH must be a number')
+    .optional(),
+  ALERT_SEND_RATE_LOW: z
+    .string()
+    .regex(/^\d*\.?\d+$/, 'ALERT_SEND_RATE_LOW must be a number')
+    .optional(),
 
   // External Services
-  SLACK_WEBHOOK_URL: z.string().url('SLACK_WEBHOOK_URL must be a valid URL').optional(),
+  SLACK_WEBHOOK_URL: z
+    .string()
+    .url('SLACK_WEBHOOK_URL must be a valid URL')
+    .optional(),
   REDIS_URL: z.string().url('REDIS_URL must be a valid URL').optional(),
-  
+
   // Cloudinary (for images)
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
@@ -119,12 +221,12 @@ export function validateEnvironment(): {
 } {
   try {
     const result = envSchema.safeParse(process.env);
-    
+
     if (!result.success) {
       const errors = result.error.errors.map(
         (err) => `${err.path.join('.')}: ${err.message}`
       );
-      
+
       return {
         success: false,
         errors,
@@ -133,23 +235,30 @@ export function validateEnvironment(): {
 
     // Additional validation warnings
     const warnings: string[] = [];
-    
+
     // Check for development-only settings in production
     if (process.env.NODE_ENV === 'production') {
       if (process.env.CRON_SECRET === 'dev-secret') {
         warnings.push('Using development CRON_SECRET in production');
       }
-      
-      if (process.env.NEXTAUTH_SECRET && process.env.NEXTAUTH_SECRET.length < 64) {
-        warnings.push('NEXTAUTH_SECRET should be longer in production (recommended: 64+ characters)');
+
+      if (
+        process.env.NEXTAUTH_SECRET &&
+        process.env.NEXTAUTH_SECRET.length < 64
+      ) {
+        warnings.push(
+          'NEXTAUTH_SECRET should be longer in production (recommended: 64+ characters)'
+        );
       }
-      
+
       if (!process.env.SENTRY_DSN) {
         warnings.push('SENTRY_DSN not configured - error tracking disabled');
       }
-      
+
       if (!process.env.REDIS_URL) {
-        warnings.push('REDIS_URL not configured - using in-memory storage (not recommended for production)');
+        warnings.push(
+          'REDIS_URL not configured - using in-memory storage (not recommended for production)'
+        );
       }
     }
 
@@ -158,22 +267,30 @@ export function validateEnvironment(): {
     switch (mailProvider) {
       case 'sendgrid':
         if (!process.env.SENDGRID_API_KEY) {
-          warnings.push('SENDGRID_API_KEY not configured but MAIL_PROVIDER is sendgrid');
+          warnings.push(
+            'SENDGRID_API_KEY not configured but MAIL_PROVIDER is sendgrid'
+          );
         }
         break;
       case 'mailgun':
         if (!process.env.MAILGUN_API_KEY || !process.env.MAILGUN_DOMAIN) {
-          warnings.push('MAILGUN_API_KEY or MAILGUN_DOMAIN not configured but MAIL_PROVIDER is mailgun');
+          warnings.push(
+            'MAILGUN_API_KEY or MAILGUN_DOMAIN not configured but MAIL_PROVIDER is mailgun'
+          );
         }
         break;
       case 'postmark':
         if (!process.env.POSTMARK_API_KEY) {
-          warnings.push('POSTMARK_API_KEY not configured but MAIL_PROVIDER is postmark');
+          warnings.push(
+            'POSTMARK_API_KEY not configured but MAIL_PROVIDER is postmark'
+          );
         }
         break;
       case 'resend':
         if (!process.env.RESEND_API_KEY) {
-          warnings.push('RESEND_API_KEY not configured but MAIL_PROVIDER is resend');
+          warnings.push(
+            'RESEND_API_KEY not configured but MAIL_PROVIDER is resend'
+          );
         }
         break;
     }
@@ -182,9 +299,11 @@ export function validateEnvironment(): {
     if (process.env.ENABLE_QUIET_HOURS === 'true') {
       const startHour = parseInt(process.env.QUIET_HOURS_START || '22');
       const endHour = parseInt(process.env.QUIET_HOURS_END || '8');
-      
+
       if (startHour < 0 || startHour > 23 || endHour < 0 || endHour > 23) {
-        warnings.push('QUIET_HOURS_START and QUIET_HOURS_END must be between 0-23');
+        warnings.push(
+          'QUIET_HOURS_START and QUIET_HOURS_END must be between 0-23'
+        );
       }
     }
 
@@ -192,7 +311,6 @@ export function validateEnvironment(): {
       success: true,
       warnings: warnings.length > 0 ? warnings : undefined,
     };
-
   } catch (error) {
     logger.error('Environment validation failed', error as Error);
     return {
@@ -205,9 +323,11 @@ export function validateEnvironment(): {
 // Get typed environment variables
 export function getEnvConfig() {
   const validation = validateEnvironment();
-  
+
   if (!validation.success) {
-    throw new Error(`Environment validation failed: ${validation.errors?.join(', ')}`);
+    throw new Error(
+      `Environment validation failed: ${validation.errors?.join(', ')}`
+    );
   }
 
   return {
@@ -233,7 +353,12 @@ export function getEnvConfig() {
     webhookSecret: process.env.WEBHOOK_SECRET,
 
     // Email Provider
-    mailProvider: (process.env.MAIL_PROVIDER || 'smtp') as 'smtp' | 'sendgrid' | 'mailgun' | 'postmark' | 'resend',
+    mailProvider: (process.env.MAIL_PROVIDER || 'smtp') as
+      | 'smtp'
+      | 'sendgrid'
+      | 'mailgun'
+      | 'postmark'
+      | 'resend',
     sendgridApiKey: process.env.SENDGRID_API_KEY,
     mailgunApiKey: process.env.MAILGUN_API_KEY,
     mailgunDomain: process.env.MAILGUN_DOMAIN,
@@ -273,7 +398,7 @@ export function getEnvConfig() {
     sentryDsn: process.env.SENTRY_DSN,
 
     // Security
-    allowedIPs: process.env.ALLOWED_IPS?.split(',').map(ip => ip.trim()),
+    allowedIPs: process.env.ALLOWED_IPS?.split(',').map((ip) => ip.trim()),
     enableRateLimiting: process.env.ENABLE_RATE_LIMITING !== 'false',
     enableSecurityHeaders: process.env.ENABLE_SECURITY_HEADERS !== 'false',
 
@@ -287,17 +412,17 @@ export function getEnvConfig() {
 // Validate environment on startup
 export function validateEnvironmentOnStartup(): void {
   const validation = validateEnvironment();
-  
+
   if (!validation.success) {
     console.error('❌ Environment validation failed:');
-    validation.errors?.forEach(error => console.error(`  - ${error}`));
+    validation.errors?.forEach((error) => console.error(`  - ${error}`));
     process.exit(1);
   }
-  
+
   if (validation.warnings?.length) {
     console.warn('⚠️  Environment validation warnings:');
-    validation.warnings.forEach(warning => console.warn(`  - ${warning}`));
+    validation.warnings.forEach((warning) => console.warn(`  - ${warning}`));
   }
-  
+
   console.log('✅ Environment validation passed');
 }

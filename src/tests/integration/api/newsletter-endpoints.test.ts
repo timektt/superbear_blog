@@ -1,8 +1,14 @@
 import { NextRequest } from 'next/server';
 import { GET as getNewsletterIssues } from '@/app/api/newsletter/issues/route';
 import { GET as getNewsletterIssue } from '@/app/api/newsletter/issues/[slug]/route';
-import { GET as getAdminNewsletterIssues, POST as createNewsletterIssue } from '@/app/api/admin/newsletter/issues/route';
-import { GET as getAdminNewsletterIssue, PUT as updateNewsletterIssue } from '@/app/api/admin/newsletter/issues/[id]/route';
+import {
+  GET as getAdminNewsletterIssues,
+  POST as createNewsletterIssue,
+} from '@/app/api/admin/newsletter/issues/route';
+import {
+  GET as getAdminNewsletterIssue,
+  PUT as updateNewsletterIssue,
+} from '@/app/api/admin/newsletter/issues/[id]/route';
 
 // Mock Prisma
 jest.mock('@/lib/prisma', () => ({
@@ -27,7 +33,8 @@ const mockNewsletterIssue = {
   id: '1',
   title: 'Weekly Tech Roundup',
   slug: 'weekly-tech-roundup-issue-5',
-  summary: 'This week we cover the latest in AI, blockchain, and startup funding.',
+  summary:
+    'This week we cover the latest in AI, blockchain, and startup funding.',
   content: {
     type: 'doc',
     content: [
@@ -57,21 +64,27 @@ describe('Newsletter API Endpoints', () => {
 
   describe('GET /api/newsletter/issues', () => {
     it('returns published newsletter issues with pagination', async () => {
-      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([mockNewsletterIssue]);
+      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([
+        mockNewsletterIssue,
+      ]);
       (prisma.newsletterIssue.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/newsletter/issues?page=1&limit=10');
+      const request = new NextRequest(
+        'http://localhost:3000/api/newsletter/issues?page=1&limit=10'
+      );
       const response = await getNewsletterIssues(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.issues).toHaveLength(1);
-      expect(data.issues[0]).toEqual(expect.objectContaining({
-        title: 'Weekly Tech Roundup',
-        slug: 'weekly-tech-roundup-issue-5',
-        issueNumber: 5,
-        status: 'PUBLISHED',
-      }));
+      expect(data.issues[0]).toEqual(
+        expect.objectContaining({
+          title: 'Weekly Tech Roundup',
+          slug: 'weekly-tech-roundup-issue-5',
+          issueNumber: 5,
+          status: 'PUBLISHED',
+        })
+      );
       expect(data.pagination).toEqual({
         page: 1,
         limit: 10,
@@ -81,10 +94,14 @@ describe('Newsletter API Endpoints', () => {
     });
 
     it('orders issues by issue number descending', async () => {
-      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([mockNewsletterIssue]);
+      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([
+        mockNewsletterIssue,
+      ]);
       (prisma.newsletterIssue.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/newsletter/issues'
+      );
       await getNewsletterIssues(request);
 
       expect(prisma.newsletterIssue.findMany).toHaveBeenCalledWith(
@@ -95,10 +112,14 @@ describe('Newsletter API Endpoints', () => {
     });
 
     it('only returns published issues', async () => {
-      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([mockNewsletterIssue]);
+      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([
+        mockNewsletterIssue,
+      ]);
       (prisma.newsletterIssue.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/newsletter/issues'
+      );
       await getNewsletterIssues(request);
 
       expect(prisma.newsletterIssue.findMany).toHaveBeenCalledWith(
@@ -109,9 +130,13 @@ describe('Newsletter API Endpoints', () => {
     });
 
     it('returns 500 on database error', async () => {
-      (prisma.newsletterIssue.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (prisma.newsletterIssue.findMany as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/newsletter/issues'
+      );
       const response = await getNewsletterIssues(request);
 
       expect(response.status).toBe(500);
@@ -120,27 +145,35 @@ describe('Newsletter API Endpoints', () => {
 
   describe('GET /api/newsletter/issues/[slug]', () => {
     it('returns newsletter issue by slug', async () => {
-      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(mockNewsletterIssue);
+      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(
+        mockNewsletterIssue
+      );
 
       const response = await getNewsletterIssue(
-        new NextRequest('http://localhost:3000/api/newsletter/issues/weekly-tech-roundup-issue-5'),
+        new NextRequest(
+          'http://localhost:3000/api/newsletter/issues/weekly-tech-roundup-issue-5'
+        ),
         { params: { slug: 'weekly-tech-roundup-issue-5' } }
       );
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.issue).toEqual(expect.objectContaining({
-        title: 'Weekly Tech Roundup',
-        slug: 'weekly-tech-roundup-issue-5',
-        issueNumber: 5,
-      }));
+      expect(data.issue).toEqual(
+        expect.objectContaining({
+          title: 'Weekly Tech Roundup',
+          slug: 'weekly-tech-roundup-issue-5',
+          issueNumber: 5,
+        })
+      );
     });
 
     it('returns 404 for non-existent issue', async () => {
       (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(null);
 
       const response = await getNewsletterIssue(
-        new NextRequest('http://localhost:3000/api/newsletter/issues/non-existent'),
+        new NextRequest(
+          'http://localhost:3000/api/newsletter/issues/non-existent'
+        ),
         { params: { slug: 'non-existent' } }
       );
 
@@ -149,10 +182,14 @@ describe('Newsletter API Endpoints', () => {
 
     it('returns 404 for draft issue to public', async () => {
       const draftIssue = { ...mockNewsletterIssue, status: 'DRAFT' };
-      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(draftIssue);
+      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(
+        draftIssue
+      );
 
       const response = await getNewsletterIssue(
-        new NextRequest('http://localhost:3000/api/newsletter/issues/weekly-tech-roundup-issue-5'),
+        new NextRequest(
+          'http://localhost:3000/api/newsletter/issues/weekly-tech-roundup-issue-5'
+        ),
         { params: { slug: 'weekly-tech-roundup-issue-5' } }
       );
 
@@ -165,10 +202,14 @@ describe('Newsletter API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([mockNewsletterIssue]);
+      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([
+        mockNewsletterIssue,
+      ]);
       (prisma.newsletterIssue.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues'
+      );
       const response = await getAdminNewsletterIssues(request);
       const data = await response.json();
 
@@ -179,7 +220,9 @@ describe('Newsletter API Endpoints', () => {
     it('returns 401 for unauthenticated user', async () => {
       (getServerSession as jest.Mock).mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues'
+      );
       const response = await getAdminNewsletterIssues(request);
 
       expect(response.status).toBe(401);
@@ -190,7 +233,9 @@ describe('Newsletter API Endpoints', () => {
         user: { id: '1', role: 'USER' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues'
+      );
       const response = await getAdminNewsletterIssues(request);
 
       expect(response.status).toBe(403);
@@ -200,10 +245,14 @@ describe('Newsletter API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([mockNewsletterIssue]);
+      (prisma.newsletterIssue.findMany as jest.Mock).mockResolvedValue([
+        mockNewsletterIssue,
+      ]);
       (prisma.newsletterIssue.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues?status=DRAFT');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues?status=DRAFT'
+      );
       await getAdminNewsletterIssues(request);
 
       expect(prisma.newsletterIssue.findMany).toHaveBeenCalledWith(
@@ -234,11 +283,14 @@ describe('Newsletter API Endpoints', () => {
         issueNumber: 6,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues', {
-        method: 'POST',
-        body: JSON.stringify(validIssueData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues',
+        {
+          method: 'POST',
+          body: JSON.stringify(validIssueData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createNewsletterIssue(request);
       const data = await response.json();
@@ -262,11 +314,14 @@ describe('Newsletter API Endpoints', () => {
         issueNumber: 6,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues', {
-        method: 'POST',
-        body: JSON.stringify(validIssueData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues',
+        {
+          method: 'POST',
+          body: JSON.stringify(validIssueData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       await createNewsletterIssue(request);
 
@@ -286,11 +341,14 @@ describe('Newsletter API Endpoints', () => {
 
       const invalidData = { title: '' }; // Missing required fields
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues', {
-        method: 'POST',
-        body: JSON.stringify(invalidData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues',
+        {
+          method: 'POST',
+          body: JSON.stringify(invalidData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createNewsletterIssue(request);
 
@@ -307,11 +365,14 @@ describe('Newsletter API Endpoints', () => {
         meta: { target: ['slug'] },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues', {
-        method: 'POST',
-        body: JSON.stringify(validIssueData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues',
+        {
+          method: 'POST',
+          body: JSON.stringify(validIssueData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createNewsletterIssue(request);
 
@@ -329,19 +390,26 @@ describe('Newsletter API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(mockNewsletterIssue);
+      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(
+        mockNewsletterIssue
+      );
       (prisma.newsletterIssue.update as jest.Mock).mockResolvedValue({
         ...mockNewsletterIssue,
         ...updateData,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues/1', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues/1',
+        {
+          method: 'PUT',
+          body: JSON.stringify(updateData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
-      const response = await updateNewsletterIssue(request, { params: { id: '1' } });
+      const response = await updateNewsletterIssue(request, {
+        params: { id: '1' },
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -354,13 +422,18 @@ describe('Newsletter API Endpoints', () => {
       });
       (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues/999', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues/999',
+        {
+          method: 'PUT',
+          body: JSON.stringify(updateData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
-      const response = await updateNewsletterIssue(request, { params: { id: '999' } });
+      const response = await updateNewsletterIssue(request, {
+        params: { id: '999' },
+      });
 
       expect(response.status).toBe(404);
     });
@@ -370,15 +443,22 @@ describe('Newsletter API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(sentIssue);
+      (prisma.newsletterIssue.findUnique as jest.Mock).mockResolvedValue(
+        sentIssue
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/admin/newsletter/issues/1', {
-        method: 'PUT',
-        body: JSON.stringify({ title: 'New Title' }),
-        headers: { 'Content-Type': 'application/json' },
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/newsletter/issues/1',
+        {
+          method: 'PUT',
+          body: JSON.stringify({ title: 'New Title' }),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+
+      const response = await updateNewsletterIssue(request, {
+        params: { id: '1' },
       });
-
-      const response = await updateNewsletterIssue(request, { params: { id: '1' } });
 
       expect(response.status).toBe(400);
     });

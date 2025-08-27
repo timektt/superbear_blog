@@ -4,7 +4,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
 import { useToast } from '@/lib/hooks/useToast';
 
@@ -59,7 +66,8 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch DLQ items',
+        description:
+          error instanceof Error ? error.message : 'Failed to fetch DLQ items',
         variant: 'destructive',
       });
     } finally {
@@ -68,7 +76,11 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
   };
 
   const moveToDLQ = async (targetCampaignId: string) => {
-    if (!confirm('Are you sure you want to move failed deliveries to Dead Letter Queue?')) {
+    if (
+      !confirm(
+        'Are you sure you want to move failed deliveries to Dead Letter Queue?'
+      )
+    ) {
       return;
     }
 
@@ -95,7 +107,8 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
     } catch (error) {
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to move to DLQ',
+        description:
+          error instanceof Error ? error.message : 'Failed to move to DLQ',
         variant: 'destructive',
       });
     } finally {
@@ -112,7 +125,9 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
   };
 
   const truncateError = (error: string, maxLength = 100) => {
-    return error.length > maxLength ? `${error.substring(0, maxLength)}...` : error;
+    return error.length > maxLength
+      ? `${error.substring(0, maxLength)}...`
+      : error;
   };
 
   return (
@@ -133,7 +148,9 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
               onClick={() => fetchDLQItems(pagination.page)}
               disabled={loading}
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`}
+              />
               Refresh
             </Button>
             {campaignId && (
@@ -144,7 +161,9 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
                 disabled={actionLoading === 'move-dlq'}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
-                {actionLoading === 'move-dlq' ? 'Moving...' : 'Move Failed to DLQ'}
+                {actionLoading === 'move-dlq'
+                  ? 'Moving...'
+                  : 'Move Failed to DLQ'}
               </Button>
             )}
           </div>
@@ -185,13 +204,15 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="font-mono text-sm">{item.recipientEmail}</div>
+                      <div className="font-mono text-sm">
+                        {item.recipientEmail}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="destructive">{item.attempts}</Badge>
                     </TableCell>
                     <TableCell>
-                      <div 
+                      <div
                         className="text-sm text-destructive"
                         title={item.lastError}
                       >
@@ -211,9 +232,12 @@ export function DeadLetterQueueViewer({ campaignId }: DLQViewerProps) {
             {pagination.pages > 1 && (
               <div className="flex items-center justify-between mt-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-                  {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-                  {pagination.total} items
+                  Showing {(pagination.page - 1) * pagination.limit + 1} to{' '}
+                  {Math.min(
+                    pagination.page * pagination.limit,
+                    pagination.total
+                  )}{' '}
+                  of {pagination.total} items
                 </div>
                 <div className="flex gap-2">
                   <Button

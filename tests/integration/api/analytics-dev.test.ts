@@ -14,13 +14,16 @@ describe('Analytics API - Development Mode', () => {
   });
 
   it('should accept minimal payload in development mode', async () => {
-    const request = new NextRequest('http://localhost:3000/api/analytics/track', {
-      method: 'POST',
-      body: JSON.stringify({}),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const request = new NextRequest(
+      'http://localhost:3000/api/analytics/track',
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -31,17 +34,20 @@ describe('Analytics API - Development Mode', () => {
   });
 
   it('should process valid payload in development mode', async () => {
-    const request = new NextRequest('http://localhost:3000/api/analytics/track', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'view',
-        articleId: 'test-article-id-123',
-        sessionId: 'test-session',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const request = new NextRequest(
+      'http://localhost:3000/api/analytics/track',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'view',
+          articleId: 'test-article-id-123',
+          sessionId: 'test-session',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -51,16 +57,19 @@ describe('Analytics API - Development Mode', () => {
   });
 
   it('should handle invalid article ID gracefully in development', async () => {
-    const request = new NextRequest('http://localhost:3000/api/analytics/track', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'view',
-        articleId: 'short',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const request = new NextRequest(
+      'http://localhost:3000/api/analytics/track',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'view',
+          articleId: 'short',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -83,13 +92,16 @@ describe('Analytics API - Production Mode', () => {
   });
 
   it('should require valid payload in production mode', async () => {
-    const request = new NextRequest('http://localhost:3000/api/analytics/track', {
-      method: 'POST',
-      body: JSON.stringify({}),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const request = new NextRequest(
+      'http://localhost:3000/api/analytics/track',
+      {
+        method: 'POST',
+        body: JSON.stringify({}),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();
@@ -100,16 +112,19 @@ describe('Analytics API - Production Mode', () => {
   });
 
   it('should validate article ID format in production', async () => {
-    const request = new NextRequest('http://localhost:3000/api/analytics/track', {
-      method: 'POST',
-      body: JSON.stringify({
-        type: 'view',
-        articleId: 'short',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const request = new NextRequest(
+      'http://localhost:3000/api/analytics/track',
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'view',
+          articleId: 'short',
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
 
     const response = await POST(request);
     const data = await response.json();

@@ -17,10 +17,7 @@ export async function POST(request: NextRequest) {
     const { email, confirmDeletion } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     if (!confirmDeletion) {
@@ -43,9 +40,9 @@ export async function POST(request: NextRequest) {
 
     if (!result.success) {
       return NextResponse.json(
-        { 
+        {
           error: 'Failed to process right to be forgotten',
-          errors: result.errors 
+          errors: result.errors,
         },
         { status: 500 }
       );
@@ -62,7 +59,6 @@ export async function POST(request: NextRequest) {
       message: 'User data has been permanently deleted',
       deletedRecords: result.deletedRecords,
     });
-
   } catch (error) {
     logger.error('Failed to process right to be forgotten', error as Error);
     return NextResponse.json(

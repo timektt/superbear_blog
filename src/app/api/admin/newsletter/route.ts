@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {};
-    
+
     if (status && status !== 'all') {
       where.status = status.toUpperCase();
     }
@@ -74,7 +74,6 @@ export async function GET(request: NextRequest) {
         stats,
       },
     });
-
   } catch (error) {
     logger.error('Failed to fetch newsletter subscribers', error);
     return NextResponse.json(
@@ -161,7 +160,6 @@ export async function PATCH(request: NextRequest) {
       message: `${updateResult.count} subscribers ${actionDescription} successfully`,
       data: { count: updateResult.count },
     });
-
   } catch (error) {
     logger.error('Failed to perform bulk operation on subscribers', error);
     return NextResponse.json(

@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = createPodcastSchema.safeParse(body);
     if (!validationResult.success) {

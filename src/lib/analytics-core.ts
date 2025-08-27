@@ -22,7 +22,12 @@ export interface ViewEvent extends AnalyticsEvent {
 
 export interface InteractionEvent extends AnalyticsEvent {
   type: 'interaction';
-  interactionType: 'LINK_CLICK' | 'SOCIAL_SHARE' | 'NEWSLETTER_SIGNUP' | 'SCROLL_MILESTONE' | 'TIME_MILESTONE';
+  interactionType:
+    | 'LINK_CLICK'
+    | 'SOCIAL_SHARE'
+    | 'NEWSLETTER_SIGNUP'
+    | 'SCROLL_MILESTONE'
+    | 'TIME_MILESTONE';
   elementId?: string;
   linkUrl?: string;
   socialPlatform?: string;
@@ -34,13 +39,23 @@ export interface InteractionEvent extends AnalyticsEvent {
 export function generateSessionId(userAgent: string, ip: string): string {
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
   const sessionData = `${userAgent}:${ip}:${today}`;
-  return createHash('sha256').update(sessionData).digest('hex').substring(0, 16);
+  return createHash('sha256')
+    .update(sessionData)
+    .digest('hex')
+    .substring(0, 16);
 }
 
 // Browser fingerprint generation (privacy-compliant)
-export function generateFingerprint(userAgent: string, acceptLanguage?: string, timezone?: string): string {
+export function generateFingerprint(
+  userAgent: string,
+  acceptLanguage?: string,
+  timezone?: string
+): string {
   const fingerprintData = `${userAgent}:${acceptLanguage || ''}:${timezone || ''}`;
-  return createHash('sha256').update(fingerprintData).digest('hex').substring(0, 12);
+  return createHash('sha256')
+    .update(fingerprintData)
+    .digest('hex')
+    .substring(0, 12);
 }
 
 // Device type detection
@@ -55,7 +70,9 @@ export function detectDevice(userAgent: string): string {
 }
 
 // Track article view
-export async function trackArticleView(event: ViewEvent): Promise<string | null> {
+export async function trackArticleView(
+  event: ViewEvent
+): Promise<string | null> {
   try {
     // Check if article exists
     const article = await prisma.article.findUnique({
@@ -68,7 +85,11 @@ export async function trackArticleView(event: ViewEvent): Promise<string | null>
     }
 
     // Generate fingerprint
-    const fingerprint = generateFingerprint(event.userAgent || '', event.metadata?.acceptLanguage, event.metadata?.timezone);
+    const fingerprint = generateFingerprint(
+      event.userAgent || '',
+      event.metadata?.acceptLanguage,
+      event.metadata?.timezone
+    );
 
     // Create view record
     const view = await prisma.articleView.create({
@@ -85,20 +106,26 @@ export async function trackArticleView(event: ViewEvent): Promise<string | null>
     });
 
     // Update article stats asynchronously
-    updateArticleStats(event.articleId).catch(error => {
-      logger.error('Failed to update article stats', error as Error, { articleId: event.articleId });
+    updateArticleStats(event.articleId).catch((error) => {
+      logger.error('Failed to update article stats', error as Error, {
+        articleId: event.articleId,
+      });
     });
 
     return view.id;
-
   } catch (error) {
-    logger.error('Failed to track article view', error as Error, { articleId: event.articleId });
+    logger.error('Failed to track article view', error as Error, {
+      articleId: event.articleId,
+    });
     return null;
   }
 }
 
 // Track article interaction
-export async function trackArticleInteraction(event: InteractionEvent, viewId?: string): Promise<void> {
+export async function trackArticleInteraction(
+  event: InteractionEvent,
+  viewId?: string
+): Promise<void> {
   try {
     // If no viewId provided, try to find recent view for this session
     if (!viewId) {
@@ -114,7 +141,10 @@ export async function trackArticleInteraction(event: InteractionEvent, viewId?: 
       });
 
       if (!recentView) {
-        logger.warn('No recent view found for interaction', { articleId: event.articleId, sessionId: event.sessionId });
+        logger.warn('No recent view found for interaction', {
+          articleId: event.articleId,
+          sessionId: event.sessionId,
+        });
         return;
       }
 
@@ -137,24 +167,32 @@ export async function trackArticleInteraction(event: InteractionEvent, viewId?: 
     });
 
     // Update article stats asynchronously
-    updateArticleStats(event.articleId).catch(error => {
-      logger.error('Failed to update article stats after interaction', error as Error, { articleId: event.articleId });
+    updateArticleStats(event.articleId).catch((error) => {
+      logger.error(
+        'Failed to update article stats after interaction',
+        error as Error,
+        { articleId: event.articleId }
+      );
     });
-
   } catch (error) {
-    logger.error('Failed to track article interaction', error as Error, { articleId: event.articleId });
+    logger.error('Failed to track article interaction', error as Error, {
+      articleId: event.articleId,
+    });
   }
 }
 
 // Update reading session
-export async function updateReadingSession(sessionId: string, updates: {
-  endTime?: Date;
-  duration?: number;
-  articlesRead?: number;
-  totalReadTime?: number;
-  pagesViewed?: number;
-  exitArticleId?: string;
-}): Promise<void> {
+export async function updateReadingSession(
+  sessionId: string,
+  updates: {
+    endTime?: Date;
+    duration?: number;
+    articlesRead?: number;
+    totalReadTime?: number;
+    pagesViewed?: number;
+    exitArticleId?: string;
+  }
+): Promise<void> {
   try {
     await prisma.readingSession.upsert({
       where: { sessionId },
@@ -169,7 +207,9 @@ export async function updateReadingSession(sessionId: string, updates: {
       },
     });
   } catch (error) {
-    logger.error('Failed to update reading session', error as Error, { sessionId });
+    logger.error('Failed to update reading session', error as Error, {
+      sessionId,
+    });
   }
 }
 
@@ -177,47 +217,43 @@ export async function updateReadingSession(sessionId: string, updates: {
 export async function updateArticleStats(articleId: string): Promise<void> {
   try {
     // Calculate stats from raw data
-    const [
-      viewStats,
-      interactionStats,
-      timeStats,
-      scrollStats,
-    ] = await Promise.all([
-      // View statistics
-      prisma.articleView.aggregate({
-        where: { articleId },
-        _count: { id: true },
-        _avg: { timeOnPage: true, scrollDepth: true },
-      }),
+    const [viewStats, interactionStats, timeStats, scrollStats] =
+      await Promise.all([
+        // View statistics
+        prisma.articleView.aggregate({
+          where: { articleId },
+          _count: { id: true },
+          _avg: { timeOnPage: true, scrollDepth: true },
+        }),
 
-      // Interaction statistics
-      prisma.articleInteraction.groupBy({
-        by: ['type'],
-        where: { articleId },
-        _count: { id: true },
-      }),
+        // Interaction statistics
+        prisma.articleInteraction.groupBy({
+          by: ['type'],
+          where: { articleId },
+          _count: { id: true },
+        }),
 
-      // Time-based view statistics
-      prisma.articleView.groupBy({
-        by: ['timestamp'],
-        where: {
-          articleId,
-          timestamp: {
-            gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+        // Time-based view statistics
+        prisma.articleView.groupBy({
+          by: ['timestamp'],
+          where: {
+            articleId,
+            timestamp: {
+              gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
+            },
           },
-        },
-        _count: { id: true },
-      }),
+          _count: { id: true },
+        }),
 
-      // Scroll depth analysis
-      prisma.articleView.aggregate({
-        where: {
-          articleId,
-          scrollDepth: { gte: 90 }, // Consider 90%+ as "completed"
-        },
-        _count: { id: true },
-      }),
-    ]);
+        // Scroll depth analysis
+        prisma.articleView.aggregate({
+          where: {
+            articleId,
+            scrollDepth: { gte: 90 }, // Consider 90%+ as "completed"
+          },
+          _count: { id: true },
+        }),
+      ]);
 
     // Calculate unique views (by fingerprint)
     const uniqueViews = await prisma.articleView.groupBy({
@@ -235,10 +271,13 @@ export async function updateArticleStats(articleId: string): Promise<void> {
     });
 
     // Process interaction stats
-    const interactionCounts = interactionStats.reduce((acc, stat) => {
-      acc[stat.type] = stat._count.id;
-      return acc;
-    }, {} as Record<string, number>);
+    const interactionCounts = interactionStats.reduce(
+      (acc, stat) => {
+        acc[stat.type] = stat._count.id;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
 
     // Calculate time-based metrics
     const now = new Date();
@@ -266,11 +305,17 @@ export async function updateArticleStats(articleId: string): Promise<void> {
         uniqueViews: uniqueViews.length,
         avgTimeOnPage: viewStats._avg.timeOnPage,
         avgScrollDepth: viewStats._avg.scrollDepth,
-        bounceRate: viewStats._count.id > 0 ? (bounceViews / viewStats._count.id) * 100 : 0,
+        bounceRate:
+          viewStats._count.id > 0
+            ? (bounceViews / viewStats._count.id) * 100
+            : 0,
         totalShares: interactionCounts.SOCIAL_SHARE || 0,
         totalClicks: interactionCounts.LINK_CLICK || 0,
         newsletterSignups: interactionCounts.NEWSLETTER_SIGNUP || 0,
-        completionRate: viewStats._count.id > 0 ? (scrollStats._count.id / viewStats._count.id) * 100 : 0,
+        completionRate:
+          viewStats._count.id > 0
+            ? (scrollStats._count.id / viewStats._count.id) * 100
+            : 0,
         viewsToday,
         viewsThisWeek,
         viewsThisMonth,
@@ -282,32 +327,46 @@ export async function updateArticleStats(articleId: string): Promise<void> {
         uniqueViews: uniqueViews.length,
         avgTimeOnPage: viewStats._avg.timeOnPage,
         avgScrollDepth: viewStats._avg.scrollDepth,
-        bounceRate: viewStats._count.id > 0 ? (bounceViews / viewStats._count.id) * 100 : 0,
+        bounceRate:
+          viewStats._count.id > 0
+            ? (bounceViews / viewStats._count.id) * 100
+            : 0,
         totalShares: interactionCounts.SOCIAL_SHARE || 0,
         totalClicks: interactionCounts.LINK_CLICK || 0,
         newsletterSignups: interactionCounts.NEWSLETTER_SIGNUP || 0,
-        completionRate: viewStats._count.id > 0 ? (scrollStats._count.id / viewStats._count.id) * 100 : 0,
+        completionRate:
+          viewStats._count.id > 0
+            ? (scrollStats._count.id / viewStats._count.id) * 100
+            : 0,
         viewsToday,
         viewsThisWeek,
         viewsThisMonth,
       },
     });
-
   } catch (error) {
-    logger.error('Failed to update article stats', error as Error, { articleId });
+    logger.error('Failed to update article stats', error as Error, {
+      articleId,
+    });
   }
 }
 
 // Get article analytics summary
-export async function getArticleAnalytics(articleId: string, timeRange?: {
-  start: Date;
-  end: Date;
-}): Promise<{
+export async function getArticleAnalytics(
+  articleId: string,
+  timeRange?: {
+    start: Date;
+    end: Date;
+  }
+): Promise<{
   stats: any;
   viewTrend: Array<{ date: string; views: number }>;
   topInteractions: Array<{ type: string; count: number }>;
   deviceBreakdown: Array<{ device: string; count: number; percentage: number }>;
-  referrerBreakdown: Array<{ referrer: string; count: number; percentage: number }>;
+  referrerBreakdown: Array<{
+    referrer: string;
+    count: number;
+    percentage: number;
+  }>;
 }> {
   try {
     // Get current stats
@@ -316,15 +375,17 @@ export async function getArticleAnalytics(articleId: string, timeRange?: {
     });
 
     // Build time filter
-    const timeFilter = timeRange ? {
-      timestamp: {
-        gte: timeRange.start,
-        lte: timeRange.end,
-      },
-    } : {};
+    const timeFilter = timeRange
+      ? {
+          timestamp: {
+            gte: timeRange.start,
+            lte: timeRange.end,
+          },
+        }
+      : {};
 
     // Get view trend (last 30 days)
-    const viewTrend = await prisma.$queryRaw`
+    const viewTrend = (await prisma.$queryRaw`
       SELECT 
         DATE(timestamp) as date,
         COUNT(*) as views
@@ -333,7 +394,7 @@ export async function getArticleAnalytics(articleId: string, timeRange?: {
         AND timestamp >= datetime('now', '-30 days')
       GROUP BY DATE(timestamp)
       ORDER BY date ASC
-    ` as Array<{ date: string; views: number }>;
+    `) as Array<{ date: string; views: number }>;
 
     // Get interaction breakdown
     const topInteractions = await prisma.articleInteraction.groupBy({
@@ -371,30 +432,38 @@ export async function getArticleAnalytics(articleId: string, timeRange?: {
     });
 
     // Calculate percentages
-    const totalViews = deviceBreakdown.reduce((sum, item) => sum + item._count.id, 0);
-    const totalReferrers = referrerBreakdown.reduce((sum, item) => sum + item._count.id, 0);
+    const totalViews = deviceBreakdown.reduce(
+      (sum, item) => sum + item._count.id,
+      0
+    );
+    const totalReferrers = referrerBreakdown.reduce(
+      (sum, item) => sum + item._count.id,
+      0
+    );
 
     return {
       stats,
       viewTrend,
-      topInteractions: topInteractions.map(item => ({
+      topInteractions: topInteractions.map((item) => ({
         type: item.type,
         count: item._count.id,
       })),
-      deviceBreakdown: deviceBreakdown.map(item => ({
+      deviceBreakdown: deviceBreakdown.map((item) => ({
         device: item.device || 'unknown',
         count: item._count.id,
         percentage: totalViews > 0 ? (item._count.id / totalViews) * 100 : 0,
       })),
-      referrerBreakdown: referrerBreakdown.map(item => ({
+      referrerBreakdown: referrerBreakdown.map((item) => ({
         referrer: item.referrer || 'direct',
         count: item._count.id,
-        percentage: totalReferrers > 0 ? (item._count.id / totalReferrers) * 100 : 0,
+        percentage:
+          totalReferrers > 0 ? (item._count.id / totalReferrers) * 100 : 0,
       })),
     };
-
   } catch (error) {
-    logger.error('Failed to get article analytics', error as Error, { articleId });
+    logger.error('Failed to get article analytics', error as Error, {
+      articleId,
+    });
     throw error;
   }
 }
@@ -404,13 +473,15 @@ export async function getTopPerformingArticles(
   metric: 'views' | 'engagement' | 'shares' | 'time',
   timeRange: 'today' | 'week' | 'month' | 'all' = 'week',
   limit: number = 10
-): Promise<Array<{
-  articleId: string;
-  title: string;
-  slug: string;
-  value: number;
-  change?: number; // Percentage change from previous period
-}>> {
+): Promise<
+  Array<{
+    articleId: string;
+    title: string;
+    slug: string;
+    value: number;
+    change?: number; // Percentage change from previous period
+  }>
+> {
   try {
     let orderBy: any;
     let selectValue: string;
@@ -452,13 +523,12 @@ export async function getTopPerformingArticles(
       take: limit,
     });
 
-    return results.map(stat => ({
+    return results.map((stat) => ({
       articleId: stat.articleId,
       title: stat.article.title,
       slug: stat.article.slug,
       value: (stat as any)[selectValue] || 0,
     }));
-
   } catch (error) {
     logger.error('Failed to get top performing articles', error as Error);
     throw error;
@@ -466,31 +536,36 @@ export async function getTopPerformingArticles(
 }
 
 // Clean up old analytics data (GDPR compliance)
-export async function cleanupOldAnalyticsData(retentionDays: number = 365): Promise<{
+export async function cleanupOldAnalyticsData(
+  retentionDays: number = 365
+): Promise<{
   deletedViews: number;
   deletedInteractions: number;
   deletedSessions: number;
 }> {
   try {
-    const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+    const cutoffDate = new Date(
+      Date.now() - retentionDays * 24 * 60 * 60 * 1000
+    );
 
-    const [deletedViews, deletedInteractions, deletedSessions] = await Promise.all([
-      prisma.articleView.deleteMany({
-        where: {
-          timestamp: { lt: cutoffDate },
-        },
-      }),
-      prisma.articleInteraction.deleteMany({
-        where: {
-          timestamp: { lt: cutoffDate },
-        },
-      }),
-      prisma.readingSession.deleteMany({
-        where: {
-          startTime: { lt: cutoffDate },
-        },
-      }),
-    ]);
+    const [deletedViews, deletedInteractions, deletedSessions] =
+      await Promise.all([
+        prisma.articleView.deleteMany({
+          where: {
+            timestamp: { lt: cutoffDate },
+          },
+        }),
+        prisma.articleInteraction.deleteMany({
+          where: {
+            timestamp: { lt: cutoffDate },
+          },
+        }),
+        prisma.readingSession.deleteMany({
+          where: {
+            startTime: { lt: cutoffDate },
+          },
+        }),
+      ]);
 
     logger.info('Analytics data cleanup completed', {
       deletedViews: deletedViews.count,
@@ -504,7 +579,6 @@ export async function cleanupOldAnalyticsData(retentionDays: number = 365): Prom
       deletedInteractions: deletedInteractions.count,
       deletedSessions: deletedSessions.count,
     };
-
   } catch (error) {
     logger.error('Failed to cleanup old analytics data', error as Error);
     throw error;

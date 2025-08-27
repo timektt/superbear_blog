@@ -47,14 +47,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Create privacy-compliant session hash
-    const sessionHash = sessionId || createHash('sha256')
-      .update(`${userAgent || ''}-${request.ip || ''}-${Date.now()}`)
-      .digest('hex');
+    const sessionHash =
+      sessionId ||
+      createHash('sha256')
+        .update(`${userAgent || ''}-${request.ip || ''}-${Date.now()}`)
+        .digest('hex');
 
     // Create browser fingerprint hash if provided
-    const fingerprintHash = fingerprint ? createHash('sha256')
-      .update(fingerprint)
-      .digest('hex') : null;
+    const fingerprintHash = fingerprint
+      ? createHash('sha256').update(fingerprint).digest('hex')
+      : null;
 
     // Check if this is a unique view (same session within last hour)
     const recentView = await prisma.articleView.findFirst({
@@ -69,11 +71,11 @@ export async function POST(request: NextRequest) {
 
     if (recentView) {
       // Update existing view with additional data if needed
-      return NextResponse.json({ 
-        success: true, 
-        tracked: false, 
+      return NextResponse.json({
+        success: true,
+        tracked: false,
         reason: 'duplicate_view',
-        viewId: recentView.id 
+        viewId: recentView.id,
       });
     }
 
@@ -92,16 +94,16 @@ export async function POST(request: NextRequest) {
     });
 
     // Update article stats asynchronously
-    updateArticleStats(articleId).catch(error => {
+    updateArticleStats(articleId).catch((error) => {
       logger.error('Failed to update article stats', error);
     });
 
-    logger.info('Article view tracked', { 
-      articleId, 
+    logger.info('Article view tracked', {
+      articleId,
       viewId: view.id,
       sessionId: sessionHash,
       country,
-      device
+      device,
     });
 
     return NextResponse.json({
@@ -145,9 +147,15 @@ export async function PUT(request: NextRequest) {
     const updatedView = await prisma.articleView.update({
       where: { id: viewId },
       data: {
-        timeOnPage: timeOnPage ? Math.max(0, Math.min(timeOnPage, 3600)) : undefined, // Cap at 1 hour
-        scrollDepth: scrollDepth ? Math.max(0, Math.min(scrollDepth, 100)) : undefined, // 0-100%
-        readingTime: readingTime ? Math.max(0, Math.min(readingTime, 3600)) : undefined,
+        timeOnPage: timeOnPage
+          ? Math.max(0, Math.min(timeOnPage, 3600))
+          : undefined, // Cap at 1 hour
+        scrollDepth: scrollDepth
+          ? Math.max(0, Math.min(scrollDepth, 100))
+          : undefined, // 0-100%
+        readingTime: readingTime
+          ? Math.max(0, Math.min(readingTime, 3600))
+          : undefined,
         bounced: bounced === true,
         linksClicked: linksClicked ? Math.max(0, linksClicked) : undefined,
         socialShares: socialShares ? Math.max(0, socialShares) : undefined,
@@ -156,8 +164,11 @@ export async function PUT(request: NextRequest) {
     });
 
     // Update article stats asynchronously
-    updateArticleStats(updatedView.articleId).catch(error => {
-      logger.error('Failed to update article stats after engagement update', error);
+    updateArticleStats(updatedView.articleId).catch((error) => {
+      logger.error(
+        'Failed to update article stats after engagement update',
+        error
+      );
     });
 
     return NextResponse.json({
@@ -198,16 +209,30 @@ async function updateArticleStats(articleId: string): Promise<void> {
     if (views.length === 0) return;
 
     // Calculate aggregated metrics
-    const uniqueSessions = new Set(views.map(v => v.sessionId));
-    const validTimeOnPage = views.filter(v => v.timeOnPage && v.timeOnPage > 0);
-    const validScrollDepth = views.filter(v => v.scrollDepth && v.scrollDepth > 0);
-    const validReadingTime = views.filter(v => v.readingTime && v.readingTime > 0);
-    
-    const bounces = views.filter(v => v.bounced).length;
-    const completions = views.filter(v => v.scrollDepth && v.scrollDepth >= 80).length;
-    const totalShares = views.reduce((sum, v) => sum + (v.socialShares || 0), 0);
-    const totalClicks = views.reduce((sum, v) => sum + (v.linksClicked || 0), 0);
-    const newsletterSignups = views.filter(v => v.newsletterSignup).length;
+    const uniqueSessions = new Set(views.map((v) => v.sessionId));
+    const validTimeOnPage = views.filter(
+      (v) => v.timeOnPage && v.timeOnPage > 0
+    );
+    const validScrollDepth = views.filter(
+      (v) => v.scrollDepth && v.scrollDepth > 0
+    );
+    const validReadingTime = views.filter(
+      (v) => v.readingTime && v.readingTime > 0
+    );
+
+    const bounces = views.filter((v) => v.bounced).length;
+    const completions = views.filter(
+      (v) => v.scrollDepth && v.scrollDepth >= 80
+    ).length;
+    const totalShares = views.reduce(
+      (sum, v) => sum + (v.socialShares || 0),
+      0
+    );
+    const totalClicks = views.reduce(
+      (sum, v) => sum + (v.linksClicked || 0),
+      0
+    );
+    const newsletterSignups = views.filter((v) => v.newsletterSignup).length;
 
     // Time-based calculations
     const now = new Date();
@@ -215,18 +240,18 @@ async function updateArticleStats(articleId: string): Promise<void> {
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thisMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const viewsToday = views.filter(v => v.timestamp >= today).length;
-    const viewsThisWeek = views.filter(v => v.timestamp >= thisWeek).length;
-    const viewsThisMonth = views.filter(v => v.timestamp >= thisMonth).length;
+    const viewsToday = views.filter((v) => v.timestamp >= today).length;
+    const viewsThisWeek = views.filter((v) => v.timestamp >= thisWeek).length;
+    const viewsThisMonth = views.filter((v) => v.timestamp >= thisMonth).length;
 
     // Calculate peak metrics
     const viewsByHour = new Map<string, number>();
     const viewsByDay = new Map<string, number>();
-    
-    views.forEach(view => {
+
+    views.forEach((view) => {
       const hour = view.timestamp.toISOString().substring(0, 13); // YYYY-MM-DDTHH
       const day = view.timestamp.toISOString().substring(0, 10); // YYYY-MM-DD
-      
+
       viewsByHour.set(hour, (viewsByHour.get(hour) || 0) + 1);
       viewsByDay.set(day, (viewsByDay.get(day) || 0) + 1);
     });
@@ -241,20 +266,31 @@ async function updateArticleStats(articleId: string): Promise<void> {
         articleId,
         totalViews: views.length,
         uniqueViews: uniqueSessions.size,
-        avgTimeOnPage: validTimeOnPage.length > 0 
-          ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) / validTimeOnPage.length 
-          : null,
-        avgScrollDepth: validScrollDepth.length > 0 
-          ? validScrollDepth.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) / validScrollDepth.length 
-          : null,
+        avgTimeOnPage:
+          validTimeOnPage.length > 0
+            ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) /
+              validTimeOnPage.length
+            : null,
+        avgScrollDepth:
+          validScrollDepth.length > 0
+            ? validScrollDepth.reduce(
+                (sum, v) => sum + (v.scrollDepth || 0),
+                0
+              ) / validScrollDepth.length
+            : null,
         bounceRate: views.length > 0 ? (bounces / views.length) * 100 : null,
         totalShares: totalShares,
         totalClicks: totalClicks,
         newsletterSignups,
-        avgReadingTime: validReadingTime.length > 0 
-          ? validReadingTime.reduce((sum, v) => sum + (v.readingTime || 0), 0) / validReadingTime.length 
-          : null,
-        completionRate: views.length > 0 ? (completions / views.length) * 100 : null,
+        avgReadingTime:
+          validReadingTime.length > 0
+            ? validReadingTime.reduce(
+                (sum, v) => sum + (v.readingTime || 0),
+                0
+              ) / validReadingTime.length
+            : null,
+        completionRate:
+          views.length > 0 ? (completions / views.length) * 100 : null,
         viewsToday,
         viewsThisWeek,
         viewsThisMonth,
@@ -265,20 +301,31 @@ async function updateArticleStats(articleId: string): Promise<void> {
       update: {
         totalViews: views.length,
         uniqueViews: uniqueSessions.size,
-        avgTimeOnPage: validTimeOnPage.length > 0 
-          ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) / validTimeOnPage.length 
-          : null,
-        avgScrollDepth: validScrollDepth.length > 0 
-          ? validScrollDepth.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) / validScrollDepth.length 
-          : null,
+        avgTimeOnPage:
+          validTimeOnPage.length > 0
+            ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) /
+              validTimeOnPage.length
+            : null,
+        avgScrollDepth:
+          validScrollDepth.length > 0
+            ? validScrollDepth.reduce(
+                (sum, v) => sum + (v.scrollDepth || 0),
+                0
+              ) / validScrollDepth.length
+            : null,
         bounceRate: views.length > 0 ? (bounces / views.length) * 100 : null,
         totalShares: totalShares,
         totalClicks: totalClicks,
         newsletterSignups,
-        avgReadingTime: validReadingTime.length > 0 
-          ? validReadingTime.reduce((sum, v) => sum + (v.readingTime || 0), 0) / validReadingTime.length 
-          : null,
-        completionRate: views.length > 0 ? (completions / views.length) * 100 : null,
+        avgReadingTime:
+          validReadingTime.length > 0
+            ? validReadingTime.reduce(
+                (sum, v) => sum + (v.readingTime || 0),
+                0
+              ) / validReadingTime.length
+            : null,
+        completionRate:
+          views.length > 0 ? (completions / views.length) * 100 : null,
         viewsToday,
         viewsThisWeek,
         viewsThisMonth,
@@ -288,10 +335,10 @@ async function updateArticleStats(articleId: string): Promise<void> {
       },
     });
 
-    logger.debug('Article stats updated', { 
-      articleId, 
-      totalViews: views.length, 
-      uniqueViews: uniqueSessions.size 
+    logger.debug('Article stats updated', {
+      articleId,
+      totalViews: views.length,
+      uniqueViews: uniqueSessions.size,
     });
   } catch (error) {
     logger.error('Failed to update article stats', error as Error);

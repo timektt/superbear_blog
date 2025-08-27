@@ -3,18 +3,24 @@
 import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  TrendingDown, 
-  Mail, 
-  Eye, 
-  MousePointer, 
+import {
+  BarChart3,
+  TrendingUp,
+  TrendingDown,
+  Mail,
+  Eye,
+  MousePointer,
   RefreshCw,
   Clock,
-  Users
+  Users,
 } from 'lucide-react';
 
 interface AnalyticsSummary {
@@ -94,14 +100,20 @@ interface EngagementMetrics {
   newsletterSignups: number;
 }
 
-type AnalyticsType = 'dashboard' | 'category' | 'views' | 'engagement' | 'summary';
+type AnalyticsType =
+  | 'dashboard'
+  | 'category'
+  | 'views'
+  | 'engagement'
+  | 'summary';
 
 export default function CampaignAnalyticsPage() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState(7);
-  const [analyticsType, setAnalyticsType] = useState<AnalyticsType>('dashboard');
+  const [analyticsType, setAnalyticsType] =
+    useState<AnalyticsType>('dashboard');
   const [dateRange, setDateRange] = useState<{
     from: Date;
     to: Date;
@@ -118,7 +130,7 @@ export default function CampaignAnalyticsPage() {
       } else {
         setLoading(true);
       }
-      
+
       const params = new URLSearchParams({
         type: analyticsType,
         days: timeRange.toString(),
@@ -126,26 +138,30 @@ export default function CampaignAnalyticsPage() {
         endDate: dateRange.to.toISOString(),
       });
 
-      const endpoint = refresh ? '/api/admin/campaigns/analytics' : `/api/admin/campaigns/analytics?${params}`;
+      const endpoint = refresh
+        ? '/api/admin/campaigns/analytics'
+        : `/api/admin/campaigns/analytics?${params}`;
       const method = refresh ? 'POST' : 'GET';
-      const body = refresh ? JSON.stringify({
-        type: analyticsType,
-        days: timeRange,
-        startDate: dateRange.from.toISOString(),
-        endDate: dateRange.to.toISOString(),
-        forceRefresh: true,
-      }) : undefined;
+      const body = refresh
+        ? JSON.stringify({
+            type: analyticsType,
+            days: timeRange,
+            startDate: dateRange.from.toISOString(),
+            endDate: dateRange.to.toISOString(),
+            forceRefresh: true,
+          })
+        : undefined;
 
       const response = await fetch(endpoint, {
         method,
         headers: refresh ? { 'Content-Type': 'application/json' } : {},
         body,
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch analytics');
       }
-      
+
       const result = await response.json();
       setData(result.data);
       setLastUpdated(new Date());
@@ -224,9 +240,12 @@ export default function CampaignAnalyticsPage() {
             Performance insights for the last {timeRange} days
           </p>
         </div>
-        
+
         <div className="flex items-center space-x-4">
-          <Select value={analyticsType} onValueChange={(value: AnalyticsType) => setAnalyticsType(value)}>
+          <Select
+            value={analyticsType}
+            onValueChange={(value: AnalyticsType) => setAnalyticsType(value)}
+          >
             <SelectTrigger className="w-40">
               <SelectValue />
             </SelectTrigger>
@@ -239,11 +258,8 @@ export default function CampaignAnalyticsPage() {
             </SelectContent>
           </Select>
 
-          <DateRangePicker
-            value={dateRange}
-            onChange={setDateRange}
-          />
-          
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
+
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(Number(e.target.value))}
@@ -254,7 +270,7 @@ export default function CampaignAnalyticsPage() {
             <option value={30}>Last 30 days</option>
             <option value={90}>Last 90 days</option>
           </select>
-          
+
           <Button onClick={() => fetchAnalytics(true)} variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
             Refresh
@@ -295,178 +311,196 @@ export default function CampaignAnalyticsPage() {
       <>
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Total Sent
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatNumber(data.summary.totalSent)}
-              </p>
-            </div>
-            <Mail className="w-8 h-8 text-blue-600" />
-          </div>
-          <div className="mt-4 flex items-center">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {data.summary.totalCampaigns} campaigns
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Avg. Open Rate
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatPercentage(data.summary.avgOpenRate)}
-              </p>
-            </div>
-            <Eye className="w-8 h-8 text-green-600" />
-          </div>
-          <div className="mt-4 flex items-center">
-            <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
-            <span className="text-sm text-green-600">
-              {formatNumber(data.summary.totalOpened)} opens
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Avg. Click Rate
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatPercentage(data.summary.avgClickRate)}
-              </p>
-            </div>
-            <MousePointer className="w-8 h-8 text-purple-600" />
-          </div>
-          <div className="mt-4 flex items-center">
-            <TrendingUp className="w-4 h-4 text-purple-600 mr-1" />
-            <span className="text-sm text-purple-600">
-              {formatNumber(data.summary.totalClicked)} clicks
-            </span>
-          </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                Delivery Rate
-              </p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatPercentage(data.summary.avgDeliveryRate)}
-              </p>
-            </div>
-            <TrendingUp className="w-8 h-8 text-indigo-600" />
-          </div>
-          <div className="mt-4 flex items-center">
-            <span className="text-sm text-gray-600 dark:text-gray-400">
-              {formatNumber(data.summary.totalDelivered)} delivered
-            </span>
-          </div>
-        </Card>
-      </div>
-
-      {/* Recent Campaigns */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Recent Campaigns
-          </h3>
-          <div className="space-y-4">
-            {data.recentCampaigns.map((campaign) => (
-              <div key={campaign.campaignId} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900 dark:text-white">
-                    {campaign.campaignName}
-                  </h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {new Date(campaign.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900 dark:text-white">
-                    {formatPercentage(campaign.rates.openRate)} open
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {formatNumber(campaign.metrics.sent)} sent
-                  </p>
-                </div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Total Sent
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatNumber(data.summary.totalSent)}
+                </p>
               </div>
-            ))}
-          </div>
-        </Card>
+              <Mail className="w-8 h-8 text-blue-600" />
+            </div>
+            <div className="mt-4 flex items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {data.summary.totalCampaigns} campaigns
+              </span>
+            </div>
+          </Card>
 
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Top Performers
-          </h3>
-          <div className="space-y-4">
-            {data.topPerformers.map((campaign, index) => (
-              <div key={campaign.campaignId} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                    {index + 1}
-                  </div>
-                  <div>
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Avg. Open Rate
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatPercentage(data.summary.avgOpenRate)}
+                </p>
+              </div>
+              <Eye className="w-8 h-8 text-green-600" />
+            </div>
+            <div className="mt-4 flex items-center">
+              <TrendingUp className="w-4 h-4 text-green-600 mr-1" />
+              <span className="text-sm text-green-600">
+                {formatNumber(data.summary.totalOpened)} opens
+              </span>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Avg. Click Rate
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatPercentage(data.summary.avgClickRate)}
+                </p>
+              </div>
+              <MousePointer className="w-8 h-8 text-purple-600" />
+            </div>
+            <div className="mt-4 flex items-center">
+              <TrendingUp className="w-4 h-4 text-purple-600 mr-1" />
+              <span className="text-sm text-purple-600">
+                {formatNumber(data.summary.totalClicked)} clicks
+              </span>
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  Delivery Rate
+                </p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {formatPercentage(data.summary.avgDeliveryRate)}
+                </p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-indigo-600" />
+            </div>
+            <div className="mt-4 flex items-center">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {formatNumber(data.summary.totalDelivered)} delivered
+              </span>
+            </div>
+          </Card>
+        </div>
+
+        {/* Recent Campaigns */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Recent Campaigns
+            </h3>
+            <div className="space-y-4">
+              {data.recentCampaigns.map((campaign) => (
+                <div
+                  key={campaign.campaignId}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                >
+                  <div className="flex-1">
                     <h4 className="font-medium text-gray-900 dark:text-white">
                       {campaign.campaignName}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {formatNumber(campaign.metrics.sent)} recipients
+                      {new Date(campaign.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                      {formatPercentage(campaign.rates.openRate)} open
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {formatNumber(campaign.metrics.sent)} sent
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-green-600">
-                    {formatPercentage(campaign.rates.openRate)}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    open rate
-                  </p>
+              ))}
+            </div>
+          </Card>
+
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Top Performers
+            </h3>
+            <div className="space-y-4">
+              {data.topPerformers.map((campaign, index) => (
+                <div
+                  key={campaign.campaignId}
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                >
+                  <div className="flex items-center">
+                    <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 dark:text-white">
+                        {campaign.campaignName}
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {formatNumber(campaign.metrics.sent)} recipients
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-green-600">
+                      {formatPercentage(campaign.rates.openRate)}
+                    </p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      open rate
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          </Card>
+        </div>
+
+        {/* Simple Trends Chart */}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Trends Overview
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Emails Sent
+              </p>
+              <p className="text-2xl font-bold text-blue-600">
+                {formatNumber(data.trends.sent.reduce((a, b) => a + b, 0))}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Total in period
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Emails Opened
+              </p>
+              <p className="text-2xl font-bold text-green-600">
+                {formatNumber(data.trends.opened.reduce((a, b) => a + b, 0))}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Total in period
+              </p>
+            </div>
+            <div className="text-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Links Clicked
+              </p>
+              <p className="text-2xl font-bold text-purple-600">
+                {formatNumber(data.trends.clicked.reduce((a, b) => a + b, 0))}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Total in period
+              </p>
+            </div>
           </div>
         </Card>
-      </div>
-
-      {/* Simple Trends Chart */}
-      <Card className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Trends Overview
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Emails Sent</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {formatNumber(data.trends.sent.reduce((a, b) => a + b, 0))}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total in period</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Emails Opened</p>
-            <p className="text-2xl font-bold text-green-600">
-              {formatNumber(data.trends.opened.reduce((a, b) => a + b, 0))}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total in period</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Links Clicked</p>
-            <p className="text-2xl font-bold text-purple-600">
-              {formatNumber(data.trends.clicked.reduce((a, b) => a + b, 0))}
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Total in period</p>
-          </div>
-        </div>
-      </Card>
       </>
     );
   }
@@ -626,7 +660,9 @@ export default function CampaignAnalyticsPage() {
                 <div className="flex items-center gap-4 mt-2 text-sm text-gray-600 dark:text-gray-400">
                   <span>{Math.round(engagement.timeOnPage)}s time</span>
                   <span>{engagement.scrollDepth.toFixed(1)}% scroll</span>
-                  <span>{engagement.interactionRate.toFixed(1)}% interaction</span>
+                  <span>
+                    {engagement.interactionRate.toFixed(1)}% interaction
+                  </span>
                 </div>
               </div>
               <div className="text-right">
@@ -815,7 +851,15 @@ function getMockDashboardData(): DashboardData {
       sent: [1250, 890, 654, 756, 432, 987, 1123],
       opened: [456, 312, 198, 334, 178, 389, 445],
       clicked: [89, 67, 45, 89, 56, 123, 134],
-      dates: ['2025-08-10', '2025-08-11', '2025-08-12', '2025-08-13', '2025-08-14', '2025-08-15', '2025-08-16'],
+      dates: [
+        '2025-08-10',
+        '2025-08-11',
+        '2025-08-12',
+        '2025-08-13',
+        '2025-08-14',
+        '2025-08-15',
+        '2025-08-16',
+      ],
     },
   };
 }

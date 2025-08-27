@@ -10,7 +10,7 @@
   "success_message": "Check your inbox to confirm.",
   "benefits": {
     "big_picture": "Weekly AI & startup landscape",
-    "dev_tools": "New tools & code discoveries", 
+    "dev_tools": "New tools & code discoveries",
     "founder_notes": "Behind-the-scenes insights"
   },
   "errors": {

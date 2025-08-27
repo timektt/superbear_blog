@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { Status, Prisma } from '@prisma/client';
+import { ArticleCache } from '@/lib/cache/article-cache';
+import { logger } from '@/lib/logger';
+import { compressedApiRoute } from '@/lib/compression';
 
-export async function GET(request: NextRequest) {
+async function handler(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
@@ -10,6 +13,38 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const tags = searchParams.get('tags')?.split(',').filter(Boolean) || [];
     const search = searchParams.get('search');
+
+    // Create filters object for caching
+    const filters = {
+      page,
+      limit,
+      category,
+      tags: tags.sort(), // Sort for consistent cache keys
+      search,
+    };
+
+    // Try to get from cache first
+    const cachedResult = await ArticleCache.getArticleList(filters);
+    if (cachedResult) {
+      logger.debug('Serving articles from cache');
+      return NextResponse.json(
+        {
+          articles: cachedResult.articles,
+          pagination: {
+            page: cachedResult.page,
+            limit: cachedResult.limit,
+            total: cachedResult.total,
+            pages: Math.ceil(cachedResult.total / cachedResult.limit),
+          },
+        },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+            'X-Cache': 'HIT',
+          },
+        }
+      );
+    }
 
     const skip = (page - 1) * limit;
 
@@ -91,20 +126,46 @@ export async function GET(request: NextRequest) {
       prisma.article.count({ where }),
     ]);
 
-    return NextResponse.json({
+    // Cache the result
+    const cacheData = {
       articles,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit),
+      total,
+      page,
+      limit,
+      hasMore: total > page * limit,
+    };
+
+    await ArticleCache.setArticleList(filters, cacheData);
+
+    logger.debug('Serving articles from database and caching');
+
+    return NextResponse.json(
+      {
+        articles,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+          'X-Cache': 'MISS',
+        },
+      }
+    );
   } catch (error) {
-    console.error('Error fetching articles:', error);
+    logger.error('Error fetching articles:', error);
     return NextResponse.json(
       { error: 'Failed to fetch articles' },
       { status: 500 }
     );
   }
 }
+
+export const GET = compressedApiRoute(handler, {
+  threshold: 1024, // Compress responses larger than 1KB
+  level: 6, // Balanced compression level
+});

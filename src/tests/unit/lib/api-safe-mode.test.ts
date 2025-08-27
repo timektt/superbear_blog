@@ -1,6 +1,12 @@
 import { NextRequest } from 'next/server';
-import { GET as getComments, POST as postComment } from '@/app/api/comments/route';
-import { GET as getReactions, POST as postReaction } from '@/app/api/reactions/route';
+import {
+  GET as getComments,
+  POST as postComment,
+} from '@/app/api/comments/route';
+import {
+  GET as getReactions,
+  POST as postReaction,
+} from '@/app/api/reactions/route';
 
 // Mock the safe Prisma client
 jest.mock('@/lib/db-safe/client', () => ({
@@ -22,7 +28,9 @@ describe('API Safe Mode Tests', () => {
     it('should return safe mode response when Prisma client is null', async () => {
       (getSafePrismaClient as jest.Mock).mockReturnValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/comments?articleId=test');
+      const request = new NextRequest(
+        'http://localhost:3000/api/comments?articleId=test'
+      );
       const response = await getComments(request);
       const data = await response.json();
 
@@ -72,7 +80,9 @@ describe('API Safe Mode Tests', () => {
     it('should return safe mode response when Prisma client is null', async () => {
       (getSafePrismaClient as jest.Mock).mockReturnValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/reactions?articleId=test');
+      const request = new NextRequest(
+        'http://localhost:3000/api/reactions?articleId=test'
+      );
       const response = await getReactions(request);
       const data = await response.json();
 
@@ -117,7 +127,9 @@ describe('API Safe Mode Tests', () => {
       };
       (getSafePrismaClient as jest.Mock).mockReturnValue(mockPrisma);
 
-      const request = new NextRequest('http://localhost:3000/api/reactions?articleId=test');
+      const request = new NextRequest(
+        'http://localhost:3000/api/reactions?articleId=test'
+      );
       const response = await getReactions(request);
       const data = await response.json();
 

@@ -18,7 +18,11 @@ class PerformanceCollector {
   /**
    * Record a timing metric
    */
-  recordTiming(name: string, durationMs: number, labels?: Record<string, string>): void {
+  recordTiming(
+    name: string,
+    durationMs: number,
+    labels?: Record<string, string>
+  ): void {
     this.addMetric({
       name,
       value: durationMs,
@@ -31,7 +35,11 @@ class PerformanceCollector {
   /**
    * Record a counter metric
    */
-  recordCount(name: string, count: number = 1, labels?: Record<string, string>): void {
+  recordCount(
+    name: string,
+    count: number = 1,
+    labels?: Record<string, string>
+  ): void {
     this.addMetric({
       name,
       value: count,
@@ -44,7 +52,11 @@ class PerformanceCollector {
   /**
    * Record a memory metric
    */
-  recordMemory(name: string, bytes: number, labels?: Record<string, string>): void {
+  recordMemory(
+    name: string,
+    bytes: number,
+    labels?: Record<string, string>
+  ): void {
     this.addMetric({
       name,
       value: bytes,
@@ -66,7 +78,7 @@ class PerformanceCollector {
    */
   getMetricsByName(namePattern: string): PerformanceMetric[] {
     const regex = new RegExp(namePattern);
-    return this.metrics.filter(metric => regex.test(metric.name));
+    return this.metrics.filter((metric) => regex.test(metric.name));
   }
 
   /**
@@ -80,7 +92,7 @@ class PerformanceCollector {
 
   private addMetric(metric: PerformanceMetric): void {
     this.metrics.push(metric);
-    
+
     // Periodic cleanup
     if (this.metrics.length % 100 === 0) {
       this.cleanup();
@@ -107,9 +119,9 @@ export async function measureAsync<T>(
     return result;
   } catch (error) {
     const duration = performance.now() - start;
-    performanceCollector.recordTiming(name, duration, { 
-      ...labels, 
-      status: 'error' 
+    performanceCollector.recordTiming(name, duration, {
+      ...labels,
+      status: 'error',
     });
     throw error;
   }
@@ -131,9 +143,9 @@ export function measureSync<T>(
     return result;
   } catch (error) {
     const duration = performance.now() - start;
-    performanceCollector.recordTiming(name, duration, { 
-      ...labels, 
-      status: 'error' 
+    performanceCollector.recordTiming(name, duration, {
+      ...labels,
+      status: 'error',
     });
     throw error;
   }

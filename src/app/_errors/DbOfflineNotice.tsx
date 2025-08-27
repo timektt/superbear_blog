@@ -26,23 +26,25 @@ export function DbOfflineNotice({
   };
 
   return (
-    <div className={`bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 ${className}`}>
+    <div
+      className={`bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 ${className}`}
+    >
       <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">
           <div className="flex items-center justify-center w-10 h-10 bg-amber-100 dark:bg-amber-900/40 rounded-full">
             <Database className="w-5 h-5 text-amber-600 dark:text-amber-400" />
           </div>
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-amber-800 dark:text-amber-200 mb-2">
             {title}
           </h3>
-          
+
           <p className="text-amber-700 dark:text-amber-300 mb-4 leading-relaxed">
             {message}
           </p>
-          
+
           <div className="flex items-center space-x-4">
             {showRetry && (
               <button
@@ -53,7 +55,7 @@ export function DbOfflineNotice({
                 Retry Connection
               </button>
             )}
-            
+
             <div className="flex items-center text-sm text-amber-600 dark:text-amber-400">
               <AlertTriangle className="w-4 h-4 mr-1" />
               Limited functionality available
@@ -76,7 +78,9 @@ export function DbOfflineInline({
   className?: string;
 }) {
   return (
-    <div className={`inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full ${className}`}>
+    <div
+      className={`inline-flex items-center px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-xs font-medium rounded-full ${className}`}
+    >
       <Database className="w-3 h-3 mr-1" />
       {message}
     </div>

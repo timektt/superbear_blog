@@ -1,10 +1,10 @@
 import { describe, it, expect } from '@jest/globals';
 import { ZodError } from 'zod';
-import { 
-  DbUnavailableError, 
-  ValidationError, 
+import {
+  DbUnavailableError,
+  ValidationError,
   handleApiError,
-  isDatabaseError 
+  isDatabaseError,
 } from '@/lib/errors/handlers';
 import { Prisma } from '@prisma/client';
 
@@ -12,17 +12,19 @@ describe('Error Handling', () => {
   describe('AppError classes', () => {
     it('should create DbUnavailableError with correct properties', () => {
       const error = new DbUnavailableError('Test message');
-      
+
       expect(error.code).toBe('DB_UNAVAILABLE');
       expect(error.statusCode).toBe(503);
-      expect(error.userMessage).toBe('Service temporarily unavailable. Please try again later.');
+      expect(error.userMessage).toBe(
+        'Service temporarily unavailable. Please try again later.'
+      );
       expect(error.message).toBe('Test message');
     });
 
     it('should create ValidationError with context', () => {
       const context = { field: 'email' };
       const error = new ValidationError('Invalid email', context);
-      
+
       expect(error.code).toBe('VALIDATION_ERROR');
       expect(error.statusCode).toBe(400);
       expect(error.context).toEqual(context);
@@ -31,7 +33,7 @@ describe('Error Handling', () => {
     it('should serialize error to JSON', () => {
       const error = new ValidationError('Test error', { field: 'test' });
       const json = error.toJSON();
-      
+
       expect(json).toEqual({
         name: 'ValidationError',
         code: 'VALIDATION_ERROR',

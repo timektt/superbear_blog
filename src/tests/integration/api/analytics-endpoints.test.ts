@@ -26,7 +26,9 @@ jest.mock('next-auth', () => ({
 }));
 
 const mockPrisma = prisma as jest.Mocked<typeof prisma>;
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockGetServerSession = getServerSession as jest.MockedFunction<
+  typeof getServerSession
+>;
 
 describe('/api/analytics/dashboard', () => {
   beforeEach(() => {
@@ -56,7 +58,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(200);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData).toEqual({
         totalViews: 1000,
@@ -108,7 +110,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(401);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toBe('Unauthorized');
     });
@@ -126,7 +128,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(403);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toBe('Insufficient permissions');
     });
@@ -147,7 +149,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(400);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toContain('Invalid date format');
     });
@@ -157,7 +159,9 @@ describe('/api/analytics/dashboard', () => {
         user: { id: '1', email: 'admin@test.com', role: 'admin' },
       });
 
-      mockPrisma.view.count.mockRejectedValue(new Error('Database connection failed'));
+      mockPrisma.view.count.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       const { req, res } = createMocks({
         method: 'GET',
@@ -167,7 +171,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(500);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toBe('Internal server error');
     });
@@ -356,7 +360,7 @@ describe('/api/analytics/dashboard', () => {
 
       // Should handle large datasets efficiently
       expect(res._getStatusCode()).toBe(200);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.viewsOverTime).toBeDefined();
     });
@@ -425,8 +429,8 @@ describe('/api/analytics/dashboard', () => {
       );
 
       // Some requests should be rate limited
-      const rateLimitedResponses = responses.filter(res => 
-        res && res.status === 429
+      const rateLimitedResponses = responses.filter(
+        (res) => res && res.status === 429
       );
 
       expect(rateLimitedResponses.length).toBeGreaterThan(0);
@@ -441,7 +445,9 @@ describe('/api/analytics/dashboard', () => {
 
       // Mock partial failure - some queries succeed, others fail
       mockPrisma.view.count.mockResolvedValue(1000);
-      mockPrisma.article.count.mockRejectedValue(new Error('Article query failed'));
+      mockPrisma.article.count.mockRejectedValue(
+        new Error('Article query failed')
+      );
 
       const { req, res } = createMocks({
         method: 'GET',
@@ -452,7 +458,7 @@ describe('/api/analytics/dashboard', () => {
 
       // Should return partial data with error indication
       expect(res._getStatusCode()).toBe(200);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.totalViews).toBe(1000);
       expect(responseData.errors).toContain('Failed to load article count');
@@ -464,10 +470,11 @@ describe('/api/analytics/dashboard', () => {
       });
 
       // Mock timeout
-      mockPrisma.view.count.mockImplementation(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Query timeout')), 100)
-        )
+      mockPrisma.view.count.mockImplementation(
+        () =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Query timeout')), 100)
+          )
       );
 
       const { req, res } = createMocks({
@@ -478,7 +485,7 @@ describe('/api/analytics/dashboard', () => {
       await handler.GET(req);
 
       expect(res._getStatusCode()).toBe(500);
-      
+
       const responseData = JSON.parse(res._getData());
       expect(responseData.error).toBe('Request timeout');
     });

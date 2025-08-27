@@ -35,8 +35,10 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
   const fetchCampaigns = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/campaigns?page=${page}&limit=10`);
-      
+      const response = await fetch(
+        `/api/admin/campaigns?page=${page}&limit=10`
+      );
+
       if (!response.ok) {
         throw new Error('Failed to fetch campaigns');
       }
@@ -64,7 +66,11 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
   }, [campaigns, onRefresh]);
 
   const handleSendCampaign = async (campaignId: string) => {
-    if (!confirm('Are you sure you want to send this campaign? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to send this campaign? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -83,14 +89,21 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
       fetchCampaigns(currentPage);
     } catch (error) {
       console.error('Error sending campaign:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to send campaign', 'error');
+      showToast(
+        error instanceof Error ? error.message : 'Failed to send campaign',
+        'error'
+      );
     } finally {
       setSendingCampaign(null);
     }
   };
 
   const handleDeleteCampaign = async (campaignId: string) => {
-    if (!confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete this campaign? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -108,7 +121,10 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
       fetchCampaigns(currentPage);
     } catch (error) {
       console.error('Error deleting campaign:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to delete campaign', 'error');
+      showToast(
+        error instanceof Error ? error.message : 'Failed to delete campaign',
+        'error'
+      );
     }
   };
 
@@ -122,7 +138,9 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
     };
 
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status]}`}
+      >
         {status}
       </span>
     );
@@ -150,7 +168,9 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Email Campaigns</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Email Campaigns
+        </h2>
         <Link
           href="/admin/campaigns/new"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
@@ -190,7 +210,10 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {campaigns.map((campaign) => (
-                <tr key={campaign.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                <tr
+                  key={campaign.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
@@ -260,18 +283,21 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
                       >
                         View
                       </Link>
-                      
+
                       {campaign.status === 'DRAFT' && (
                         <button
                           onClick={() => handleSendCampaign(campaign.id)}
                           disabled={sendingCampaign === campaign.id}
                           className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 disabled:opacity-50"
                         >
-                          {sendingCampaign === campaign.id ? 'Sending...' : 'Send'}
+                          {sendingCampaign === campaign.id
+                            ? 'Sending...'
+                            : 'Send'}
                         </button>
                       )}
-                      
-                      {(campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED') && (
+
+                      {(campaign.status === 'DRAFT' ||
+                        campaign.status === 'SCHEDULED') && (
                         <button
                           onClick={() => handleDeleteCampaign(campaign.id)}
                           className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
@@ -306,11 +332,11 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
           >
             Previous
           </button>
-          
+
           <span className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
             Page {currentPage} of {totalPages}
           </span>
-          
+
           <button
             onClick={() => fetchCampaigns(currentPage + 1)}
             disabled={currentPage === totalPages}

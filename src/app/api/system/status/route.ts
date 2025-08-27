@@ -45,7 +45,7 @@ interface SystemStatus {
 
 export async function GET(): Promise<NextResponse<SystemStatus>> {
   const startTime = Date.now();
-  
+
   // Check database connection
   let dbConnected = false;
   try {
@@ -63,7 +63,9 @@ export async function GET(): Promise<NextResponse<SystemStatus>> {
 
   // Get memory usage
   const memoryUsage = process.memoryUsage();
-  const memoryPercentage = Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100);
+  const memoryPercentage = Math.round(
+    (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100
+  );
 
   // Check cron status (simplified - would need actual cron tracking in production)
   const cronStatus = {
@@ -107,7 +109,7 @@ export async function GET(): Promise<NextResponse<SystemStatus>> {
     },
   };
 
-  logger.debug('System status check', { 
+  logger.debug('System status check', {
     status: systemStatus,
     responseTime: Date.now() - startTime,
   });
@@ -115,7 +117,7 @@ export async function GET(): Promise<NextResponse<SystemStatus>> {
   return NextResponse.json(systemStatus, {
     headers: {
       'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'Pragma': 'no-cache',
+      Pragma: 'no-cache',
     },
   });
 }

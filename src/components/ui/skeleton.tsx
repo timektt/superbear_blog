@@ -1,18 +1,15 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 function Skeleton({ className, ...props }: SkeletonProps) {
   return (
     <div
-      className={cn(
-        "animate-pulse rounded-md bg-muted",
-        className
-      )}
+      className={cn('animate-pulse rounded-md bg-muted', className)}
       {...props}
     />
-  )
+  );
 }
 
 // Specific skeleton components for different content types
@@ -29,7 +26,7 @@ function ArticleCardSkeleton() {
         <Skeleton className="h-4 w-20" />
       </div>
     </div>
-  )
+  );
 }
 
 function PodcastCardSkeleton() {
@@ -44,7 +41,7 @@ function PodcastCardSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 function NewsletterCardSkeleton() {
@@ -58,7 +55,7 @@ function NewsletterCardSkeleton() {
       <Skeleton className="h-4 w-4/5" />
       <Skeleton className="h-4 w-3/5" />
     </div>
-  )
+  );
 }
 
 function NavigationSkeleton() {
@@ -69,25 +66,25 @@ function NavigationSkeleton() {
       <Skeleton className="h-8 w-20" />
       <Skeleton className="h-8 w-18" />
     </div>
-  )
+  );
 }
 
 function LoadingSpinner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "animate-spin rounded-full border-2 border-muted border-t-primary",
+        'animate-spin rounded-full border-2 border-muted border-t-primary',
         className
       )}
     />
-  )
+  );
 }
 
-export { 
-  Skeleton, 
-  ArticleCardSkeleton, 
-  PodcastCardSkeleton, 
-  NewsletterCardSkeleton, 
+export {
+  Skeleton,
+  ArticleCardSkeleton,
+  PodcastCardSkeleton,
+  NewsletterCardSkeleton,
   NavigationSkeleton,
-  LoadingSpinner 
-}
+  LoadingSpinner,
+};

@@ -39,10 +39,12 @@ interface CampaignDetailsProps {
   campaign: Campaign;
 }
 
-export default function CampaignDetails({ campaign: initialCampaign }: CampaignDetailsProps) {
+export default function CampaignDetails({
+  campaign: initialCampaign,
+}: CampaignDetailsProps) {
   const router = useRouter();
   const { showToast } = useToast();
-  
+
   const [campaign, setCampaign] = useState<Campaign>(initialCampaign);
   const [stats, setStats] = useState<CampaignStats | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +56,7 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       try {
         const response = await fetch(`/api/admin/campaigns/${campaign.id}`);
         if (!response.ok) throw new Error('Failed to fetch stats');
-        
+
         const data = await response.json();
         setStats(data.stats);
         setCampaign(data.campaign);
@@ -69,7 +71,11 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
   }, [campaign.id]);
 
   const handleSendCampaign = async () => {
-    if (!confirm('Are you sure you want to send this campaign? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to send this campaign? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -85,9 +91,11 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       }
 
       showToast('Campaign sent successfully!', 'success');
-      
+
       // Refresh campaign data
-      const updatedResponse = await fetch(`/api/admin/campaigns/${campaign.id}`);
+      const updatedResponse = await fetch(
+        `/api/admin/campaigns/${campaign.id}`
+      );
       if (updatedResponse.ok) {
         const data = await updatedResponse.json();
         setCampaign(data.campaign);
@@ -95,14 +103,21 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       }
     } catch (error) {
       console.error('Error sending campaign:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to send campaign', 'error');
+      showToast(
+        error instanceof Error ? error.message : 'Failed to send campaign',
+        'error'
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleDeleteCampaign = async () => {
-    if (!confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+    if (
+      !confirm(
+        'Are you sure you want to delete this campaign? This action cannot be undone.'
+      )
+    ) {
       return;
     }
 
@@ -120,7 +135,10 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       router.push('/admin/campaigns');
     } catch (error) {
       console.error('Error deleting campaign:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to delete campaign', 'error');
+      showToast(
+        error instanceof Error ? error.message : 'Failed to delete campaign',
+        'error'
+      );
     }
   };
 
@@ -134,7 +152,9 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
     };
 
     return (
-      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status]}`}>
+      <span
+        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${statusStyles[status]}`}
+      >
         {status}
       </span>
     );
@@ -161,12 +181,14 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center space-x-3 mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{campaign.title}</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {campaign.title}
+            </h1>
             {getStatusBadge(campaign.status)}
           </div>
           <p className="text-gray-600 dark:text-gray-400">{campaign.subject}</p>
         </div>
-        
+
         <div className="flex space-x-3">
           <Link
             href="/admin/campaigns"
@@ -174,7 +196,7 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
           >
             ← Back to Campaigns
           </Link>
-          
+
           {campaign.status === 'DRAFT' && (
             <button
               onClick={handleSendCampaign}
@@ -184,7 +206,7 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
               {loading ? 'Sending...' : 'Send Now'}
             </button>
           )}
-          
+
           {(campaign.status === 'DRAFT' || campaign.status === 'SCHEDULED') && (
             <button
               onClick={handleDeleteCampaign}
@@ -202,26 +224,34 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
             {campaign.recipients.toLocaleString()}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Recipients</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Recipients
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
             {campaign.template?.name || 'No Template'}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Template</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Template
+          </div>
         </div>
 
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm">
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
-            {campaign.sentAt ? formatDate(campaign.sentAt) : 
-             campaign.scheduledAt ? formatDate(campaign.scheduledAt) : 
-             formatDate(campaign.createdAt)}
+            {campaign.sentAt
+              ? formatDate(campaign.sentAt)
+              : campaign.scheduledAt
+                ? formatDate(campaign.scheduledAt)
+                : formatDate(campaign.createdAt)}
           </div>
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {campaign.sentAt ? 'Sent' : 
-             campaign.scheduledAt ? 'Scheduled' : 
-             'Created'}
+            {campaign.sentAt
+              ? 'Sent'
+              : campaign.scheduledAt
+                ? 'Scheduled'
+                : 'Created'}
           </div>
         </div>
 
@@ -229,15 +259,19 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
           <div className="text-2xl font-bold text-gray-900 dark:text-white">
             {campaign.template?.category || 'Unknown'}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400">Category</div>
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            Category
+          </div>
         </div>
       </div>
 
       {/* Performance Stats */}
       {campaign.status === 'SENT' && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Performance</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+            Performance
+          </h2>
+
           {statsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
@@ -250,32 +284,48 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
           ) : stats ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">{stats.delivered.toLocaleString()}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Delivered</div>
+                <div className="text-3xl font-bold text-green-600">
+                  {stats.delivered.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Delivered
+                </div>
                 <div className="text-xs text-gray-500">
                   {calculateRate(stats.delivered, stats.sent)}% delivery rate
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">{stats.opened.toLocaleString()}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Opened</div>
+                <div className="text-3xl font-bold text-blue-600">
+                  {stats.opened.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Opened
+                </div>
                 <div className="text-xs text-gray-500">
                   {calculateRate(stats.opened, stats.delivered)}% open rate
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600">{stats.clicked.toLocaleString()}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Clicked</div>
+                <div className="text-3xl font-bold text-purple-600">
+                  {stats.clicked.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Clicked
+                </div>
                 <div className="text-xs text-gray-500">
                   {calculateRate(stats.clicked, stats.opened)}% click rate
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-3xl font-bold text-red-600">{stats.bounced.toLocaleString()}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">Bounced</div>
+                <div className="text-3xl font-bold text-red-600">
+                  {stats.bounced.toLocaleString()}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Bounced
+                </div>
                 <div className="text-xs text-gray-500">
                   {calculateRate(stats.bounced, stats.sent)}% bounce rate
                 </div>
@@ -292,26 +342,40 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
       {/* Template Info */}
       {campaign.template && (
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Template Details</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Template Details
+          </h2>
+
           <div className="space-y-3">
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>
-              <span className="ml-2 text-gray-900 dark:text-white">{campaign.template.name}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                Name:
+              </span>
+              <span className="ml-2 text-gray-900 dark:text-white">
+                {campaign.template.name}
+              </span>
             </div>
-            
+
             <div>
-              <span className="font-medium text-gray-700 dark:text-gray-300">Category:</span>
-              <span className="ml-2 text-gray-900 dark:text-white">{campaign.template.category}</span>
+              <span className="font-medium text-gray-700 dark:text-gray-300">
+                Category:
+              </span>
+              <span className="ml-2 text-gray-900 dark:text-white">
+                {campaign.template.category}
+              </span>
             </div>
-            
+
             {campaign.template.description && (
               <div>
-                <span className="font-medium text-gray-700 dark:text-gray-300">Description:</span>
-                <span className="ml-2 text-gray-900 dark:text-white">{campaign.template.description}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">
+                  Description:
+                </span>
+                <span className="ml-2 text-gray-900 dark:text-white">
+                  {campaign.template.description}
+                </span>
               </div>
             )}
-            
+
             <div className="pt-3">
               <Link
                 href={`/admin/email-templates/${campaign.template.id}`}
@@ -326,33 +390,49 @@ export default function CampaignDetails({ campaign: initialCampaign }: CampaignD
 
       {/* Campaign Timeline */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Timeline</h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Timeline
+        </h2>
+
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
             <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
             <div>
-              <div className="font-medium text-gray-900 dark:text-white">Campaign Created</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">{formatDate(campaign.createdAt)}</div>
+              <div className="font-medium text-gray-900 dark:text-white">
+                Campaign Created
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                {formatDate(campaign.createdAt)}
+              </div>
             </div>
           </div>
-          
+
           {campaign.scheduledAt && (
             <div className="flex items-center space-x-3">
-              <div className={`w-3 h-3 rounded-full ${campaign.status === 'SCHEDULED' ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
+              <div
+                className={`w-3 h-3 rounded-full ${campaign.status === 'SCHEDULED' ? 'bg-yellow-500' : 'bg-green-500'}`}
+              ></div>
               <div>
-                <div className="font-medium text-gray-900 dark:text-white">Scheduled</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{formatDate(campaign.scheduledAt)}</div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  Scheduled
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {formatDate(campaign.scheduledAt)}
+                </div>
               </div>
             </div>
           )}
-          
+
           {campaign.sentAt && (
             <div className="flex items-center space-x-3">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <div>
-                <div className="font-medium text-gray-900 dark:text-white">Campaign Sent</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{formatDate(campaign.sentAt)}</div>
+                <div className="font-medium text-gray-900 dark:text-white">
+                  Campaign Sent
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {formatDate(campaign.sentAt)}
+                </div>
               </div>
             </div>
           )}

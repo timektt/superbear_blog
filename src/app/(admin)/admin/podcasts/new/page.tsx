@@ -12,7 +12,7 @@ export const metadata = {
 
 async function NewPodcastPage() {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     redirect('/admin/login');
   }

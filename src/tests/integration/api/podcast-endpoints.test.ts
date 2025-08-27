@@ -1,8 +1,15 @@
 import { NextRequest } from 'next/server';
 import { GET as getPodcasts } from '@/app/api/podcasts/route';
 import { GET as getPodcast } from '@/app/api/podcasts/[slug]/route';
-import { GET as getAdminPodcasts, POST as createPodcast } from '@/app/api/admin/podcasts/route';
-import { GET as getAdminPodcast, PUT as updatePodcast, DELETE as deletePodcast } from '@/app/api/admin/podcasts/[id]/route';
+import {
+  GET as getAdminPodcasts,
+  POST as createPodcast,
+} from '@/app/api/admin/podcasts/route';
+import {
+  GET as getAdminPodcast,
+  PUT as updatePodcast,
+  DELETE as deletePodcast,
+} from '@/app/api/admin/podcasts/[id]/route';
 
 // Mock Prisma
 jest.mock('@/lib/prisma', () => ({
@@ -49,9 +56,7 @@ const mockPodcast = {
     name: 'Technology',
     slug: 'technology',
   },
-  tags: [
-    { id: '1', name: 'AI', slug: 'ai' },
-  ],
+  tags: [{ id: '1', name: 'AI', slug: 'ai' }],
 };
 
 describe('Podcast API Endpoints', () => {
@@ -61,20 +66,26 @@ describe('Podcast API Endpoints', () => {
 
   describe('GET /api/podcasts', () => {
     it('returns published podcasts with pagination', async () => {
-      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([mockPodcast]);
+      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([
+        mockPodcast,
+      ]);
       (prisma.podcastEpisode.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/podcasts?page=1&limit=10');
+      const request = new NextRequest(
+        'http://localhost:3000/api/podcasts?page=1&limit=10'
+      );
       const response = await getPodcasts(request);
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.podcasts).toHaveLength(1);
-      expect(data.podcasts[0]).toEqual(expect.objectContaining({
-        title: 'Test Podcast Episode',
-        slug: 'test-podcast-episode',
-        status: 'PUBLISHED',
-      }));
+      expect(data.podcasts[0]).toEqual(
+        expect.objectContaining({
+          title: 'Test Podcast Episode',
+          slug: 'test-podcast-episode',
+          status: 'PUBLISHED',
+        })
+      );
       expect(data.pagination).toEqual({
         page: 1,
         limit: 10,
@@ -84,10 +95,14 @@ describe('Podcast API Endpoints', () => {
     });
 
     it('filters podcasts by category', async () => {
-      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([mockPodcast]);
+      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([
+        mockPodcast,
+      ]);
       (prisma.podcastEpisode.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/podcasts?category=technology');
+      const request = new NextRequest(
+        'http://localhost:3000/api/podcasts?category=technology'
+      );
       await getPodcasts(request);
 
       expect(prisma.podcastEpisode.findMany).toHaveBeenCalledWith(
@@ -100,10 +115,14 @@ describe('Podcast API Endpoints', () => {
     });
 
     it('handles search query', async () => {
-      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([mockPodcast]);
+      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([
+        mockPodcast,
+      ]);
       (prisma.podcastEpisode.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/podcasts?search=test');
+      const request = new NextRequest(
+        'http://localhost:3000/api/podcasts?search=test'
+      );
       await getPodcasts(request);
 
       expect(prisma.podcastEpisode.findMany).toHaveBeenCalledWith(
@@ -119,7 +138,9 @@ describe('Podcast API Endpoints', () => {
     });
 
     it('returns 500 on database error', async () => {
-      (prisma.podcastEpisode.findMany as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (prisma.podcastEpisode.findMany as jest.Mock).mockRejectedValue(
+        new Error('Database error')
+      );
 
       const request = new NextRequest('http://localhost:3000/api/podcasts');
       const response = await getPodcasts(request);
@@ -130,19 +151,25 @@ describe('Podcast API Endpoints', () => {
 
   describe('GET /api/podcasts/[slug]', () => {
     it('returns podcast by slug', async () => {
-      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(mockPodcast);
+      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(
+        mockPodcast
+      );
 
       const response = await getPodcast(
-        new NextRequest('http://localhost:3000/api/podcasts/test-podcast-episode'),
+        new NextRequest(
+          'http://localhost:3000/api/podcasts/test-podcast-episode'
+        ),
         { params: { slug: 'test-podcast-episode' } }
       );
       const data = await response.json();
 
       expect(response.status).toBe(200);
-      expect(data.podcast).toEqual(expect.objectContaining({
-        title: 'Test Podcast Episode',
-        slug: 'test-podcast-episode',
-      }));
+      expect(data.podcast).toEqual(
+        expect.objectContaining({
+          title: 'Test Podcast Episode',
+          slug: 'test-podcast-episode',
+        })
+      );
     });
 
     it('returns 404 for non-existent podcast', async () => {
@@ -158,10 +185,14 @@ describe('Podcast API Endpoints', () => {
 
     it('returns 404 for draft podcast to public', async () => {
       const draftPodcast = { ...mockPodcast, status: 'DRAFT' };
-      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(draftPodcast);
+      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(
+        draftPodcast
+      );
 
       const response = await getPodcast(
-        new NextRequest('http://localhost:3000/api/podcasts/test-podcast-episode'),
+        new NextRequest(
+          'http://localhost:3000/api/podcasts/test-podcast-episode'
+        ),
         { params: { slug: 'test-podcast-episode' } }
       );
 
@@ -174,10 +205,14 @@ describe('Podcast API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([mockPodcast]);
+      (prisma.podcastEpisode.findMany as jest.Mock).mockResolvedValue([
+        mockPodcast,
+      ]);
       (prisma.podcastEpisode.count as jest.Mock).mockResolvedValue(1);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts'
+      );
       const response = await getAdminPodcasts(request);
       const data = await response.json();
 
@@ -188,7 +223,9 @@ describe('Podcast API Endpoints', () => {
     it('returns 401 for unauthenticated user', async () => {
       (getServerSession as jest.Mock).mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts'
+      );
       const response = await getAdminPodcasts(request);
 
       expect(response.status).toBe(401);
@@ -199,7 +236,9 @@ describe('Podcast API Endpoints', () => {
         user: { id: '1', role: 'USER' },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts');
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts'
+      );
       const response = await getAdminPodcasts(request);
 
       expect(response.status).toBe(403);
@@ -224,11 +263,14 @@ describe('Podcast API Endpoints', () => {
         ...validPodcastData,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts', {
-        method: 'POST',
-        body: JSON.stringify(validPodcastData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts',
+        {
+          method: 'POST',
+          body: JSON.stringify(validPodcastData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createPodcast(request);
       const data = await response.json();
@@ -249,11 +291,14 @@ describe('Podcast API Endpoints', () => {
 
       const invalidData = { title: '' }; // Missing required fields
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts', {
-        method: 'POST',
-        body: JSON.stringify(invalidData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts',
+        {
+          method: 'POST',
+          body: JSON.stringify(invalidData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createPodcast(request);
 
@@ -269,11 +314,14 @@ describe('Podcast API Endpoints', () => {
         meta: { target: ['slug'] },
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts', {
-        method: 'POST',
-        body: JSON.stringify(validPodcastData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts',
+        {
+          method: 'POST',
+          body: JSON.stringify(validPodcastData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await createPodcast(request);
 
@@ -291,17 +339,22 @@ describe('Podcast API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(mockPodcast);
+      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(
+        mockPodcast
+      );
       (prisma.podcastEpisode.update as jest.Mock).mockResolvedValue({
         ...mockPodcast,
         ...updateData,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts/1', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts/1',
+        {
+          method: 'PUT',
+          body: JSON.stringify(updateData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await updatePodcast(request, { params: { id: '1' } });
       const data = await response.json();
@@ -316,11 +369,14 @@ describe('Podcast API Endpoints', () => {
       });
       (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts/999', {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts/999',
+        {
+          method: 'PUT',
+          body: JSON.stringify(updateData),
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
 
       const response = await updatePodcast(request, { params: { id: '999' } });
 
@@ -333,12 +389,19 @@ describe('Podcast API Endpoints', () => {
       (getServerSession as jest.Mock).mockResolvedValue({
         user: { id: '1', role: 'ADMIN' },
       });
-      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(mockPodcast);
-      (prisma.podcastEpisode.delete as jest.Mock).mockResolvedValue(mockPodcast);
+      (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(
+        mockPodcast
+      );
+      (prisma.podcastEpisode.delete as jest.Mock).mockResolvedValue(
+        mockPodcast
+      );
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts/1', {
-        method: 'DELETE',
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts/1',
+        {
+          method: 'DELETE',
+        }
+      );
 
       const response = await deletePodcast(request, { params: { id: '1' } });
 
@@ -354,9 +417,12 @@ describe('Podcast API Endpoints', () => {
       });
       (prisma.podcastEpisode.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/podcasts/999', {
-        method: 'DELETE',
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/podcasts/999',
+        {
+          method: 'DELETE',
+        }
+      );
 
       const response = await deletePodcast(request, { params: { id: '999' } });
 

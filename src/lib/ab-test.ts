@@ -59,7 +59,7 @@ export function getABTestVariant(): ABTestVariant {
   if (!variant || !['A', 'B'].includes(variant)) {
     // Assign random variant (50/50 split)
     variant = Math.random() < 0.5 ? 'A' : 'B';
-    
+
     // Set cookie for 14 days
     setCookie(cookieName, variant, {
       maxAge: 14 * 24 * 60 * 60, // 14 days
@@ -75,7 +75,10 @@ export function getABTestConfig(variant: ABTestVariant) {
   return NEWSLETTER_AB_TEST.variants[variant];
 }
 
-export function formatABTestCopy(text: string, subscriberCount: number): string {
+export function formatABTestCopy(
+  text: string,
+  subscriberCount: number
+): string {
   return text.replace('{{count}}', subscriberCount.toLocaleString());
 }
 

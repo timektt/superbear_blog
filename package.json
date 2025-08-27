@@ -41,9 +41,11 @@
     "test:podcast-newsletter:e2e": "tsx src/tests/podcast-newsletter-test-suite.ts --e2e",
     "test:podcast-newsletter:accessibility": "tsx src/tests/podcast-newsletter-test-suite.ts --accessibility",
     "test:podcast-newsletter:performance": "tsx src/tests/podcast-newsletter-test-suite.ts --performance",
-    "build:analyze": "ANALYZE=true npm run build",
+    "build:analyze": "node scripts/analyze-bundle.js",
+    "dev:clean": "rm -rf .next && npm run dev",
     "build:prod": "NODE_ENV=production npm run build",
     "build:standalone": "NODE_ENV=production npm run build && npm run db:generate",
+    "postinstall": "prisma generate",
     "postbuild": "npm run db:generate",
     "start:prod": "bash scripts/production-start.sh",
     "start:prod:windows": "powershell -ExecutionPolicy Bypass -File scripts/production-start.ps1",
@@ -61,7 +63,8 @@
     "campaigns:queue": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/queue').then(r=>r.json()).then(console.log)\"",
     "campaigns:process-queue": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/queue/process', {method: 'POST'}).then(r=>r.json()).then(console.log)\"",
     "suppressions:stats": "node -e \"fetch('http://localhost:3000/api/admin/suppressions').then(r=>r.json()).then(console.log)\"",
-    "suppressions:export": "node -e \"fetch('http://localhost:3000/api/admin/suppressions?action=export').then(r=>r.json()).then(console.log)\""
+    "suppressions:export": "node -e \"fetch('http://localhost:3000/api/admin/suppressions?action=export').then(r=>r.json()).then(console.log)\"",
+    "test:layout": "node scripts/test-layout.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -87,6 +90,7 @@
     "cookies-next": "^6.1.0",
     "dotenv": "^17.2.1",
     "handlebars": "^4.7.8",
+    "ioredis": "^5.7.0",
     "juice": "^11.0.1",
     "lowlight": "^3.3.0",
     "lucide-react": "^0.536.0",

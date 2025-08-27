@@ -85,22 +85,31 @@ export default async function Home() {
           summary: featured.summary || '',
           category: featured.category?.name || 'Tech',
           author: featured.author?.name || 'SuperBear Reporter',
-          date: featured.createdAt ? new Date(featured.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+          date: featured.createdAt
+            ? new Date(featured.createdAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
           imageUrl: featured.image || featured.imageUrl || '/og-default.svg',
           slug: featured.slug,
         }}
         headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES}
-        latest={latest.length > 0 ? latest.map(article => ({
-          id: article.id,
-          title: article.title,
-          category: article.category?.name || 'Tech',
-          author: article.author?.name || 'SuperBear Reporter',
-          date: article.createdAt ? new Date(article.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
-          slug: article.slug,
-          imageUrl: article.image || article.imageUrl || '/og-default.svg',
-          snippet: article.summary || '',
-          tags: article.tags?.map(tag => tag.name) || [],
-        })) : MOCK_LATEST}
+        latest={
+          latest.length > 0
+            ? latest.map((article) => ({
+                id: article.id,
+                title: article.title,
+                category: article.category?.name || 'Tech',
+                author: article.author?.name || 'SuperBear Reporter',
+                date: article.createdAt
+                  ? new Date(article.createdAt).toLocaleDateString()
+                  : new Date().toLocaleDateString(),
+                slug: article.slug,
+                imageUrl:
+                  article.image || article.imageUrl || '/og-default.svg',
+                snippet: article.summary || '',
+                tags: article.tags?.map((tag) => tag.name) || [],
+              }))
+            : MOCK_LATEST
+        }
       />
     );
   } catch (error) {
@@ -179,9 +188,7 @@ function HomeView({
       <section className="bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-foreground">
-              Latest News
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground">Latest News</h2>
             <Link
               href="/news"
               className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors duration-200"
@@ -237,7 +244,8 @@ function HomeView({
               Stay Updated
             </h2>
             <p className="text-muted-foreground mb-6">
-              Get curated tech insights delivered weekly. No spam, unsubscribe anytime.
+              Get curated tech insights delivered weekly. No spam, unsubscribe
+              anytime.
             </p>
             <NewsletterSubscription
               source="homepage"

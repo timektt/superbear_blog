@@ -42,7 +42,6 @@ export async function POST(
       message: result.message,
       cancelledDeliveries: result.cancelledDeliveries,
     });
-
   } catch (error) {
     logger.error('Failed to cancel campaign', error as Error);
     return NextResponse.json(

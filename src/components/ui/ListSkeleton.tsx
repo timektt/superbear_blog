@@ -8,24 +8,24 @@ export default function ListSkeleton() {
         >
           {/* Thumbnail skeleton */}
           <div className="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-muted rounded-lg"></div>
-          
+
           {/* Content skeleton */}
           <div className="flex-1 min-w-0">
             {/* Category badge skeleton */}
             <div className="w-20 h-5 bg-muted rounded mb-2"></div>
-            
+
             {/* Title skeleton */}
             <div className="space-y-2 mb-3">
               <div className="h-5 bg-muted rounded w-full"></div>
               <div className="h-5 bg-muted rounded w-3/4"></div>
             </div>
-            
+
             {/* Snippet skeleton */}
             <div className="space-y-2 mb-3">
               <div className="h-4 bg-muted rounded w-full"></div>
               <div className="h-4 bg-muted rounded w-2/3"></div>
             </div>
-            
+
             {/* Meta skeleton */}
             <div className="flex items-center space-x-2">
               <div className="h-3 bg-muted rounded w-20"></div>

@@ -17,13 +17,13 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = scheduleSchema.safeParse(body);
     if (!validationResult.success) {
@@ -34,7 +34,7 @@ export async function POST(
     }
 
     const scheduledAt = new Date(validationResult.data.scheduledAt);
-    
+
     // Check if scheduled time is in the future
     if (scheduledAt <= new Date()) {
       return NextResponse.json(
@@ -45,17 +45,21 @@ export async function POST(
 
     await scheduleCampaign(params.id, scheduledAt);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: 'Campaign scheduled successfully',
       scheduledAt: scheduledAt.toISOString(),
     });
-
   } catch (error) {
-    logger.error('Failed to schedule campaign', error as Error, { campaignId: params.id });
-    
+    logger.error('Failed to schedule campaign', error as Error, {
+      campaignId: params.id,
+    });
+
     if (error instanceof Error && error.message === 'Campaign not found') {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(

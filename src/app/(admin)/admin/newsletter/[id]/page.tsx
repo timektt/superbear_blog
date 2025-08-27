@@ -18,17 +18,20 @@ interface EditNewsletterIssuePageProps {
 
 async function fetchNewsletterIssue(id: string) {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/admin/newsletter/issues/${id}`, {
-      cache: 'no-store',
-    });
-    
+    const response = await fetch(
+      `${process.env.NEXTAUTH_URL}/api/admin/newsletter/issues/${id}`,
+      {
+        cache: 'no-store',
+      }
+    );
+
     if (!response.ok) {
       if (response.status === 404) {
         notFound();
       }
       throw new Error('Failed to fetch newsletter issue');
     }
-    
+
     return response.json();
   } catch (error) {
     console.error('Error fetching newsletter issue:', error);
@@ -36,9 +39,11 @@ async function fetchNewsletterIssue(id: string) {
   }
 }
 
-async function EditNewsletterIssuePage({ params }: EditNewsletterIssuePageProps) {
+async function EditNewsletterIssuePage({
+  params,
+}: EditNewsletterIssuePageProps) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session?.user) {
     redirect('/admin/login');
   }
