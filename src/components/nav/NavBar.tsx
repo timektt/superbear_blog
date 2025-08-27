@@ -32,7 +32,10 @@ export default function NavBar() {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         closeMoreDropdown();
       }
     };
@@ -80,27 +83,30 @@ export default function NavBar() {
   ];
 
   const moreNavigationItems = [
-    { 
-      href: '/open-source', 
+    {
+      href: '/open-source',
       label: 'Open Source',
-      description: 'Latest open source projects and tools'
+      description: 'Latest open source projects and tools',
     },
-    { 
-      href: '/podcasts', 
+    {
+      href: '/podcasts',
       label: 'Podcasts',
-      description: 'Tech talks and developer interviews'
+      description: 'Tech talks and developer interviews',
     },
-    { 
-      href: '/newsletter', 
+    {
+      href: '/newsletter',
       label: 'Newsletter',
-      description: 'Weekly curated tech insights'
+      description: 'Weekly curated tech insights',
     },
   ];
 
   const allNavigationItems = [...mainNavigationItems, ...moreNavigationItems];
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-all duration-200">
+    <header
+      data-testid="navbar"
+      className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-all duration-200"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -135,7 +141,7 @@ export default function NavBar() {
                   {item.label}
                 </Link>
               ))}
-              
+
               {/* More Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -148,7 +154,7 @@ export default function NavBar() {
                     }
                   }}
                   className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
-                    moreNavigationItems.some(item => isActivePage(item.href))
+                    moreNavigationItems.some((item) => isActivePage(item.href))
                       ? 'text-primary bg-primary/10'
                       : 'text-foreground hover:text-primary hover:bg-muted/50'
                   }`}
@@ -157,7 +163,7 @@ export default function NavBar() {
                   aria-label="More navigation options"
                 >
                   <span>More</span>
-                  <ChevronDown 
+                  <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${
                       isMoreDropdownOpen ? 'rotate-180' : ''
                     }`}
@@ -177,7 +183,7 @@ export default function NavBar() {
                 {/* Dropdown Menu */}
                 {isMoreDropdownOpen && (
                   <div
-                    className="absolute top-full left-0 mt-2 w-64 bg-card/95 backdrop-blur-md border border-border rounded-lg shadow-lg z-50 py-2 animate-slide-down"
+                    className="absolute top-full left-0 mt-2 w-64 bg-popover text-popover-foreground border border-border rounded-lg shadow-lg z-50 py-2 animate-slide-down"
                     role="menu"
                     aria-orientation="vertical"
                   >
@@ -189,10 +195,12 @@ export default function NavBar() {
                         className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
                           isActivePage(item.href)
                             ? 'text-primary bg-primary/10'
-                            : 'text-card-foreground hover:text-primary hover:bg-muted/50'
+                            : 'text-popover-foreground hover:text-primary hover:bg-muted/50'
                         }`}
                         role="menuitem"
-                        aria-current={isActivePage(item.href) ? 'page' : undefined}
+                        aria-current={
+                          isActivePage(item.href) ? 'page' : undefined
+                        }
                       >
                         <div className="font-medium">{item.label}</div>
                         <div className="text-xs text-muted-foreground mt-1">

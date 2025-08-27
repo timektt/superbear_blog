@@ -20,12 +20,13 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '10');
 
     // Get top performing articles by different metrics
-    const [topByViews, topByEngagement, topByShares, topByTime] = await Promise.all([
-      getTopPerformingArticles('views', timeRange as any, limit),
-      getTopPerformingArticles('engagement', timeRange as any, limit),
-      getTopPerformingArticles('shares', timeRange as any, limit),
-      getTopPerformingArticles('time', timeRange as any, limit),
-    ]);
+    const [topByViews, topByEngagement, topByShares, topByTime] =
+      await Promise.all([
+        getTopPerformingArticles('views', timeRange as any, limit),
+        getTopPerformingArticles('engagement', timeRange as any, limit),
+        getTopPerformingArticles('shares', timeRange as any, limit),
+        getTopPerformingArticles('time', timeRange as any, limit),
+      ]);
 
     // Get overall statistics
     const overallStats = await getOverallAnalyticsStats(timeRange);
@@ -50,7 +51,6 @@ export async function GET(request: NextRequest) {
         recentActivity,
       },
     });
-
   } catch (error) {
     logger.error('Failed to get analytics dashboard data', error as Error);
     return NextResponse.json(
@@ -64,37 +64,38 @@ export async function GET(request: NextRequest) {
 async function getOverallAnalyticsStats(timeRange: string) {
   const timeFilter = getTimeFilter(timeRange);
 
-  const [totalViews, totalArticles, avgEngagement, totalShares] = await Promise.all([
-    // Total views
-    prisma?.articleView.count({
-      where: timeFilter,
-    }) || 0,
+  const [totalViews, totalArticles, avgEngagement, totalShares] =
+    await Promise.all([
+      // Total views
+      prisma?.articleView.count({
+        where: timeFilter,
+      }) || 0,
 
-    // Total published articles
-    prisma?.article.count({
-      where: {
-        status: 'PUBLISHED',
-        publishedAt: timeFilter.timestamp,
-      },
-    }) || 0,
+      // Total published articles
+      prisma?.article.count({
+        where: {
+          status: 'PUBLISHED',
+          publishedAt: timeFilter.timestamp,
+        },
+      }) || 0,
 
-    // Average engagement (completion rate)
-    prisma?.articleStats.aggregate({
-      _avg: {
-        completionRate: true,
-        avgTimeOnPage: true,
-        bounceRate: true,
-      },
-    }),
+      // Average engagement (completion rate)
+      prisma?.articleStats.aggregate({
+        _avg: {
+          completionRate: true,
+          avgTimeOnPage: true,
+          bounceRate: true,
+        },
+      }),
 
-    // Total social shares
-    prisma?.articleInteraction.count({
-      where: {
-        type: 'SOCIAL_SHARE',
-        ...timeFilter,
-      },
-    }) || 0,
-  ]);
+      // Total social shares
+      prisma?.articleInteraction.count({
+        where: {
+          type: 'SOCIAL_SHARE',
+          ...timeFilter,
+        },
+      }) || 0,
+    ]);
 
   return {
     totalViews,
@@ -156,34 +157,36 @@ async function getCategoryPerformance(timeRange: string) {
 // Helper function to get recent analytics activity
 async function getRecentAnalyticsActivity() {
   try {
-    const recentViews = await prisma?.articleView.findMany({
-      take: 10,
-      orderBy: { timestamp: 'desc' },
-      include: {
-        article: {
-          select: {
-            title: true,
-            slug: true,
+    const recentViews =
+      (await prisma?.articleView.findMany({
+        take: 10,
+        orderBy: { timestamp: 'desc' },
+        include: {
+          article: {
+            select: {
+              title: true,
+              slug: true,
+            },
           },
         },
-      },
-    }) || [];
+      })) || [];
 
-    const recentInteractions = await prisma?.articleInteraction.findMany({
-      take: 10,
-      orderBy: { timestamp: 'desc' },
-      include: {
-        article: {
-          select: {
-            title: true,
-            slug: true,
+    const recentInteractions =
+      (await prisma?.articleInteraction.findMany({
+        take: 10,
+        orderBy: { timestamp: 'desc' },
+        include: {
+          article: {
+            select: {
+              title: true,
+              slug: true,
+            },
           },
         },
-      },
-    }) || [];
+      })) || [];
 
     return {
-      recentViews: recentViews.map(view => ({
+      recentViews: recentViews.map((view) => ({
         id: view.id,
         articleTitle: view.article.title,
         articleSlug: view.article.slug,
@@ -191,7 +194,7 @@ async function getRecentAnalyticsActivity() {
         device: view.device,
         country: view.country,
       })),
-      recentInteractions: recentInteractions.map(interaction => ({
+      recentInteractions: recentInteractions.map((interaction) => ({
         id: interaction.id,
         articleTitle: interaction.article.title,
         articleSlug: interaction.article.slug,

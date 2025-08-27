@@ -33,10 +33,10 @@ export function PodcastEditForm({ podcast }: PodcastEditFormProps) {
       }
     } catch (error) {
       console.error('Error updating podcast:', error);
-      toast({ 
-        title: 'Failed to update podcast', 
+      toast({
+        title: 'Failed to update podcast',
         description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive' 
+        variant: 'destructive',
       });
       throw error;
     } finally {

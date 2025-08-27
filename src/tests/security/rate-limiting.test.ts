@@ -20,7 +20,7 @@ describe('Rate Limiting', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStore.clear();
-    
+
     rateLimiter = new RateLimiter({
       windowMs: 60000, // 1 minute
       maxRequests: 10,
@@ -110,7 +110,7 @@ describe('Rate Limiting', () => {
   describe('Rate Limit Window Management', () => {
     it('should reset rate limit after window expires', async () => {
       const now = Date.now();
-      
+
       // First request - within limit
       rateLimiter.check.mockResolvedValueOnce({
         allowed: true,
@@ -145,7 +145,7 @@ describe('Rate Limiting', () => {
 
     it('should handle sliding window correctly', async () => {
       const requests = [];
-      
+
       // Mock 15 requests over time
       for (let i = 1; i <= 15; i++) {
         rateLimiter.check.mockResolvedValueOnce({
@@ -272,7 +272,7 @@ describe('Rate Limiting', () => {
 
     it('should include retry-after header when rate limited', async () => {
       const resetTime = Date.now() + 45000;
-      
+
       rateLimiter.check.mockResolvedValue({
         allowed: false,
         remaining: 0,
@@ -288,7 +288,7 @@ describe('Rate Limiting', () => {
       const result = await rateLimiter.check(req);
 
       const retryAfter = Math.ceil((resetTime - Date.now()) / 1000);
-      
+
       expect(result.allowed).toBe(false);
       expect(retryAfter).toBeGreaterThan(0);
       expect(retryAfter).toBeLessThanOrEqual(60);
@@ -370,7 +370,7 @@ describe('Rate Limiting', () => {
   describe('Rate Limit Bypass', () => {
     it('should allow bypass for whitelisted IPs', async () => {
       const whitelistedIP = '127.0.0.1';
-      
+
       rateLimiter.check.mockResolvedValue({
         allowed: true,
         remaining: 10, // Full limit available
@@ -399,9 +399,9 @@ describe('Rate Limiting', () => {
 
       const { req } = createMocks({
         method: 'GET',
-        headers: { 
+        headers: {
           'x-forwarded-for': '192.168.1.1',
-          'authorization': 'Bearer admin-token',
+          authorization: 'Bearer admin-token',
         },
       });
 
@@ -435,9 +435,7 @@ describe('Rate Limiting', () => {
         totalRequests: 50,
         blockedRequests: 10,
         uniqueIPs: 5,
-        topIPs: [
-          { ip: '192.168.1.100', requests: 25, blocked: 8 },
-        ],
+        topIPs: [{ ip: '192.168.1.100', requests: 25, blocked: 8 }],
       });
 
       const stats = await rateLimiter.getStats();
@@ -472,7 +470,7 @@ describe('Rate Limiting', () => {
   describe('Rate Limit Performance', () => {
     it('should handle high request volumes efficiently', async () => {
       const startTime = Date.now();
-      
+
       // Mock 1000 rapid requests
       for (let i = 0; i < 1000; i++) {
         rateLimiter.check.mockResolvedValueOnce({
@@ -536,7 +534,9 @@ describe('Rate Limiting', () => {
       });
 
       // Should not throw, but handle gracefully
-      await expect(rateLimiter.check(req)).rejects.toThrow('Storage unavailable');
+      await expect(rateLimiter.check(req)).rejects.toThrow(
+        'Storage unavailable'
+      );
     });
 
     it('should provide fallback behavior when rate limiting fails', async () => {

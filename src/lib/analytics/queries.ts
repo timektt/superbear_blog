@@ -64,18 +64,18 @@ export async function getCampaignPerformance(
   endDate?: Date
 ): Promise<CampaignPerformance[]> {
   const prisma = getSafePrismaClient();
-  
+
   if (!prisma) {
     return generateMockCampaignPerformance(campaignIds);
   }
 
   try {
     const whereClause: any = {};
-    
+
     if (campaignIds && campaignIds.length > 0) {
       whereClause.id = { in: campaignIds };
     }
-    
+
     if (startDate || endDate) {
       whereClause.createdAt = {};
       if (startDate) whereClause.createdAt.gte = startDate;
@@ -108,27 +108,34 @@ export async function getCampaignPerformance(
       },
     });
 
-    return campaigns.map(campaign => {
+    return campaigns.map((campaign) => {
       // Calculate metrics from deliveries and events
       const deliveries = campaign.deliveries;
       const events = campaign.events;
-      
+
       const metrics = {
         sent: deliveries.length,
-        delivered: deliveries.filter(d => d.deliveredAt).length,
-        opened: deliveries.filter(d => d.openedAt).length,
-        clicked: deliveries.filter(d => d.clickedAt).length,
-        bounced: deliveries.filter(d => d.bouncedAt).length,
-        complained: deliveries.filter(d => d.complainedAt).length,
-        unsubscribed: events.filter(e => e.type === 'UNSUBSCRIBED').length,
+        delivered: deliveries.filter((d) => d.deliveredAt).length,
+        opened: deliveries.filter((d) => d.openedAt).length,
+        clicked: deliveries.filter((d) => d.clickedAt).length,
+        bounced: deliveries.filter((d) => d.bouncedAt).length,
+        complained: deliveries.filter((d) => d.complainedAt).length,
+        unsubscribed: events.filter((e) => e.type === 'UNSUBSCRIBED').length,
       };
 
       const rates = {
-        deliveryRate: metrics.sent > 0 ? (metrics.delivered / metrics.sent) * 100 : 0,
-        openRate: metrics.delivered > 0 ? (metrics.opened / metrics.delivered) * 100 : 0,
-        clickRate: metrics.opened > 0 ? (metrics.clicked / metrics.opened) * 100 : 0,
-        unsubscribeRate: metrics.sent > 0 ? (metrics.unsubscribed / metrics.sent) * 100 : 0,
-        bounceRate: metrics.sent > 0 ? (metrics.bounced / metrics.sent) * 100 : 0,
+        deliveryRate:
+          metrics.sent > 0 ? (metrics.delivered / metrics.sent) * 100 : 0,
+        openRate:
+          metrics.delivered > 0
+            ? (metrics.opened / metrics.delivered) * 100
+            : 0,
+        clickRate:
+          metrics.opened > 0 ? (metrics.clicked / metrics.opened) * 100 : 0,
+        unsubscribeRate:
+          metrics.sent > 0 ? (metrics.unsubscribed / metrics.sent) * 100 : 0,
+        bounceRate:
+          metrics.sent > 0 ? (metrics.bounced / metrics.sent) * 100 : 0,
       };
 
       return {
@@ -156,7 +163,7 @@ export async function getCategoryPerformance(
   endDate?: Date
 ): Promise<CategoryPerformance[]> {
   const prisma = getSafePrismaClient();
-  
+
   if (!prisma) {
     return generateMockCategoryPerformance(startDate, endDate);
   }
@@ -165,7 +172,7 @@ export async function getCategoryPerformance(
     const whereClause: any = {
       status: 'PUBLISHED',
     };
-    
+
     if (startDate || endDate) {
       whereClause.publishedAt = {};
       if (startDate) whereClause.publishedAt.gte = startDate;
@@ -183,37 +190,43 @@ export async function getCategoryPerformance(
           },
         },
         stats: true,
-        views: startDate || endDate ? {
-          where: {
-            timestamp: {
-              ...(startDate && { gte: startDate }),
-              ...(endDate && { lte: endDate }),
-            },
-          },
-        } : true,
+        views:
+          startDate || endDate
+            ? {
+                where: {
+                  timestamp: {
+                    ...(startDate && { gte: startDate }),
+                    ...(endDate && { lte: endDate }),
+                  },
+                },
+              }
+            : true,
       },
     });
 
     // Group by category and aggregate metrics
-    const categoryMap = new Map<string, {
-      categoryId: string;
-      categoryName: string;
-      articles: typeof articles;
-      totalViews: number;
-      uniqueViews: number;
-      totalTimeOnPage: number;
-      totalScrollDepth: number;
-      totalBounces: number;
-      totalShares: number;
-      totalClicks: number;
-      totalCompletions: number;
-      viewCount: number;
-    }>();
+    const categoryMap = new Map<
+      string,
+      {
+        categoryId: string;
+        categoryName: string;
+        articles: typeof articles;
+        totalViews: number;
+        uniqueViews: number;
+        totalTimeOnPage: number;
+        totalScrollDepth: number;
+        totalBounces: number;
+        totalShares: number;
+        totalClicks: number;
+        totalCompletions: number;
+        viewCount: number;
+      }
+    >();
 
     for (const article of articles) {
       const categoryId = article.category.id;
       const categoryName = article.category.name;
-      
+
       if (!categoryMap.has(categoryId)) {
         categoryMap.set(categoryId, {
           categoryId,
@@ -240,18 +253,22 @@ export async function getCategoryPerformance(
         categoryData.uniqueViews += article.stats.uniqueViews;
         categoryData.totalShares += article.stats.totalShares;
         categoryData.totalClicks += article.stats.totalClicks;
-        
+
         if (article.stats.avgTimeOnPage) {
-          categoryData.totalTimeOnPage += article.stats.avgTimeOnPage * article.stats.totalViews;
+          categoryData.totalTimeOnPage +=
+            article.stats.avgTimeOnPage * article.stats.totalViews;
         }
         if (article.stats.avgScrollDepth) {
-          categoryData.totalScrollDepth += article.stats.avgScrollDepth * article.stats.totalViews;
+          categoryData.totalScrollDepth +=
+            article.stats.avgScrollDepth * article.stats.totalViews;
         }
         if (article.stats.bounceRate) {
-          categoryData.totalBounces += (article.stats.bounceRate / 100) * article.stats.totalViews;
+          categoryData.totalBounces +=
+            (article.stats.bounceRate / 100) * article.stats.totalViews;
         }
         if (article.stats.completionRate) {
-          categoryData.totalCompletions += (article.stats.completionRate / 100) * article.stats.totalViews;
+          categoryData.totalCompletions +=
+            (article.stats.completionRate / 100) * article.stats.totalViews;
         }
       }
 
@@ -270,17 +287,29 @@ export async function getCategoryPerformance(
       }
     }
 
-    return Array.from(categoryMap.values()).map(categoryData => ({
+    return Array.from(categoryMap.values()).map((categoryData) => ({
       categoryId: categoryData.categoryId,
       categoryName: categoryData.categoryName,
       totalViews: categoryData.totalViews,
       uniqueViews: categoryData.uniqueViews,
-      avgTimeOnPage: categoryData.totalViews > 0 ? categoryData.totalTimeOnPage / categoryData.totalViews : 0,
-      avgScrollDepth: categoryData.totalViews > 0 ? categoryData.totalScrollDepth / categoryData.totalViews : 0,
-      bounceRate: categoryData.totalViews > 0 ? (categoryData.totalBounces / categoryData.totalViews) * 100 : 0,
+      avgTimeOnPage:
+        categoryData.totalViews > 0
+          ? categoryData.totalTimeOnPage / categoryData.totalViews
+          : 0,
+      avgScrollDepth:
+        categoryData.totalViews > 0
+          ? categoryData.totalScrollDepth / categoryData.totalViews
+          : 0,
+      bounceRate:
+        categoryData.totalViews > 0
+          ? (categoryData.totalBounces / categoryData.totalViews) * 100
+          : 0,
       totalShares: categoryData.totalShares,
       totalClicks: categoryData.totalClicks,
-      completionRate: categoryData.totalViews > 0 ? (categoryData.totalCompletions / categoryData.totalViews) * 100 : 0,
+      completionRate:
+        categoryData.totalViews > 0
+          ? (categoryData.totalCompletions / categoryData.totalViews) * 100
+          : 0,
       period: {
         start: startDate || new Date(0),
         end: endDate || new Date(),
@@ -301,18 +330,18 @@ export async function getViewMetrics(
   endDate?: Date
 ): Promise<ViewMetrics> {
   const prisma = getSafePrismaClient();
-  
+
   if (!prisma) {
     return generateMockViewMetrics();
   }
 
   try {
     const whereClause: any = {};
-    
+
     if (articleId) {
       whereClause.articleId = articleId;
     }
-    
+
     if (startDate || endDate) {
       whereClause.timestamp = {};
       if (startDate) whereClause.timestamp.gte = startDate;
@@ -333,23 +362,29 @@ export async function getViewMetrics(
     });
 
     // Calculate unique views by session
-    const uniqueSessions = new Set(views.map(v => v.sessionId));
-    
+    const uniqueSessions = new Set(views.map((v) => v.sessionId));
+
     // Time-based calculations
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const thisWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
     const thisMonth = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-    const viewsToday = views.filter(v => v.timestamp >= today).length;
-    const viewsThisWeek = views.filter(v => v.timestamp >= thisWeek).length;
-    const viewsThisMonth = views.filter(v => v.timestamp >= thisMonth).length;
+    const viewsToday = views.filter((v) => v.timestamp >= today).length;
+    const viewsThisWeek = views.filter((v) => v.timestamp >= thisWeek).length;
+    const viewsThisMonth = views.filter((v) => v.timestamp >= thisMonth).length;
 
     // Calculate averages
-    const validTimeOnPage = views.filter(v => v.timeOnPage && v.timeOnPage > 0);
-    const validScrollDepth = views.filter(v => v.scrollDepth && v.scrollDepth > 0);
-    const bounces = views.filter(v => v.bounced).length;
-    const completions = views.filter(v => v.scrollDepth && v.scrollDepth >= 80).length;
+    const validTimeOnPage = views.filter(
+      (v) => v.timeOnPage && v.timeOnPage > 0
+    );
+    const validScrollDepth = views.filter(
+      (v) => v.scrollDepth && v.scrollDepth > 0
+    );
+    const bounces = views.filter((v) => v.bounced).length;
+    const completions = views.filter(
+      (v) => v.scrollDepth && v.scrollDepth >= 80
+    ).length;
 
     return {
       totalViews: views.length,
@@ -357,12 +392,16 @@ export async function getViewMetrics(
       viewsToday,
       viewsThisWeek,
       viewsThisMonth,
-      avgTimeOnPage: validTimeOnPage.length > 0 
-        ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) / validTimeOnPage.length 
-        : 0,
-      avgScrollDepth: validScrollDepth.length > 0 
-        ? validScrollDepth.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) / validScrollDepth.length 
-        : 0,
+      avgTimeOnPage:
+        validTimeOnPage.length > 0
+          ? validTimeOnPage.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) /
+            validTimeOnPage.length
+          : 0,
+      avgScrollDepth:
+        validScrollDepth.length > 0
+          ? validScrollDepth.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) /
+            validScrollDepth.length
+          : 0,
       bounceRate: views.length > 0 ? (bounces / views.length) * 100 : 0,
       completionRate: views.length > 0 ? (completions / views.length) * 100 : 0,
     };
@@ -382,7 +421,7 @@ export async function getTopPerformingCampaigns(
   endDate?: Date
 ): Promise<CampaignPerformance[]> {
   const campaigns = await getCampaignPerformance(undefined, startDate, endDate);
-  
+
   return campaigns
     .sort((a, b) => b.rates[metric] - a.rates[metric])
     .slice(0, limit);
@@ -416,7 +455,12 @@ export async function getDashboardAnalytics(days = 7): Promise<{
   startDate.setDate(startDate.getDate() - days);
 
   const campaigns = await getCampaignPerformance(undefined, startDate, endDate);
-  const topPerformers = await getTopPerformingCampaigns('openRate', 3, startDate, endDate);
+  const topPerformers = await getTopPerformingCampaigns(
+    'openRate',
+    3,
+    startDate,
+    endDate
+  );
 
   // Calculate summary
   const summary = campaigns.reduce(
@@ -441,17 +485,25 @@ export async function getDashboardAnalytics(days = 7): Promise<{
 
   // Calculate averages
   if (campaigns.length > 0) {
-    summary.avgOpenRate = campaigns.reduce((sum, c) => sum + c.rates.openRate, 0) / campaigns.length;
-    summary.avgClickRate = campaigns.reduce((sum, c) => sum + c.rates.clickRate, 0) / campaigns.length;
-    summary.avgDeliveryRate = campaigns.reduce((sum, c) => sum + c.rates.deliveryRate, 0) / campaigns.length;
+    summary.avgOpenRate =
+      campaigns.reduce((sum, c) => sum + c.rates.openRate, 0) /
+      campaigns.length;
+    summary.avgClickRate =
+      campaigns.reduce((sum, c) => sum + c.rates.clickRate, 0) /
+      campaigns.length;
+    summary.avgDeliveryRate =
+      campaigns.reduce((sum, c) => sum + c.rates.deliveryRate, 0) /
+      campaigns.length;
   }
 
   // Generate trends data (simplified)
   const trends = {
-    sent: campaigns.slice(0, 7).map(c => c.metrics.sent),
-    opened: campaigns.slice(0, 7).map(c => c.metrics.opened),
-    clicked: campaigns.slice(0, 7).map(c => c.metrics.clicked),
-    dates: campaigns.slice(0, 7).map(c => c.createdAt.toISOString().split('T')[0]),
+    sent: campaigns.slice(0, 7).map((c) => c.metrics.sent),
+    opened: campaigns.slice(0, 7).map((c) => c.metrics.opened),
+    clicked: campaigns.slice(0, 7).map((c) => c.metrics.clicked),
+    dates: campaigns
+      .slice(0, 7)
+      .map((c) => c.createdAt.toISOString().split('T')[0]),
   };
 
   return {
@@ -465,7 +517,9 @@ export async function getDashboardAnalytics(days = 7): Promise<{
 /**
  * Generate mock campaign performance data
  */
-function generateMockCampaignPerformance(campaignIds?: string[]): CampaignPerformance[] {
+function generateMockCampaignPerformance(
+  campaignIds?: string[]
+): CampaignPerformance[] {
   const mockCampaigns = [
     {
       campaignId: 'mock-campaign-1',
@@ -506,23 +560,40 @@ function generateMockCampaignPerformance(campaignIds?: string[]): CampaignPerfor
   ];
 
   return mockCampaigns
-    .filter(campaign => !campaignIds || campaignIds.includes(campaign.campaignId))
-    .map(campaign => {
+    .filter(
+      (campaign) => !campaignIds || campaignIds.includes(campaign.campaignId)
+    )
+    .map((campaign) => {
       const rates = {
-        deliveryRate: campaign.sent > 0 ? (campaign.delivered / campaign.sent) * 100 : 0,
-        openRate: campaign.delivered > 0 ? (campaign.opened / campaign.delivered) * 100 : 0,
-        clickRate: campaign.opened > 0 ? (campaign.clicked / campaign.opened) * 100 : 0,
-        unsubscribeRate: campaign.sent > 0 ? (campaign.unsubscribed / campaign.sent) * 100 : 0,
-        bounceRate: campaign.sent > 0 ? (campaign.bounced / campaign.sent) * 100 : 0,
+        deliveryRate:
+          campaign.sent > 0 ? (campaign.delivered / campaign.sent) * 100 : 0,
+        openRate:
+          campaign.delivered > 0
+            ? (campaign.opened / campaign.delivered) * 100
+            : 0,
+        clickRate:
+          campaign.opened > 0 ? (campaign.clicked / campaign.opened) * 100 : 0,
+        unsubscribeRate:
+          campaign.sent > 0 ? (campaign.unsubscribed / campaign.sent) * 100 : 0,
+        bounceRate:
+          campaign.sent > 0 ? (campaign.bounced / campaign.sent) * 100 : 0,
       };
 
       return {
         campaignId: campaign.campaignId,
         campaignName: campaign.campaignName,
         status: campaign.status,
-        createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000),
-        scheduledAt: campaign.status === 'SCHEDULED' ? new Date(Date.now() + 24 * 60 * 60 * 1000) : undefined,
-        sentAt: campaign.status === 'SENT' ? new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000) : undefined,
+        createdAt: new Date(
+          Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000
+        ),
+        scheduledAt:
+          campaign.status === 'SCHEDULED'
+            ? new Date(Date.now() + 24 * 60 * 60 * 1000)
+            : undefined,
+        sentAt:
+          campaign.status === 'SENT'
+            ? new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000)
+            : undefined,
         metrics: {
           sent: campaign.sent,
           delivered: campaign.delivered,
@@ -540,7 +611,10 @@ function generateMockCampaignPerformance(campaignIds?: string[]): CampaignPerfor
 /**
  * Generate mock category performance data
  */
-function generateMockCategoryPerformance(startDate?: Date, endDate?: Date): CategoryPerformance[] {
+function generateMockCategoryPerformance(
+  startDate?: Date,
+  endDate?: Date
+): CategoryPerformance[] {
   const mockCategories = [
     {
       categoryId: 'ai-ml',
@@ -580,7 +654,7 @@ function generateMockCategoryPerformance(startDate?: Date, endDate?: Date): Cate
     },
   ];
 
-  return mockCategories.map(category => ({
+  return mockCategories.map((category) => ({
     ...category,
     period: {
       start: startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),

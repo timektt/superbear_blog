@@ -21,12 +21,14 @@ test.describe('Admin RBAC (Role-Based Access Control)', () => {
   test('should redirect VIEWER role from admin pages', async ({ page }) => {
     // Try to access admin dashboard
     await page.goto('/admin');
-    
+
     // Should be redirected to login or access denied
     await expect(page).toHaveURL(/\/(login|unauthorized)/);
   });
 
-  test('should allow EDITOR role to access article management', async ({ page }) => {
+  test('should allow EDITOR role to access article management', async ({
+    page,
+  }) => {
     // Mock session with EDITOR role
     await page.route('**/api/auth/session', async (route) => {
       await route.fulfill({
@@ -52,13 +54,17 @@ test.describe('Admin RBAC (Role-Based Access Control)', () => {
     });
 
     await page.goto('/admin/articles');
-    
+
     // Should be able to access articles page
     await expect(page.locator('h1')).toContainText('Articles');
-    await expect(page.locator('[data-testid="create-article-button"]')).toBeVisible();
+    await expect(
+      page.locator('[data-testid="create-article-button"]')
+    ).toBeVisible();
   });
 
-  test('should prevent EDITOR from accessing user management', async ({ page }) => {
+  test('should prevent EDITOR from accessing user management', async ({
+    page,
+  }) => {
     // Mock session with EDITOR role
     await page.route('**/api/auth/session', async (route) => {
       await route.fulfill({
@@ -75,7 +81,7 @@ test.describe('Admin RBAC (Role-Based Access Control)', () => {
     });
 
     await page.goto('/admin/users');
-    
+
     // Should be redirected or show access denied
     await expect(page).toHaveURL(/\/(login|unauthorized)/);
   });
@@ -106,8 +112,13 @@ test.describe('Admin RBAC (Role-Based Access Control)', () => {
     });
 
     // Test access to different admin sections
-    const adminPages = ['/admin', '/admin/articles', '/admin/users', '/admin/settings'];
-    
+    const adminPages = [
+      '/admin',
+      '/admin/articles',
+      '/admin/users',
+      '/admin/settings',
+    ];
+
     for (const adminPage of adminPages) {
       await page.goto(adminPage);
       // Should not be redirected to login
@@ -140,10 +151,10 @@ test.describe('Admin RBAC (Role-Based Access Control)', () => {
     });
 
     await page.goto('/admin');
-    
+
     // Should see article management link
     await expect(page.locator('nav a[href="/admin/articles"]')).toBeVisible();
-    
+
     // Should not see user management link
     await expect(page.locator('nav a[href="/admin/users"]')).not.toBeVisible();
   });

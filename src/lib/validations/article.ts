@@ -186,10 +186,7 @@ export const podcastFormSchema = z.object({
         return false;
       }
     }, 'Invalid cover image URL'),
-  duration: z
-    .number()
-    .positive('Duration must be positive')
-    .optional(),
+  duration: z.number().positive('Duration must be positive').optional(),
   episodeNumber: z
     .number()
     .positive('Episode number must be positive')
@@ -231,14 +228,8 @@ export const createPodcastSchema = z.object({
     .string()
     .min(1, 'Audio URL is required')
     .url('Valid audio URL required'),
-  coverImage: z
-    .string()
-    .optional()
-    .url('Invalid cover image URL'),
-  duration: z
-    .number()
-    .positive('Duration must be positive')
-    .optional(),
+  coverImage: z.string().optional().url('Invalid cover image URL'),
+  duration: z.number().positive('Duration must be positive').optional(),
   episodeNumber: z
     .number()
     .positive('Episode number must be positive')
@@ -280,18 +271,9 @@ export const updatePodcastSchema = z.object({
       (val) => !val || val.length <= 500,
       'Summary must be less than 500 characters'
     ),
-  audioUrl: z
-    .string()
-    .url('Valid audio URL required')
-    .optional(),
-  coverImage: z
-    .string()
-    .optional()
-    .url('Invalid cover image URL'),
-  duration: z
-    .number()
-    .positive('Duration must be positive')
-    .optional(),
+  audioUrl: z.string().url('Valid audio URL required').optional(),
+  coverImage: z.string().optional().url('Invalid cover image URL'),
+  duration: z.number().positive('Duration must be positive').optional(),
   episodeNumber: z
     .number()
     .positive('Episode number must be positive')

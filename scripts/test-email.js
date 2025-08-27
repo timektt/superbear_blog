@@ -38,21 +38,21 @@ async function testEmail() {
     console.log('✅ Email sent successfully!');
     console.log('📧 Message ID:', info.messageId);
     console.log('🔗 Preview URL:', nodemailer.getTestMessageUrl(info));
-    
+
     return {
       success: true,
       messageId: info.messageId,
       previewUrl: nodemailer.getTestMessageUrl(info),
       testAccount: {
         user: testAccount.user,
-        pass: testAccount.pass
-      }
+        pass: testAccount.pass,
+      },
     };
   } catch (error) {
     console.error('❌ Email test failed:', error);
     return {
       success: false,
-      error: error.message
+      error: error.message,
     };
   }
 }

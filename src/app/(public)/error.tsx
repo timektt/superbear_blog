@@ -31,15 +31,15 @@ export default function Error({
             />
           </svg>
         </div>
-        
+
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
           Something went wrong
         </h1>
-        
+
         <p className="text-gray-600 dark:text-gray-400 mb-8">
           We encountered an error while loading this page. Please try again.
         </p>
-        
+
         <div className="space-y-4">
           <button
             onClick={reset}
@@ -60,11 +60,11 @@ export default function Error({
             </svg>
             Try Again
           </button>
-          
+
           <div className="text-sm text-gray-500 dark:text-gray-400">
             If the problem persists, you can:
           </div>
-          
+
           <div className="flex flex-wrap gap-2 justify-center">
             <a
               href="/"

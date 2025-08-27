@@ -29,10 +29,10 @@ export function NewsletterIssueCreateForm() {
       }
     } catch (error) {
       console.error('Error creating newsletter issue:', error);
-      toast({ 
-        title: 'Failed to create newsletter issue', 
+      toast({
+        title: 'Failed to create newsletter issue',
         description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive' 
+        variant: 'destructive',
       });
       throw error;
     } finally {

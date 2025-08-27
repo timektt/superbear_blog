@@ -26,24 +26,25 @@ export class AppErrorHandler {
    */
   static handle(error: unknown, context?: string): AppError {
     const timestamp = new Date();
-    
+
     // Handle fetch/network errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
       return {
         type: 'network',
-        message: 'Network connection failed. Please check your internet connection.',
+        message:
+          'Network connection failed. Please check your internet connection.',
         code: 'NETWORK_ERROR',
         timestamp,
         context,
         retryable: true,
-        details: error
+        details: error,
       };
     }
 
     // Handle HTTP response errors
     if (error instanceof Response) {
       const status = error.status;
-      
+
       if (status === 401) {
         return {
           type: 'auth',
@@ -52,10 +53,10 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: false,
-          details: { status }
+          details: { status },
         };
       }
-      
+
       if (status === 403) {
         return {
           type: 'auth',
@@ -64,10 +65,10 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: false,
-          details: { status }
+          details: { status },
         };
       }
-      
+
       if (status === 404) {
         return {
           type: 'server',
@@ -76,10 +77,10 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: false,
-          details: { status }
+          details: { status },
         };
       }
-      
+
       if (status >= 500) {
         return {
           type: 'server',
@@ -88,10 +89,10 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: true,
-          details: { status }
+          details: { status },
         };
       }
-      
+
       if (status >= 400) {
         return {
           type: 'validation',
@@ -100,7 +101,7 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: false,
-          details: { status }
+          details: { status },
         };
       }
     }
@@ -114,7 +115,7 @@ export class AppErrorHandler {
         timestamp,
         context,
         retryable: false,
-        details: error
+        details: error,
       };
     }
 
@@ -129,7 +130,7 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: true,
-          details: error
+          details: error,
         };
       }
 
@@ -141,7 +142,7 @@ export class AppErrorHandler {
           timestamp,
           context,
           retryable: true,
-          details: error
+          details: error,
         };
       }
 
@@ -152,7 +153,7 @@ export class AppErrorHandler {
         timestamp,
         context,
         retryable: false,
-        details: error
+        details: error,
       };
     }
 
@@ -165,7 +166,7 @@ export class AppErrorHandler {
         timestamp,
         context,
         retryable: false,
-        details: { originalError: error }
+        details: { originalError: error },
       };
     }
 
@@ -177,7 +178,7 @@ export class AppErrorHandler {
       timestamp,
       context,
       retryable: false,
-      details: error
+      details: error,
     };
   }
 
@@ -208,24 +209,26 @@ export class AppErrorHandler {
   ) {
     return async (): Promise<T> => {
       let lastError: AppError | null = null;
-      
+
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         const [result, error] = await this.handleAsync(operation(), context);
-        
+
         if (result !== null) {
           return result;
         }
-        
+
         lastError = error;
-        
+
         if (!error?.retryable || attempt === maxRetries) {
           break;
         }
-        
+
         // Exponential backoff
-        await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
+        await new Promise((resolve) =>
+          setTimeout(resolve, delay * Math.pow(2, attempt - 1))
+        );
       }
-      
+
       throw lastError || new Error('Max retries exceeded');
     };
   }
@@ -241,7 +244,7 @@ export class AppErrorHandler {
         code: error.code,
         context: error.context,
         timestamp: error.timestamp,
-        details: error.details
+        details: error.details,
       });
     } else {
       // In production, send to error tracking service (Sentry, etc.)
@@ -260,21 +263,23 @@ export class AppErrorHandler {
   static getUserMessage(error: AppError): string {
     const contextMessages: Record<string, Record<string, string>> = {
       'article-save': {
-        network: 'Failed to save article. Please check your connection and try again.',
+        network:
+          'Failed to save article. Please check your connection and try again.',
         validation: 'Please fill in all required fields correctly.',
         auth: 'Your session expired. Please log in and try again.',
-        server: 'Unable to save article due to server error. Please try again later.'
+        server:
+          'Unable to save article due to server error. Please try again later.',
       },
       'image-upload': {
         network: 'Failed to upload image. Please check your connection.',
         validation: 'Please select a valid image file (JPG, PNG, WebP).',
-        server: 'Image upload failed. Please try again later.'
+        server: 'Image upload failed. Please try again later.',
       },
       'data-fetch': {
         network: 'Failed to load data. Please check your connection.',
         auth: 'Please log in to view this content.',
-        server: 'Unable to load data. Please refresh the page.'
-      }
+        server: 'Unable to load data. Please refresh the page.',
+      },
     };
 
     const contextSpecific = error.context && contextMessages[error.context];
@@ -292,7 +297,7 @@ export class AppErrorHandler {
 export async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
-    
+
     try {
       const errorData = await response.json();
       errorMessage = errorData.message || errorData.error || errorMessage;
@@ -300,7 +305,7 @@ export async function handleApiResponse<T>(response: Response): Promise<T> {
       // If we can't parse the error response, use the status text
       errorMessage = response.statusText || errorMessage;
     }
-    
+
     const error = new Error(errorMessage);
     (error as any).status = response.status;
     throw error;

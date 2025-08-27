@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
-import { 
-  AppError, 
-  DbUnavailableError, 
-  TimeoutError, 
-  ValidationError, 
+import {
+  AppError,
+  DbUnavailableError,
+  TimeoutError,
+  ValidationError,
   NotFoundError,
-  InternalServerError 
+  InternalServerError,
 } from './types';
 import { logger } from '@/lib/logger';
 
@@ -52,7 +52,10 @@ export function handleApiError(
     appError = new ValidationError('Database query validation failed');
   } else if (error instanceof Error) {
     // Check for timeout errors
-    if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+    if (
+      error.message.includes('timeout') ||
+      error.message.includes('ETIMEDOUT')
+    ) {
       appError = new TimeoutError(error.message);
     } else {
       appError = new InternalServerError(error.message);
@@ -92,7 +95,9 @@ export function handleApiError(
 /**
  * Handle Prisma-specific errors
  */
-function handlePrismaError(error: Prisma.PrismaClientKnownRequestError): AppError {
+function handlePrismaError(
+  error: Prisma.PrismaClientKnownRequestError
+): AppError {
   switch (error.code) {
     case 'P2002':
       return new ValidationError('Unique constraint violation', {
@@ -145,11 +150,11 @@ export async function safeDbOperation<T>(
     return await operation();
   } catch (error) {
     logger.warn('Database operation failed, using fallback', error as Error);
-    
+
     if (fallback !== undefined) {
       return fallback;
     }
-    
+
     throw error;
   }
 }
@@ -161,16 +166,18 @@ export function isDatabaseError(error: unknown): boolean {
   if (error instanceof DbUnavailableError || error instanceof TimeoutError) {
     return true;
   }
-  
-  if (error instanceof Prisma.PrismaClientUnknownRequestError ||
-      error instanceof Prisma.PrismaClientInitializationError) {
+
+  if (
+    error instanceof Prisma.PrismaClientUnknownRequestError ||
+    error instanceof Prisma.PrismaClientInitializationError
+  ) {
     return true;
   }
-  
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     const connectivityCodes = ['P1001', 'P1002', 'P1008', 'P1017'];
     return connectivityCodes.includes(error.code);
   }
-  
+
   return false;
 }

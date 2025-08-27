@@ -55,7 +55,6 @@ export async function POST(request: NextRequest) {
         status: updatedSubscription.status,
       },
     });
-
   } catch (error) {
     logger.error('Newsletter unsubscription error', error);
 
@@ -64,7 +63,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           message: 'Invalid input data',
-          errors: error.issues.map(issue => ({
+          errors: error.issues.map((issue) => ({
             field: issue.path.join('.'),
             message: issue.message,
           })),
@@ -108,7 +107,10 @@ export async function GET(request: NextRequest) {
 
     if (subscription.status === 'UNSUBSCRIBED') {
       return NextResponse.redirect(
-        new URL('/newsletter/unsubscribe?status=already_unsubscribed', request.url)
+        new URL(
+          '/newsletter/unsubscribe?status=already_unsubscribed',
+          request.url
+        )
       );
     }
 
@@ -125,9 +127,12 @@ export async function GET(request: NextRequest) {
 
     // Redirect to unsubscribe confirmation page
     return NextResponse.redirect(
-      new URL('/newsletter/unsubscribe?status=success&email=' + encodeURIComponent(email), request.url)
+      new URL(
+        '/newsletter/unsubscribe?status=success&email=' +
+          encodeURIComponent(email),
+        request.url
+      )
     );
-
   } catch (error) {
     logger.error('Newsletter unsubscribe link error', error);
 

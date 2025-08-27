@@ -6,16 +6,19 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   const { articleId, emailHash } = await request.json();
-  
+
   if (!articleId || !emailHash) {
-    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing required fields' },
+      { status: 400 }
+    );
   }
-  
+
   const prisma = getSafePrismaClient();
   if (!prisma) {
     return NextResponse.json({ error: 'Service unavailable' }, { status: 503 });
   }
-  
+
   try {
     // Use comments table as proxy for bookmarks until schema is updated
     const existing = await prisma.comment.findFirst({
@@ -25,7 +28,7 @@ export async function POST(request: NextRequest) {
         body: 'bookmark:saved',
       },
     });
-    
+
     if (existing) {
       await prisma.comment.delete({
         where: { id: existing.id },
@@ -44,6 +47,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ action: 'added', bookmarked: true });
     }
   } catch {
-    return NextResponse.json({ error: 'Failed to toggle bookmark' }, { status: 500 });
+    return NextResponse.json(
+      { error: 'Failed to toggle bookmark' },
+      { status: 500 }
+    );
   }
 }

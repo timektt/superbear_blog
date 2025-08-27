@@ -15,7 +15,9 @@ interface TagPageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export async function generateMetadata({ params }: TagPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: TagPageProps): Promise<Metadata> {
   const { slug } = await params;
   const tagName = slug.replace(/-/g, ' ');
   return createTagPageMetadata(tagName);
@@ -64,7 +66,7 @@ function TagPageSkeleton() {
           <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-32 mb-2 animate-pulse"></div>
           <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48 animate-pulse"></div>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8">
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">

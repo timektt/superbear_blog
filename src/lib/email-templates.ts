@@ -35,17 +35,17 @@ export const DEFAULT_DESIGN_CONFIG = {
     secondary: '#64748b',
     background: '#ffffff',
     text: '#1e293b',
-    accent: '#f59e0b'
+    accent: '#f59e0b',
   },
   fonts: {
     heading: 'Inter, sans-serif',
-    body: 'Inter, sans-serif'
+    body: 'Inter, sans-serif',
   },
   layout: {
     maxWidth: '600px',
     padding: '20px',
-    borderRadius: '8px'
-  }
+    borderRadius: '8px',
+  },
 };
 
 // Email template compilation with optimization
@@ -53,17 +53,17 @@ export async function compileTemplate(
   templateId: string,
   variables: Partial<TemplateVariables>,
   subscriberEmail?: string
-): Promise<{ 
-  html: string; 
-  text: string; 
-  subject: string; 
+): Promise<{
+  html: string;
+  text: string;
+  subject: string;
   preheader: string;
   size: number;
   warnings: string[];
   headers: Record<string, string>;
 }> {
   const template = await prisma.emailTemplate.findUnique({
-    where: { id: templateId }
+    where: { id: templateId },
   });
 
   if (!template) {
@@ -104,31 +104,34 @@ export async function compileTemplate(
   const subject = subjectTemplate(variables);
 
   // Generate email headers
-  const headers = subscriberEmail 
+  const headers = subscriberEmail
     ? EmailCompliance.generateHeaders(templateId, subscriberEmail)
     : {};
 
-  return { 
-    html, 
-    text, 
-    subject, 
+  return {
+    html,
+    text,
+    subject,
     preheader,
     size: optimization.size,
     warnings: optimization.warnings,
-    headers
+    headers,
   };
 }
 
 // Generate preheader text
-function generatePreheader(subject: string, variables: Partial<TemplateVariables>): string {
+function generatePreheader(
+  subject: string,
+  variables: Partial<TemplateVariables>
+): string {
   const subjectTemplate = Handlebars.compile(subject);
   const compiledSubject = subjectTemplate(variables);
-  
+
   // Create meaningful preheader based on content
   if (variables.articles?.featured) {
     return `${variables.articles.featured.title} and more tech news...`;
   }
-  
+
   return `${compiledSubject} - Stay updated with the latest tech news`;
 }
 
@@ -140,37 +143,39 @@ function addPreheaderToHtml(html: string, preheader: string): string {
       ${preheader}
     </div>
   `;
-  
+
   // Insert after <body> tag
   return html.replace(/<body[^>]*>/, `$&${preheaderHtml}`);
 }
 
 // Generate proper text version from HTML
 function generateTextFromHtml(html: string): string {
-  return html
-    // Remove style and script tags completely
-    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-    // Convert common HTML elements to text equivalents
-    .replace(/<h[1-6][^>]*>/gi, '\n\n')
-    .replace(/<\/h[1-6]>/gi, '\n')
-    .replace(/<p[^>]*>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<br[^>]*>/gi, '\n')
-    .replace(/<div[^>]*>/gi, '\n')
-    .replace(/<\/div>/gi, '')
-    .replace(/<a[^>]*href="([^"]*)"[^>]*>/gi, '')
-    .replace(/<\/a>/gi, ' ($1)')
-    .replace(/<strong[^>]*>|<b[^>]*>/gi, '**')
-    .replace(/<\/strong>|<\/b>/gi, '**')
-    .replace(/<em[^>]*>|<i[^>]*>/gi, '*')
-    .replace(/<\/em>|<\/i>/gi, '*')
-    // Remove all other HTML tags
-    .replace(/<[^>]*>/g, '')
-    // Clean up whitespace
-    .replace(/\n\s*\n\s*\n/g, '\n\n')
-    .replace(/^\s+|\s+$/g, '')
-    .trim();
+  return (
+    html
+      // Remove style and script tags completely
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      // Convert common HTML elements to text equivalents
+      .replace(/<h[1-6][^>]*>/gi, '\n\n')
+      .replace(/<\/h[1-6]>/gi, '\n')
+      .replace(/<p[^>]*>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<br[^>]*>/gi, '\n')
+      .replace(/<div[^>]*>/gi, '\n')
+      .replace(/<\/div>/gi, '')
+      .replace(/<a[^>]*href="([^"]*)"[^>]*>/gi, '')
+      .replace(/<\/a>/gi, ' ($1)')
+      .replace(/<strong[^>]*>|<b[^>]*>/gi, '**')
+      .replace(/<\/strong>|<\/b>/gi, '**')
+      .replace(/<em[^>]*>|<i[^>]*>/gi, '*')
+      .replace(/<\/em>|<\/i>/gi, '*')
+      // Remove all other HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Clean up whitespace
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .replace(/^\s+|\s+$/g, '')
+      .trim()
+  );
 }
 
 // Get template by category
@@ -178,11 +183,11 @@ export async function getTemplatesByCategory(category: TemplateCategory) {
   return await prisma.emailTemplate.findMany({
     where: {
       category,
-      status: TemplateStatus.ACTIVE
+      status: TemplateStatus.ACTIVE,
     },
     orderBy: {
-      updatedAt: 'desc'
-    }
+      updatedAt: 'desc',
+    },
   });
 }
 
@@ -195,7 +200,7 @@ export async function createTemplateVersion(
 ) {
   // Get current version count
   const versionCount = await prisma.templateVersion.count({
-    where: { templateId }
+    where: { templateId },
   });
 
   return await prisma.templateVersion.create({
@@ -204,8 +209,8 @@ export async function createTemplateVersion(
       version: versionCount + 1,
       htmlContent,
       textContent,
-      designConfig
-    }
+      designConfig,
+    },
   });
 }
 
@@ -387,7 +392,7 @@ Thanks for reading! 🚀
 {{site.name}} - Curated tech news for developers
 Visit: {{site.url}}
 Unsubscribe: {{campaign.unsubscribeUrl}}
-`
+`,
   },
 
   BREAKING_NEWS: {
@@ -452,7 +457,7 @@ Read the full story: {{site.url}}/news/{{articles.featured.slug}}
 Stay informed with {{site.name}}
 Visit: {{site.url}}
 Unsubscribe: {{campaign.unsubscribeUrl}}
-`
+`,
   },
 
   WELCOME: {
@@ -539,20 +544,20 @@ Dev Tools: {{site.url}}/devtools
 ---
 {{site.name}} - Curated tech news for developers
 Unsubscribe: {{campaign.unsubscribeUrl}}
-`
-  }
+`,
+  },
 };
 
 // Register Handlebars helpers
-Handlebars.registerHelper('formatDate', function(date: string) {
+Handlebars.registerHelper('formatDate', function (date: string) {
   return new Date(date).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
 });
 
-Handlebars.registerHelper('truncate', function(str: string, length: number) {
+Handlebars.registerHelper('truncate', function (str: string, length: number) {
   if (str && str.length > length) {
     return str.substring(0, length) + '...';
   }

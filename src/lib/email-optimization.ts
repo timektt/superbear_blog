@@ -12,7 +12,7 @@ export class EmailOptimizer {
     warnings: string[];
   }> {
     const warnings: string[] = [];
-    
+
     try {
       // Inline CSS using juice
       let optimizedHtml = juice(html, {
@@ -23,27 +23,31 @@ export class EmailOptimizer {
           images: false, // Don't inline images
           svgs: false,
           scripts: false,
-          links: false
-        }
+          links: false,
+        },
       });
 
       // Add email client specific fixes
       optimizedHtml = this.addEmailClientFixes(optimizedHtml);
-      
+
       // Calculate size
       const size = Buffer.byteLength(optimizedHtml, 'utf8');
-      
+
       // Check size warnings
       if (size > this.MAX_EMAIL_SIZE) {
-        warnings.push(`Email size (${this.formatBytes(size)}) exceeds Gmail's 102KB limit. Email may be clipped.`);
+        warnings.push(
+          `Email size (${this.formatBytes(size)}) exceeds Gmail's 102KB limit. Email may be clipped.`
+        );
       } else if (size > this.WARNING_SIZE) {
-        warnings.push(`Email size (${this.formatBytes(size)}) is approaching Gmail's 102KB limit.`);
+        warnings.push(
+          `Email size (${this.formatBytes(size)}) is approaching Gmail's 102KB limit.`
+        );
       }
 
       return {
         optimizedHtml,
         size,
-        warnings
+        warnings,
       };
     } catch (error) {
       console.error('Email optimization failed:', error);
@@ -132,17 +136,24 @@ export class EmailOptimizer {
       errors.push('JavaScript is not allowed in email templates');
     }
 
-    if (html.includes('position: fixed') || html.includes('position: absolute')) {
-      warnings.push('Fixed/absolute positioning may not work in all email clients');
+    if (
+      html.includes('position: fixed') ||
+      html.includes('position: absolute')
+    ) {
+      warnings.push(
+        'Fixed/absolute positioning may not work in all email clients'
+      );
     }
 
     if (html.includes('display: flex') || html.includes('display: grid')) {
-      warnings.push('Flexbox and Grid may not be supported in older email clients');
+      warnings.push(
+        'Flexbox and Grid may not be supported in older email clients'
+      );
     }
 
     // Check for missing alt attributes on images
     const imgTags = html.match(/<img[^>]*>/gi) || [];
-    imgTags.forEach(img => {
+    imgTags.forEach((img) => {
       if (!img.includes('alt=')) {
         warnings.push('Image missing alt attribute for accessibility');
       }
@@ -151,7 +162,7 @@ export class EmailOptimizer {
     return {
       isValid: errors.length === 0,
       errors,
-      warnings
+      warnings,
     };
   }
 }
@@ -159,17 +170,21 @@ export class EmailOptimizer {
 // Email template builder with bulletproof components
 export class BulletproofEmailBuilder {
   // Create bulletproof button
-  static createButton(text: string, url: string, options: {
-    backgroundColor?: string;
-    textColor?: string;
-    borderRadius?: string;
-    padding?: string;
-  } = {}): string {
+  static createButton(
+    text: string,
+    url: string,
+    options: {
+      backgroundColor?: string;
+      textColor?: string;
+      borderRadius?: string;
+      padding?: string;
+    } = {}
+  ): string {
     const {
       backgroundColor = '#2563eb',
       textColor = '#ffffff',
       borderRadius = '6px',
-      padding = '12px 24px'
+      padding = '12px 24px',
     } = options;
 
     return `
@@ -190,15 +205,18 @@ export class BulletproofEmailBuilder {
   }
 
   // Create bulletproof table layout
-  static createTableLayout(content: string, options: {
-    width?: string;
-    backgroundColor?: string;
-    padding?: string;
-  } = {}): string {
+  static createTableLayout(
+    content: string,
+    options: {
+      width?: string;
+      backgroundColor?: string;
+      padding?: string;
+    } = {}
+  ): string {
     const {
       width = '600',
       backgroundColor = '#ffffff',
-      padding = '20'
+      padding = '20',
     } = options;
 
     return `
@@ -213,23 +231,31 @@ export class BulletproofEmailBuilder {
   }
 
   // Create responsive image
-  static createResponsiveImage(src: string, alt: string, options: {
-    width?: number;
-    height?: number;
-    retinaSrc?: string;
-  } = {}): string {
+  static createResponsiveImage(
+    src: string,
+    alt: string,
+    options: {
+      width?: number;
+      height?: number;
+      retinaSrc?: string;
+    } = {}
+  ): string {
     const { width = 600, height, retinaSrc } = options;
     const heightAttr = height ? `height="${height}"` : '';
-    
+
     return `
       <img src="${src}" alt="${alt}" width="${width}" ${heightAttr} style="display:block;width:100%;max-width:${width}px;height:auto;border:0;outline:none;text-decoration:none;" />
-      ${retinaSrc ? `
+      ${
+        retinaSrc
+          ? `
         <style>
           @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2) {
             .retina-image { content: url('${retinaSrc}') !important; }
           }
         </style>
-      ` : ''}
+      `
+          : ''
+      }
     `;
   }
 }

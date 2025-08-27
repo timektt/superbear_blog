@@ -8,16 +8,19 @@ import { Mail, Archive } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Newsletter | SuperBear Blog',
-  description: 'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
+  description:
+    'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
   openGraph: {
     title: 'Newsletter | SuperBear Blog',
-    description: 'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
+    description:
+      'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Newsletter | SuperBear Blog',
-    description: 'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
+    description:
+      'Subscribe to our weekly tech newsletter for curated insights on AI, development, startups, and more.',
   },
 };
 
@@ -31,18 +34,21 @@ interface NewsletterPageProps {
 
 async function getNewsletterIssues(params: SearchParams) {
   const searchParams = new URLSearchParams();
-  
+
   if (params.page) searchParams.set('page', params.page);
   searchParams.set('limit', '12');
-  
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/newsletter/issues?${searchParams}`, {
-    next: { revalidate: 300 }, // Revalidate every 5 minutes
-  });
-  
+
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/newsletter/issues?${searchParams}`,
+    {
+      next: { revalidate: 300 }, // Revalidate every 5 minutes
+    }
+  );
+
   if (!response.ok) {
     return { issues: [], pagination: { page: 1, totalPages: 1, total: 0 } };
   }
-  
+
   return response.json();
 }
 
@@ -93,7 +99,10 @@ function NewsletterGrid({ issues }: { issues: any[] }) {
   );
 }
 
-function Pagination({ currentPage, totalPages }: {
+function Pagination({
+  currentPage,
+  totalPages,
+}: {
   currentPage: number;
   totalPages: number;
 }) {
@@ -115,18 +124,18 @@ function Pagination({ currentPage, totalPages }: {
           <a href={`/newsletter?page=${currentPage - 1}`}>Previous</a>
         </Button>
       )}
-      
+
       {pages.map((page) => (
         <Button
           key={page}
-          variant={page === currentPage ? "default" : "outline"}
+          variant={page === currentPage ? 'default' : 'outline'}
           size="sm"
           asChild
         >
           <a href={`/newsletter?page=${page}`}>{page}</a>
         </Button>
       ))}
-      
+
       {currentPage < totalPages && (
         <Button variant="outline" size="sm" asChild>
           <a href={`/newsletter?page=${currentPage + 1}`}>Next</a>
@@ -136,7 +145,9 @@ function Pagination({ currentPage, totalPages }: {
   );
 }
 
-export default async function NewsletterPage({ searchParams }: NewsletterPageProps) {
+export default async function NewsletterPage({
+  searchParams,
+}: NewsletterPageProps) {
   const newsletterData = await getNewsletterIssues(searchParams);
   const currentPage = parseInt(searchParams.page || '1');
 
@@ -149,8 +160,8 @@ export default async function NewsletterPage({ searchParams }: NewsletterPagePro
         </div>
         <h1 className="text-4xl font-bold mb-4">SuperBear Newsletter</h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          Get weekly curated tech insights, AI updates, development trends, and startup news 
-          delivered straight to your inbox.
+          Get weekly curated tech insights, AI updates, development trends, and
+          startup news delivered straight to your inbox.
         </p>
       </div>
 
@@ -166,7 +177,8 @@ export default async function NewsletterPage({ searchParams }: NewsletterPagePro
           <h2 className="text-2xl font-bold">Newsletter Archive</h2>
         </div>
         <p className="text-muted-foreground">
-          Browse our previous newsletter issues to catch up on the latest tech insights.
+          Browse our previous newsletter issues to catch up on the latest tech
+          insights.
         </p>
       </div>
 
@@ -182,9 +194,12 @@ export default async function NewsletterPage({ searchParams }: NewsletterPagePro
       {/* Bottom CTA */}
       {newsletterData.issues && newsletterData.issues.length > 0 && (
         <div className="text-center mt-16 p-8 bg-muted/50 rounded-lg">
-          <h3 className="text-xl font-semibold mb-4">Don't miss out on future issues</h3>
+          <h3 className="text-xl font-semibold mb-4">
+            Don't miss out on future issues
+          </h3>
           <p className="text-muted-foreground mb-6">
-            Join thousands of developers and tech enthusiasts who get our weekly insights.
+            Join thousands of developers and tech enthusiasts who get our weekly
+            insights.
           </p>
           <div className="max-w-md mx-auto">
             <NewsletterSubscription variant="inline" showBenefits={false} />

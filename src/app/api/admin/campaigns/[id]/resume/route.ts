@@ -34,7 +34,6 @@ export async function POST(
       success: true,
       message: result.message,
     });
-
   } catch (error) {
     logger.error('Failed to resume campaign', error as Error);
     return NextResponse.json(

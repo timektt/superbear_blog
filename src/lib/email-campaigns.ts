@@ -42,7 +42,7 @@ export async function createCampaign(data: CampaignData): Promise<string> {
   try {
     // Get recipient count based on filter
     const recipientCount = await getRecipientCount(data.recipientFilter);
-    
+
     const campaign = await prisma.newsletterCampaign.create({
       data: {
         title: data.title,
@@ -50,12 +50,17 @@ export async function createCampaign(data: CampaignData): Promise<string> {
         templateId: data.templateId,
         scheduledAt: data.scheduledAt,
         recipients: recipientCount,
-        status: data.scheduledAt ? CampaignStatus.SCHEDULED : CampaignStatus.DRAFT,
+        status: data.scheduledAt
+          ? CampaignStatus.SCHEDULED
+          : CampaignStatus.DRAFT,
         content: {}, // Will be populated when sending
       },
     });
 
-    logger.info('Campaign created', { campaignId: campaign.id, title: data.title });
+    logger.info('Campaign created', {
+      campaignId: campaign.id,
+      title: data.title,
+    });
     return campaign.id;
   } catch (error) {
     logger.error('Failed to create campaign', error as Error);
@@ -64,7 +69,9 @@ export async function createCampaign(data: CampaignData): Promise<string> {
 }
 
 // Get recipient count based on filter
-export async function getRecipientCount(filter?: CampaignData['recipientFilter']): Promise<number> {
+export async function getRecipientCount(
+  filter?: CampaignData['recipientFilter']
+): Promise<number> {
   const whereClause: any = {
     status: 'ACTIVE', // Only active subscribers
   };
@@ -78,14 +85,19 @@ export async function getRecipientCount(filter?: CampaignData['recipientFilter']
   }
 
   if (filter?.subscribedBefore) {
-    whereClause.subscribedAt = { ...whereClause.subscribedAt, lte: filter.subscribedBefore };
+    whereClause.subscribedAt = {
+      ...whereClause.subscribedAt,
+      lte: filter.subscribedBefore,
+    };
   }
 
   return await prisma.newsletter.count({ where: whereClause });
 }
 
 // Get campaign recipients
-export async function getCampaignRecipients(filter?: CampaignData['recipientFilter']) {
+export async function getCampaignRecipients(
+  filter?: CampaignData['recipientFilter']
+) {
   const whereClause: any = {
     status: 'ACTIVE',
   };
@@ -99,7 +111,10 @@ export async function getCampaignRecipients(filter?: CampaignData['recipientFilt
   }
 
   if (filter?.subscribedBefore) {
-    whereClause.subscribedAt = { ...whereClause.subscribedAt, lte: filter.subscribedBefore };
+    whereClause.subscribedAt = {
+      ...whereClause.subscribedAt,
+      lte: filter.subscribedBefore,
+    };
   }
 
   return await prisma.newsletter.findMany({
@@ -149,7 +164,6 @@ export async function sendCampaign(campaignId: string): Promise<void> {
     await queueCampaign(campaignId);
 
     logger.info('Campaign queued successfully', { campaignId });
-
   } catch (error) {
     // Update campaign status to failed
     await prisma.newsletterCampaign.update({
@@ -169,7 +183,7 @@ async function sendCampaignEmail(
   content: any
 ): Promise<void> {
   const unsubscribeUrl = `${process.env.NEXTAUTH_URL}/api/newsletter/unsubscribe?token=${recipient.id}`;
-  
+
   const templateVariables = {
     subscriber: {
       name: recipient.email.split('@')[0], // Simple name extraction
@@ -199,7 +213,10 @@ async function sendCampaignEmail(
   const mailOptions = {
     from: {
       name: 'SuperBear Blog',
-      address: process.env.SMTP_FROM || process.env.SMTP_USER || 'noreply@superbear.blog',
+      address:
+        process.env.SMTP_FROM ||
+        process.env.SMTP_USER ||
+        'noreply@superbear.blog',
     },
     to: recipient.email,
     subject: compiledEmail.subject,
@@ -245,7 +262,7 @@ export async function generateCampaignContent(templateId: string) {
 
   // Group articles by category
   const articlesByCategory: Record<string, any[]> = {};
-  latestArticles.slice(1, 6).forEach(article => {
+  latestArticles.slice(1, 6).forEach((article) => {
     const categoryName = article.category.name;
     if (!articlesByCategory[categoryName]) {
       articlesByCategory[categoryName] = [];
@@ -263,16 +280,18 @@ export async function generateCampaignContent(templateId: string) {
 
   return {
     articles: {
-      featured: featuredArticle ? {
-        id: featuredArticle.id,
-        title: featuredArticle.title,
-        slug: featuredArticle.slug,
-        summary: featuredArticle.summary,
-        publishedAt: featuredArticle.publishedAt,
-        author: featuredArticle.author.name,
-        category: featuredArticle.category.name,
-      } : null,
-      latest: latestArticles.slice(1, 6).map(article => ({
+      featured: featuredArticle
+        ? {
+            id: featuredArticle.id,
+            title: featuredArticle.title,
+            slug: featuredArticle.slug,
+            summary: featuredArticle.summary,
+            publishedAt: featuredArticle.publishedAt,
+            author: featuredArticle.author.name,
+            category: featuredArticle.category.name,
+          }
+        : null,
+      latest: latestArticles.slice(1, 6).map((article) => ({
         id: article.id,
         title: article.title,
         slug: article.slug,
@@ -288,7 +307,10 @@ export async function generateCampaignContent(templateId: string) {
 }
 
 // Schedule campaign for later sending
-export async function scheduleCampaign(campaignId: string, scheduledAt: Date): Promise<void> {
+export async function scheduleCampaign(
+  campaignId: string,
+  scheduledAt: Date
+): Promise<void> {
   await prisma.newsletterCampaign.update({
     where: { id: campaignId },
     data: {
@@ -301,7 +323,9 @@ export async function scheduleCampaign(campaignId: string, scheduledAt: Date): P
 }
 
 // Get campaign statistics
-export async function getCampaignStats(campaignId: string): Promise<CampaignStats> {
+export async function getCampaignStats(
+  campaignId: string
+): Promise<CampaignStats> {
   const campaign = await prisma.newsletterCampaign.findUnique({
     where: { id: campaignId },
   });

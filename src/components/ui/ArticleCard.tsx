@@ -60,17 +60,18 @@ export default function ArticleCard({
   const title = article?.title || propTitle || '';
   const category = article?.category?.name || propCategory || '';
   const author = article?.author?.name || propAuthor || '';
-  const date = article?.publishedAt 
+  const date = article?.publishedAt
     ? new Date(article.publishedAt).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
       })
     : propDate || '';
-  const imageUrl = article?.image || article?.imageUrl || propImageUrl || '/og-default.svg';
+  const imageUrl =
+    article?.image || article?.imageUrl || propImageUrl || '/og-default.svg';
   const slug = article?.slug || propSlug || '';
   const snippet = article?.summary || propSnippet || '';
-  const tags = article?.tags?.map(tag => tag.name) || propTags || [];
+  const tags = article?.tags?.map((tag) => tag.name) || propTags || [];
   const href = `/news/${slug || 'article'}`;
 
   if (variant === 'compact') {
@@ -99,11 +100,7 @@ export default function ArticleCard({
                 {title}
               </h4>
 
-              {date && (
-                <p className="text-xs text-muted-foreground">
-                  {date}
-                </p>
-              )}
+              {date && <p className="text-xs text-muted-foreground">{date}</p>}
             </div>
           </div>
         </Link>
@@ -113,7 +110,9 @@ export default function ArticleCard({
 
   if (variant === 'list') {
     return (
-      <article className={`group flex gap-4 py-4 border-b border-border last:border-b-0 hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-all duration-200 ${className}`}>
+      <article
+        className={`group flex gap-4 py-4 border-b border-border last:border-b-0 hover:bg-muted/50 -mx-4 px-4 rounded-lg transition-all duration-200 ${className}`}
+      >
         <Link
           href={href}
           className="flex-shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
@@ -136,7 +135,7 @@ export default function ArticleCard({
             </span>
           </div>
 
-          <Link 
+          <Link
             href={href}
             className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md"
           >
@@ -165,7 +164,9 @@ export default function ArticleCard({
 
   // Default card variant
   return (
-    <article className={`group bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${className}`}>
+    <article
+      className={`group bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${className}`}
+    >
       <Link href={href} className="block">
         {/* Article Image */}
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">

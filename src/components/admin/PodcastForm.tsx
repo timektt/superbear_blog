@@ -12,7 +12,13 @@ import { z } from 'zod';
 
 const PodcastFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
-  slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug must contain only lowercase letters, numbers, and hyphens'
+    ),
   description: z.string().optional(),
   summary: z.string().max(500).optional(),
   audioUrl: z.string().url('Valid audio URL required'),
@@ -35,7 +41,12 @@ interface PodcastFormProps {
   isLoading?: boolean;
 }
 
-export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: PodcastFormProps) {
+export function PodcastForm({
+  podcast,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: PodcastFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<PodcastFormData>>({
@@ -51,7 +62,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
     categoryId: podcast?.categoryId || '',
     tagIds: podcast?.tags?.map((tag: any) => tag.id) || [],
     status: podcast?.status || 'DRAFT',
-    publishedAt: podcast?.publishedAt ? new Date(podcast.publishedAt) : undefined,
+    publishedAt: podcast?.publishedAt
+      ? new Date(podcast.publishedAt)
+      : undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [categories, setCategories] = useState<any[]>([]);
@@ -102,7 +115,7 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
       });
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({ ...prev, slug: data.slug }));
+        setFormData((prev) => ({ ...prev, slug: data.slug }));
       }
     } catch (error) {
       console.error('Failed to generate slug:', error);
@@ -123,7 +136,7 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
 
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({ ...prev, coverImage: data.url }));
+        setFormData((prev) => ({ ...prev, coverImage: data.url }));
         toast({ title: 'Image uploaded successfully' });
       } else {
         throw new Error('Upload failed');
@@ -143,9 +156,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path) {
-            newErrors[err.path[0]] = err.message;
+        error.issues.forEach((issue) => {
+          if (issue.path && issue.path.length > 0) {
+            newErrors[issue.path[0] as string] = issue.message;
           }
         });
         setErrors(newErrors);
@@ -156,7 +169,7 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast({ title: 'Please fix validation errors', variant: 'destructive' });
       return;
@@ -164,18 +177,20 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
 
     try {
       await onSubmit(formData as PodcastFormData);
-      toast({ title: `Podcast ${podcast ? 'updated' : 'created'} successfully` });
+      toast({
+        title: `Podcast ${podcast ? 'updated' : 'created'} successfully`,
+      });
     } catch (error) {
       toast({ title: 'Failed to save podcast', variant: 'destructive' });
     }
   };
 
   const handleTagToggle = (tagId: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tagIds: prev.tagIds?.includes(tagId)
-        ? prev.tagIds.filter(id => id !== tagId)
-        : [...(prev.tagIds || []), tagId]
+        ? prev.tagIds.filter((id) => id !== tagId)
+        : [...(prev.tagIds || []), tagId],
     }));
   };
 
@@ -200,65 +215,111 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Title *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Title *
+                </label>
                 <Input
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   placeholder="Enter podcast title"
                   className={errors.title ? 'border-red-500' : ''}
                 />
-                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Slug *</label>
                 <Input
                   value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                  }
                   placeholder="podcast-episode-slug"
                   className={errors.slug ? 'border-red-500' : ''}
                 />
-                {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug}</p>}
+                {errors.slug && (
+                  <p className="text-red-500 text-sm mt-1">{errors.slug}</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Audio URL *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Audio URL *
+                </label>
                 <Input
                   value={formData.audioUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, audioUrl: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      audioUrl: e.target.value,
+                    }))
+                  }
                   placeholder="https://example.com/audio.mp3"
                   className={errors.audioUrl ? 'border-red-500' : ''}
                 />
-                {errors.audioUrl && <p className="text-red-500 text-sm mt-1">{errors.audioUrl}</p>}
+                {errors.audioUrl && (
+                  <p className="text-red-500 text-sm mt-1">{errors.audioUrl}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Episode Number</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Episode Number
+                  </label>
                   <Input
                     type="number"
                     value={formData.episodeNumber || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, episodeNumber: e.target.value ? parseInt(e.target.value) : undefined }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        episodeNumber: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
+                      }))
+                    }
                     placeholder="1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Season Number</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Season Number
+                  </label>
                   <Input
                     type="number"
                     value={formData.seasonNumber || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, seasonNumber: e.target.value ? parseInt(e.target.value) : undefined }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        seasonNumber: e.target.value
+                          ? parseInt(e.target.value)
+                          : undefined,
+                      }))
+                    }
                     placeholder="1"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Duration (seconds)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Duration (seconds)
+                </label>
                 <Input
                   type="number"
                   value={formData.duration || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, duration: e.target.value ? parseInt(e.target.value) : undefined }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      duration: e.target.value
+                        ? parseInt(e.target.value)
+                        : undefined,
+                    }))
+                  }
                   placeholder="1800"
                 />
               </div>
@@ -266,7 +327,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Cover Image</label>
+                <label className="block text-sm font-medium mb-2">
+                  Cover Image
+                </label>
                 <div className="space-y-2">
                   <Input
                     type="file"
@@ -286,15 +349,21 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
                       />
                     </div>
                   )}
-                  {isUploading && <p className="text-sm text-gray-500">Uploading...</p>}
+                  {isUploading && (
+                    <p className="text-sm text-gray-500">Uploading...</p>
+                  )}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Category</label>
+                <label className="block text-sm font-medium mb-2">
+                  Category
+                </label>
                 <Select
                   value={formData.categoryId}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, categoryId: value }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, categoryId: value }))
+                  }
                 >
                   <option value="">Select category</option>
                   {categories.map((category) => (
@@ -309,7 +378,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
                 <label className="block text-sm font-medium mb-2">Status</label>
                 <Select
                   value={formData.status}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+                  onValueChange={(value) =>
+                    setFormData((prev) => ({ ...prev, status: value as any }))
+                  }
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Published</option>
@@ -319,14 +390,24 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
 
               {formData.status === 'PUBLISHED' && (
                 <div>
-                  <label className="block text-sm font-medium mb-2">Publish Date</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Publish Date
+                  </label>
                   <Input
                     type="datetime-local"
-                    value={formData.publishedAt ? formData.publishedAt.toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setFormData(prev => ({ 
-                      ...prev, 
-                      publishedAt: e.target.value ? new Date(e.target.value) : undefined 
-                    }))}
+                    value={
+                      formData.publishedAt
+                        ? formData.publishedAt.toISOString().slice(0, 16)
+                        : ''
+                    }
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        publishedAt: e.target.value
+                          ? new Date(e.target.value)
+                          : undefined,
+                      }))
+                    }
                   />
                 </div>
               )}
@@ -337,7 +418,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
             <label className="block text-sm font-medium mb-2">Summary</label>
             <textarea
               value={formData.summary}
-              onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, summary: e.target.value }))
+              }
               placeholder="Brief episode summary (max 500 characters)"
               className="w-full p-3 border rounded-md resize-none"
               rows={3}
@@ -349,10 +432,17 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Description</label>
+            <label className="block text-sm font-medium mb-2">
+              Description
+            </label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
               placeholder="Detailed episode description and show notes"
               className="w-full p-3 border rounded-md resize-none"
               rows={6}
@@ -365,7 +455,9 @@ export function PodcastForm({ podcast, onSubmit, onCancel, isLoading = false }: 
               {tags.map((tag) => (
                 <Badge
                   key={tag.id}
-                  variant={formData.tagIds?.includes(tag.id) ? 'default' : 'outline'}
+                  variant={
+                    formData.tagIds?.includes(tag.id) ? 'default' : 'outline'
+                  }
                   className="cursor-pointer"
                   onClick={() => handleTagToggle(tag.id)}
                 >

@@ -26,11 +26,13 @@ export async function POST(request: NextRequest) {
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
-        { 
+        {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString(),
+            'X-RateLimit-Reset': new Date(
+              rateLimitResult.resetTime
+            ).toISOString(),
           },
         }
       );
@@ -39,11 +41,11 @@ export async function POST(request: NextRequest) {
     // Verify cron job authorization
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'dev-secret';
-    
+
     if (authHeader !== `Bearer ${cronSecret}`) {
-      logger.warn('Unauthorized cron job attempt', { 
+      logger.warn('Unauthorized cron job attempt', {
         ip: request.headers.get('x-forwarded-for') || 'unknown',
-        userAgent: request.headers.get('user-agent') || 'unknown'
+        userAgent: request.headers.get('user-agent') || 'unknown',
       });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -121,11 +123,10 @@ export async function POST(request: NextRequest) {
       results,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Cron job failed', error as Error);
     return NextResponse.json(
-      { 
+      {
         error: 'Cron job failed',
         timestamp: new Date().toISOString(),
       },
@@ -139,7 +140,7 @@ export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET || 'dev-secret';
-    
+
     if (authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -149,13 +150,9 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
       message: 'Campaign cron job endpoint is operational',
     });
-
   } catch (error) {
     logger.error('Cron health check failed', error as Error);
-    return NextResponse.json(
-      { error: 'Health check failed' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Health check failed' }, { status: 500 });
   }
 }
 
@@ -167,7 +164,7 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
     // Check if it's time for weekly digest (every Sunday at 9 AM)
     const dayOfWeek = now.getDay(); // 0 = Sunday
     const hour = now.getHours();
-    
+
     // Only run on Sundays between 9-10 AM
     if (dayOfWeek !== 0 || hour !== 9) {
       return null;
@@ -185,7 +182,7 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
     // Check if we already created a digest this week
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - 7);
-    
+
     const existingDigest = await prisma.emailCampaign.findFirst({
       where: {
         name: {
@@ -270,7 +267,7 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
         scheduledAt,
         metadata: {
           type: 'weekly_digest',
-          articles: topArticles.map(article => ({
+          articles: topArticles.map((article) => ({
             id: article.id,
             title: article.title,
             slug: article.slug,

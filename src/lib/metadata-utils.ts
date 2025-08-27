@@ -209,8 +209,13 @@ export function generateSiteMetadata(
   const defaultDescription =
     'Curated tech news, AI insights, and development tools for developers, AI builders, and tech entrepreneurs.';
 
-  const title = (typeof overrides.title === 'string' ? overrides.title : null) || defaultTitle;
-  const description = (typeof overrides.description === 'string' ? overrides.description : null) || defaultDescription;
+  const title =
+    (typeof overrides.title === 'string' ? overrides.title : null) ||
+    defaultTitle;
+  const description =
+    (typeof overrides.description === 'string'
+      ? overrides.description
+      : null) || defaultDescription;
 
   return {
     title: {

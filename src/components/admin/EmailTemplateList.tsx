@@ -25,19 +25,22 @@ interface EmailTemplateListProps {
   onPreview?: (template: EmailTemplate) => void;
 }
 
-export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateListProps) {
+export default function EmailTemplateList({
+  onEdit,
+  onPreview,
+}: EmailTemplateListProps) {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({
     category: '',
     status: '',
-    search: ''
+    search: '',
   });
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
-    pages: 0
+    pages: 0,
   });
 
   const router = useRouter();
@@ -49,7 +52,7 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
       setLoading(true);
       const params = new URLSearchParams({
         page: pagination.page.toString(),
-        limit: pagination.limit.toString()
+        limit: pagination.limit.toString(),
       });
 
       if (filter.category) params.append('category', filter.category);
@@ -79,7 +82,10 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
   // Delete template
   const handleDelete = async (template: EmailTemplate) => {
     if (template._count.campaigns > 0) {
-      showToast('Cannot delete template that is being used in campaigns', 'error');
+      showToast(
+        'Cannot delete template that is being used in campaigns',
+        'error'
+      );
       return;
     }
 
@@ -88,9 +94,12 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
     }
 
     try {
-      const response = await fetch(`/api/admin/email-templates/${template.id}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/admin/email-templates/${template.id}`,
+        {
+          method: 'DELETE',
+        }
+      );
 
       if (response.ok) {
         showToast('Template deleted successfully', 'success');
@@ -108,13 +117,16 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
   // Duplicate template
   const handleDuplicate = async (template: EmailTemplate) => {
     try {
-      const response = await fetch(`/api/admin/email-templates/${template.id}/duplicate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `${template.name} (Copy)`
-        })
-      });
+      const response = await fetch(
+        `/api/admin/email-templates/${template.id}/duplicate`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${template.name} (Copy)`,
+          }),
+        }
+      );
 
       if (response.ok) {
         showToast('Template duplicated successfully', 'success');
@@ -132,23 +144,34 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
   // Get status badge color
   const getStatusColor = (status: TemplateStatus) => {
     switch (status) {
-      case 'ACTIVE': return 'bg-green-100 text-green-800';
-      case 'DRAFT': return 'bg-yellow-100 text-yellow-800';
-      case 'ARCHIVED': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'ACTIVE':
+        return 'bg-green-100 text-green-800';
+      case 'DRAFT':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'ARCHIVED':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
   // Get category badge color
   const getCategoryColor = (category: TemplateCategory) => {
     switch (category) {
-      case 'NEWSLETTER': return 'bg-blue-100 text-blue-800';
-      case 'WELCOME': return 'bg-purple-100 text-purple-800';
-      case 'BREAKING_NEWS': return 'bg-red-100 text-red-800';
-      case 'DIGEST': return 'bg-indigo-100 text-indigo-800';
-      case 'PROMOTIONAL': return 'bg-orange-100 text-orange-800';
-      case 'TRANSACTIONAL': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'NEWSLETTER':
+        return 'bg-blue-100 text-blue-800';
+      case 'WELCOME':
+        return 'bg-purple-100 text-purple-800';
+      case 'BREAKING_NEWS':
+        return 'bg-red-100 text-red-800';
+      case 'DIGEST':
+        return 'bg-indigo-100 text-indigo-800';
+      case 'PROMOTIONAL':
+        return 'bg-orange-100 text-orange-800';
+      case 'TRANSACTIONAL':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -189,7 +212,9 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
             </label>
             <select
               value={filter.category}
-              onChange={(e) => setFilter({ ...filter, category: e.target.value })}
+              onChange={(e) =>
+                setFilter({ ...filter, category: e.target.value })
+              }
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="">All Categories</option>
@@ -250,10 +275,14 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
             </div>
 
             <div className="flex flex-wrap gap-2 mb-4">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(template.category)}`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(template.category)}`}
+              >
                 {template.category.replace('_', ' ')}
               </span>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(template.status)}`}>
+              <span
+                className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(template.status)}`}
+              >
                 {template.status}
               </span>
             </div>
@@ -303,8 +332,18 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
       {templates.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
-            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              className="mx-auto h-12 w-12"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -326,7 +365,9 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
       {pagination.pages > 1 && (
         <div className="flex justify-center items-center space-x-2">
           <button
-            onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+            onClick={() =>
+              setPagination({ ...pagination, page: pagination.page - 1 })
+            }
             disabled={pagination.page === 1}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
@@ -336,7 +377,9 @@ export default function EmailTemplateList({ onEdit, onPreview }: EmailTemplateLi
             Page {pagination.page} of {pagination.pages}
           </span>
           <button
-            onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+            onClick={() =>
+              setPagination({ ...pagination, page: pagination.page + 1 })
+            }
             disabled={pagination.page === pagination.pages}
             className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >

@@ -9,7 +9,10 @@ interface ThemeSwitcherProps {
   className?: string;
 }
 
-export default function ThemeSwitcher({ variant = 'button', className = '' }: ThemeSwitcherProps) {
+export default function ThemeSwitcher({
+  variant = 'button',
+  className = '',
+}: ThemeSwitcherProps) {
   const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme, resolvedTheme, themes } = useTheme();
@@ -28,23 +31,23 @@ export default function ThemeSwitcher({ variant = 'button', className = '' }: Th
       value: 'light',
       label: 'Light',
       icon: Sun,
-      description: 'Light theme'
+      description: 'Light theme',
     },
     {
       value: 'dark',
       label: 'Dark',
       icon: Moon,
-      description: 'Dark theme'
+      description: 'Dark theme',
     },
     {
       value: 'system',
       label: 'System',
       icon: Monitor,
-      description: 'Follow system preference'
-    }
+      description: 'Follow system preference',
+    },
   ];
 
-  const currentTheme = themeOptions.find(option => option.value === theme);
+  const currentTheme = themeOptions.find((option) => option.value === theme);
   const CurrentIcon = currentTheme?.icon || Monitor;
 
   const cycleTheme = () => {
@@ -108,7 +111,12 @@ export default function ThemeSwitcher({ variant = 'button', className = '' }: Th
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -121,7 +129,7 @@ export default function ThemeSwitcher({ variant = 'button', className = '' }: Th
           {themeOptions.map((option) => {
             const Icon = option.icon;
             const isSelected = theme === option.value;
-            
+
             return (
               <button
                 key={option.value}
@@ -133,10 +141,17 @@ export default function ThemeSwitcher({ variant = 'button', className = '' }: Th
                 aria-selected={isSelected}
                 tabIndex={0}
               >
-                <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+                <Icon
+                  className="w-4 h-4 text-muted-foreground"
+                  aria-hidden="true"
+                />
                 <div className="flex-1">
-                  <div className="text-sm font-medium text-foreground">{option.label}</div>
-                  <div className="text-xs text-muted-foreground">{option.description}</div>
+                  <div className="text-sm font-medium text-foreground">
+                    {option.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {option.description}
+                  </div>
                 </div>
                 {isSelected && (
                   <Check className="w-4 h-4 text-primary" aria-hidden="true" />

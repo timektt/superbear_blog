@@ -8,19 +8,18 @@ import { logger } from '@/lib/logger';
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const stats = emailQueue.getStats();
-    
+
     return NextResponse.json({
       success: true,
       stats,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Failed to get queue stats', error as Error);
     return NextResponse.json(
@@ -34,12 +33,14 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    logger.info('Manual queue processing triggered by admin', { userId: session.user.email });
+    logger.info('Manual queue processing triggered by admin', {
+      userId: session.user.email,
+    });
 
     await processEmailQueue();
 
@@ -51,7 +52,6 @@ export async function POST(request: NextRequest) {
       stats,
       timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     logger.error('Failed to process queue manually', error as Error);
     return NextResponse.json(

@@ -47,18 +47,18 @@ async function testAnalytics() {
 
     // 2. Test analytics tracking
     console.log('\n2. Testing analytics tracking...');
-    
+
     // Simulate article views
     const sessionId = 'test-session-' + Date.now();
     const views = [];
-    
+
     for (let i = 0; i < 5; i++) {
       const view = await prisma.articleView.create({
         data: {
           articleId: testArticle.id,
           sessionId: sessionId + '-' + i,
           fingerprint: 'test-fingerprint-' + i,
-          timestamp: new Date(Date.now() - (i * 60000)), // Spread over time
+          timestamp: new Date(Date.now() - i * 60000), // Spread over time
           userAgent: 'Mozilla/5.0 (Test Browser)',
           referrer: i % 2 === 0 ? 'https://google.com' : 'https://twitter.com',
           country: ['US', 'UK', 'CA', 'AU', 'DE'][i],
@@ -77,21 +77,27 @@ async function testAnalytics() {
     // 3. Test interactions
     console.log('\n3. Testing interactions...');
     const interactions = [];
-    
+
     for (const view of views) {
       // Add some random interactions
       const interactionCount = Math.floor(Math.random() * 3) + 1;
-      
+
       for (let j = 0; j < interactionCount; j++) {
-        const interactionTypes = ['LINK_CLICK', 'SOCIAL_SHARE', 'SCROLL_MILESTONE', 'TIME_MILESTONE'];
-        const type = interactionTypes[Math.floor(Math.random() * interactionTypes.length)];
-        
+        const interactionTypes = [
+          'LINK_CLICK',
+          'SOCIAL_SHARE',
+          'SCROLL_MILESTONE',
+          'TIME_MILESTONE',
+        ];
+        const type =
+          interactionTypes[Math.floor(Math.random() * interactionTypes.length)];
+
         const interaction = await prisma.articleInteraction.create({
           data: {
             viewId: view.id,
             articleId: testArticle.id,
             type,
-            timestamp: new Date(view.timestamp.getTime() + (j * 30000)),
+            timestamp: new Date(view.timestamp.getTime() + j * 30000),
             timeFromStart: j * 30000,
             ...(type === 'LINK_CLICK' && {
               linkUrl: 'https://example.com/link-' + j,
@@ -133,16 +139,21 @@ async function testAnalytics() {
 
     // 5. Test article stats calculation
     console.log('\n5. Testing article stats calculation...');
-    
+
     // Calculate stats manually for verification
     const totalViews = views.length;
-    const uniqueViews = new Set(views.map(v => v.fingerprint)).size;
-    const avgTimeOnPage = views.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) / views.length;
-    const avgScrollDepth = views.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) / views.length;
-    const bounceRate = (views.filter(v => v.bounced).length / views.length) * 100;
+    const uniqueViews = new Set(views.map((v) => v.fingerprint)).size;
+    const avgTimeOnPage =
+      views.reduce((sum, v) => sum + (v.timeOnPage || 0), 0) / views.length;
+    const avgScrollDepth =
+      views.reduce((sum, v) => sum + (v.scrollDepth || 0), 0) / views.length;
+    const bounceRate =
+      (views.filter((v) => v.bounced).length / views.length) * 100;
     const totalShares = views.reduce((sum, v) => sum + v.socialShares, 0);
     const totalClicks = views.reduce((sum, v) => sum + v.linksClicked, 0);
-    const completionRate = (views.filter(v => (v.scrollDepth || 0) >= 90).length / views.length) * 100;
+    const completionRate =
+      (views.filter((v) => (v.scrollDepth || 0) >= 90).length / views.length) *
+      100;
 
     const articleStats = await prisma.articleStats.create({
       data: {
@@ -164,7 +175,7 @@ async function testAnalytics() {
 
     // 6. Test content recommendations
     console.log('\n6. Testing content recommendations...');
-    
+
     // Create another test article for recommendations
     const relatedArticle = await prisma.article.create({
       data: {
@@ -207,7 +218,7 @@ async function testAnalytics() {
 
     // 7. Test analytics queries
     console.log('\n7. Testing analytics queries...');
-    
+
     // Test dashboard data query
     const dashboardStats = await prisma.articleStats.aggregate({
       _sum: {
@@ -266,7 +277,6 @@ async function testAnalytics() {
     console.log('- Completion Rate:', Math.round(completionRate), '%');
 
     console.log('\n✅ All analytics tests passed!');
-
   } catch (error) {
     console.error('❌ Analytics test failed:', error);
     throw error;

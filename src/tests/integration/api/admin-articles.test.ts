@@ -103,13 +103,16 @@ describe('/api/admin/articles', () => {
         ...validArticleData,
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles', {
-        method: 'POST',
-        body: JSON.stringify(validArticleData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles',
+        {
+          method: 'POST',
+          body: JSON.stringify(validArticleData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -122,13 +125,16 @@ describe('/api/admin/articles', () => {
     it('should return 401 when not authenticated', async () => {
       mockGetServerSession.mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles', {
-        method: 'POST',
-        body: JSON.stringify(validArticleData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles',
+        {
+          method: 'POST',
+          body: JSON.stringify(validArticleData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -147,13 +153,16 @@ describe('/api/admin/articles', () => {
         categoryId: 'category-1',
       };
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles', {
-        method: 'POST',
-        body: JSON.stringify(invalidData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles',
+        {
+          method: 'POST',
+          body: JSON.stringify(invalidData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -175,13 +184,16 @@ describe('/api/admin/articles', () => {
         tagIds: ['tag-1', 'nonexistent-tag'],
       };
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles', {
-        method: 'POST',
-        body: JSON.stringify(dataWithInvalidTags),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles',
+        {
+          method: 'POST',
+          body: JSON.stringify(dataWithInvalidTags),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -193,18 +205,23 @@ describe('/api/admin/articles', () => {
     it('should handle duplicate slug by returning error', async () => {
       mockGetServerSession.mockResolvedValue(mockSession as any);
       // Mock existing article with same slug
-      mockPrisma.article.findUnique.mockResolvedValue({ id: 'existing-article' });
+      mockPrisma.article.findUnique.mockResolvedValue({
+        id: 'existing-article',
+      });
       mockPrisma.author.findUnique.mockResolvedValue({ id: 'author-1' });
       mockPrisma.category.findUnique.mockResolvedValue({ id: 'category-1' });
       mockPrisma.tag.findMany.mockResolvedValue([{ id: 'tag-1' }]);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles', {
-        method: 'POST',
-        body: JSON.stringify(validArticleData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles',
+        {
+          method: 'POST',
+          body: JSON.stringify(validArticleData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       const response = await POST(request);
       const data = await response.json();
@@ -218,7 +235,10 @@ describe('/api/admin/articles', () => {
     const updateData = {
       title: 'Updated Article',
       slug: 'updated-article',
-      content: JSON.stringify({ type: 'doc', content: [{ type: 'text', text: 'Updated content' }] }),
+      content: JSON.stringify({
+        type: 'doc',
+        content: [{ type: 'text', text: 'Updated content' }],
+      }),
     };
 
     it('should update article successfully', async () => {
@@ -234,15 +254,20 @@ describe('/api/admin/articles', () => {
         updatedAt: new Date(),
       });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'PATCH',
-        body: JSON.stringify(updateData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'PATCH',
+          body: JSON.stringify(updateData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -258,15 +283,20 @@ describe('/api/admin/articles', () => {
       mockGetServerSession.mockResolvedValue(mockSession as any);
       mockPrisma.article.findUnique.mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/nonexistent', {
-        method: 'PATCH',
-        body: JSON.stringify(updateData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/nonexistent',
+        {
+          method: 'PATCH',
+          body: JSON.stringify(updateData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'nonexistent' }) });
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'nonexistent' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(404);
@@ -282,15 +312,20 @@ describe('/api/admin/articles', () => {
         content: 'invalid json',
       };
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'PATCH',
-        body: JSON.stringify(invalidUpdateData),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'PATCH',
+          body: JSON.stringify(invalidUpdateData),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -306,15 +341,20 @@ describe('/api/admin/articles', () => {
         tagIds: ['tag-1', 'nonexistent-tag'],
       };
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'PATCH',
-        body: JSON.stringify(updateWithInvalidTags),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'PATCH',
+          body: JSON.stringify(updateWithInvalidTags),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      const response = await PATCH(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await PATCH(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(400);
@@ -328,24 +368,32 @@ describe('/api/admin/articles', () => {
       const articleWithImage = {
         id: 'article-1',
         title: 'Test Article',
-        image: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg',
+        image:
+          'https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg',
       };
 
       mockPrisma.article.findUnique.mockResolvedValue(articleWithImage);
       mockPrisma.article.delete.mockResolvedValue(articleWithImage);
       mockCloudinary.uploader.destroy.mockResolvedValue({ result: 'ok' });
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'DELETE',
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'DELETE',
+        }
+      );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(data.data.message).toBe('Article deleted successfully');
-      expect(mockPrisma.article.delete).toHaveBeenCalledWith({ where: { id: 'article-1' } });
+      expect(mockPrisma.article.delete).toHaveBeenCalledWith({
+        where: { id: 'article-1' },
+      });
       expect(mockCloudinary.uploader.destroy).toHaveBeenCalledWith('sample');
     });
 
@@ -360,11 +408,16 @@ describe('/api/admin/articles', () => {
       mockPrisma.article.findUnique.mockResolvedValue(articleWithoutImage);
       mockPrisma.article.delete.mockResolvedValue(articleWithoutImage);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'DELETE',
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'DELETE',
+        }
+      );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'article-1' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'article-1' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(200);
@@ -378,26 +431,39 @@ describe('/api/admin/articles', () => {
       const articleWithImage = {
         id: 'article-1',
         title: 'Test Article',
-        image: 'https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg',
+        image:
+          'https://res.cloudinary.com/demo/image/upload/v1234567890/sample.jpg',
       };
 
       mockPrisma.article.findUnique.mockResolvedValue(articleWithImage);
       mockPrisma.article.delete.mockResolvedValue(articleWithImage);
-      mockCloudinary.uploader.destroy.mockRejectedValue(new Error('Cloudinary error'));
+      mockCloudinary.uploader.destroy.mockRejectedValue(
+        new Error('Cloudinary error')
+      );
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/article-1', {
-        method: 'DELETE',
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/article-1',
+        {
+          method: 'DELETE',
+        }
+      );
+
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'article-1' }),
       });
-
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'article-1' }) });
       const data = await response.json();
 
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
       expect(mockPrisma.article.delete).toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith('Error deleting image from Cloudinary:', expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error deleting image from Cloudinary:',
+        expect.any(Error)
+      );
 
       consoleSpy.mockRestore();
     });
@@ -406,11 +472,16 @@ describe('/api/admin/articles', () => {
       mockGetServerSession.mockResolvedValue(mockSession as any);
       mockPrisma.article.findUnique.mockResolvedValue(null);
 
-      const request = new NextRequest('http://localhost:3000/api/admin/articles/nonexistent', {
-        method: 'DELETE',
-      });
+      const request = new NextRequest(
+        'http://localhost:3000/api/admin/articles/nonexistent',
+        {
+          method: 'DELETE',
+        }
+      );
 
-      const response = await DELETE(request, { params: Promise.resolve({ id: 'nonexistent' }) });
+      const response = await DELETE(request, {
+        params: Promise.resolve({ id: 'nonexistent' }),
+      });
       const data = await response.json();
 
       expect(response.status).toBe(404);

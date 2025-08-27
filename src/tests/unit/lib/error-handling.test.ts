@@ -37,7 +37,7 @@ describe('Error Handling', () => {
     it('should handle network errors', () => {
       const networkError = new Error('Failed to fetch');
       networkError.name = 'NetworkError';
-      
+
       const result = AppErrorHandler.handle(networkError, 'api-call');
 
       expect(result.type).toBe('network');
@@ -184,7 +184,10 @@ describe('Error Handling', () => {
 
     it('should handle rejected promises', async () => {
       const failurePromise = Promise.reject(new Error('Async error'));
-      const [data, error] = await AppErrorHandler.handleAsync(failurePromise, 'async-context');
+      const [data, error] = await AppErrorHandler.handleAsync(
+        failurePromise,
+        'async-context'
+      );
 
       expect(data).toBeNull();
       expect(error).toEqual({
@@ -200,7 +203,10 @@ describe('Error Handling', () => {
         setTimeout(() => reject(new Error('Request timeout')), 100);
       });
 
-      const [data, error] = await AppErrorHandler.handleAsync(timeoutPromise, 'timeout-test');
+      const [data, error] = await AppErrorHandler.handleAsync(
+        timeoutPromise,
+        'timeout-test'
+      );
 
       expect(data).toBeNull();
       expect(error?.type).toBe('unknown');
@@ -215,7 +221,10 @@ describe('Error Handling', () => {
       };
       const apiPromise = Promise.reject(apiError);
 
-      const [data, error] = await AppErrorHandler.handleAsync(apiPromise, 'api-call');
+      const [data, error] = await AppErrorHandler.handleAsync(
+        apiPromise,
+        'api-call'
+      );
 
       expect(data).toBeNull();
       expect(error?.type).toBe('server');
@@ -252,7 +261,9 @@ describe('Error Handling', () => {
       };
 
       const userMessage = AppErrorHandler.getUserMessage(networkError);
-      expect(userMessage).toBe('Unable to connect to the server. Please check your internet connection and try again.');
+      expect(userMessage).toBe(
+        'Unable to connect to the server. Please check your internet connection and try again.'
+      );
     });
 
     it('should provide actionable guidance', () => {

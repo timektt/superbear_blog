@@ -36,25 +36,28 @@ class EmailQueue {
   private jobs: Map<string, QueueJob> = new Map();
   private processing: Set<string> = new Set();
   private domainThrottles: Map<string, DomainThrottle> = new Map();
-  
+
   // Domain-specific throttling rules
   private readonly DOMAIN_LIMITS: Record<string, number> = {
-    'gmail.com': 40,      // 40 emails per minute
+    'gmail.com': 40, // 40 emails per minute
     'googlemail.com': 40,
-    'outlook.com': 15,    // 15 emails per minute
+    'outlook.com': 15, // 15 emails per minute
     'hotmail.com': 15,
     'live.com': 15,
-    'yahoo.com': 20,      // 20 emails per minute
-    'aol.com': 10,        // 10 emails per minute
-    'icloud.com': 25,     // 25 emails per minute
+    'yahoo.com': 20, // 20 emails per minute
+    'aol.com': 10, // 10 emails per minute
+    'icloud.com': 25, // 25 emails per minute
     'me.com': 25,
-    'default': 30,        // Default limit for other domains
+    default: 30, // Default limit for other domains
   };
 
   // Add email to queue with idempotency
   async addEmailJob(job: EmailJob): Promise<string> {
-    const idempotencyKey = this.generateIdempotencyKey(job.campaignId, job.recipientId);
-    
+    const idempotencyKey = this.generateIdempotencyKey(
+      job.campaignId,
+      job.recipientId
+    );
+
     // Check if job already exists (idempotency)
     const existingDelivery = await prisma.campaignDelivery.findUnique({
       where: { idempotencyKey },
@@ -91,11 +94,11 @@ class EmailQueue {
     };
 
     this.jobs.set(queueJob.id, queueJob);
-    
-    logger.info('Email job added to queue', { 
-      jobId: queueJob.id, 
+
+    logger.info('Email job added to queue', {
+      jobId: queueJob.id,
       recipientEmail: job.recipientEmail,
-      delay: queueJob.delay 
+      delay: queueJob.delay,
     });
 
     return queueJob.id;
@@ -104,13 +107,14 @@ class EmailQueue {
   // Process next available job
   async processNext(): Promise<boolean> {
     const now = new Date();
-    
+
     // Find next job ready to process
     const readyJobs = Array.from(this.jobs.values())
-      .filter(job => 
-        !this.processing.has(job.id) && 
-        job.processAt <= now &&
-        job.attempts < job.maxAttempts
+      .filter(
+        (job) =>
+          !this.processing.has(job.id) &&
+          job.processAt <= now &&
+          job.attempts < job.maxAttempts
       )
       .sort((a, b) => a.processAt.getTime() - b.processAt.getTime());
 
@@ -119,43 +123,43 @@ class EmailQueue {
     }
 
     const job = readyJobs[0];
-    
+
     // Check domain throttling
     if (!this.canSendToDomain(job.data.recipientEmail)) {
-      logger.debug('Domain throttle limit reached', { 
+      logger.debug('Domain throttle limit reached', {
         email: job.data.recipientEmail,
-        domain: this.extractDomain(job.data.recipientEmail)
+        domain: this.extractDomain(job.data.recipientEmail),
       });
       return false;
     }
 
     // Mark as processing
     this.processing.add(job.id);
-    
+
     try {
       await this.processEmailJob(job);
-      
+
       // Remove from queue on success
       this.jobs.delete(job.id);
-      
+
       logger.info('Email job processed successfully', { jobId: job.id });
       return true;
-      
     } catch (error) {
       logger.error('Email job failed', error as Error, { jobId: job.id });
-      
+
       // Increment attempts and reschedule with exponential backoff
       job.attempts++;
-      job.processAt = new Date(Date.now() + this.calculateBackoffDelay(job.attempts));
-      
+      job.processAt = new Date(
+        Date.now() + this.calculateBackoffDelay(job.attempts)
+      );
+
       if (job.attempts >= job.maxAttempts) {
         // Move to dead letter queue
         await this.handleFailedJob(job, error as Error);
         this.jobs.delete(job.id);
       }
-      
+
       return false;
-      
     } finally {
       this.processing.delete(job.id);
     }
@@ -164,13 +168,13 @@ class EmailQueue {
   // Process email job
   private async processEmailJob(job: QueueJob): Promise<void> {
     const emailJob = job.data as EmailJob;
-    
+
     // Get campaign and delivery details
     const delivery = await prisma.campaignDelivery.findUnique({
       where: { id: job.id },
       include: {
         campaign: {
-          include: { snapshot: true }
+          include: { snapshot: true },
         },
         recipient: true,
       },
@@ -192,7 +196,7 @@ class EmailQueue {
 
     // Send email using existing email service
     const { sendCampaignEmail } = await import('@/lib/email-campaigns');
-    
+
     // Create email content from snapshot
     const emailContent = {
       subject: delivery.campaign.snapshot?.subject || delivery.campaign.subject,
@@ -230,14 +234,17 @@ class EmailQueue {
       },
     });
 
-    logger.error('Email job moved to dead letter queue', error, { 
+    logger.error('Email job moved to dead letter queue', error, {
       jobId: job.id,
-      attempts: job.attempts 
+      attempts: job.attempts,
     });
   }
 
   // Generate idempotency key
-  private generateIdempotencyKey(campaignId: string, recipientId: string): string {
+  private generateIdempotencyKey(
+    campaignId: string,
+    recipientId: string
+  ): string {
     return createHash('sha256')
       .update(`${campaignId}:${recipientId}`)
       .digest('hex');
@@ -247,13 +254,13 @@ class EmailQueue {
   private calculateDelay(email: string): number {
     const domain = this.extractDomain(email);
     const throttle = this.domainThrottles.get(domain);
-    
+
     if (!throttle) {
       return 0; // No delay for first email to domain
     }
 
     const limit = this.DOMAIN_LIMITS[domain] || this.DOMAIN_LIMITS.default;
-    
+
     if (throttle.currentCount >= limit) {
       // Calculate delay until reset
       const delayMs = throttle.resetAt.getTime() - Date.now();
@@ -276,7 +283,7 @@ class EmailQueue {
     const domain = this.extractDomain(email);
     const limit = this.DOMAIN_LIMITS[domain] || this.DOMAIN_LIMITS.default;
     const throttle = this.domainThrottles.get(domain);
-    
+
     if (!throttle) {
       return true; // No throttle record, can send
     }
@@ -294,9 +301,9 @@ class EmailQueue {
   private updateDomainThrottle(email: string): void {
     const domain = this.extractDomain(email);
     const limit = this.DOMAIN_LIMITS[domain] || this.DOMAIN_LIMITS.default;
-    
+
     let throttle = this.domainThrottles.get(domain);
-    
+
     if (!throttle) {
       throttle = {
         domain,
@@ -325,28 +332,35 @@ class EmailQueue {
   getStats() {
     const now = new Date();
     const jobs = Array.from(this.jobs.values());
-    
+
     return {
       total: jobs.length,
-      ready: jobs.filter(job => job.processAt <= now && job.attempts < job.maxAttempts).length,
+      ready: jobs.filter(
+        (job) => job.processAt <= now && job.attempts < job.maxAttempts
+      ).length,
       processing: this.processing.size,
-      failed: jobs.filter(job => job.attempts >= job.maxAttempts).length,
-      delayed: jobs.filter(job => job.processAt > now).length,
-      domainThrottles: Array.from(this.domainThrottles.entries()).map(([domain, throttle]) => ({
-        domain,
-        currentCount: throttle.currentCount,
-        maxPerMinute: throttle.maxPerMinute,
-        resetAt: throttle.resetAt,
-      })),
+      failed: jobs.filter((job) => job.attempts >= job.maxAttempts).length,
+      delayed: jobs.filter((job) => job.processAt > now).length,
+      domainThrottles: Array.from(this.domainThrottles.entries()).map(
+        ([domain, throttle]) => ({
+          domain,
+          currentCount: throttle.currentCount,
+          maxPerMinute: throttle.maxPerMinute,
+          resetAt: throttle.resetAt,
+        })
+      ),
     };
   }
 
   // Clear completed and failed jobs
   async cleanup(): Promise<void> {
     const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
-    
+
     for (const [jobId, job] of this.jobs.entries()) {
-      if (job.createdAt < cutoff && (job.attempts >= job.maxAttempts || this.processing.has(jobId))) {
+      if (
+        job.createdAt < cutoff &&
+        (job.attempts >= job.maxAttempts || this.processing.has(jobId))
+      ) {
         this.jobs.delete(jobId);
       }
     }
@@ -368,23 +382,23 @@ export async function processEmailQueue(): Promise<void> {
 
   while (Date.now() - startTime < maxProcessingTime) {
     const hasMore = await emailQueue.processNext();
-    
+
     if (!hasMore) {
       // No more jobs ready, wait a bit
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       continue;
     }
 
     processed++;
-    
+
     // Small delay between jobs to avoid overwhelming email service
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
-  logger.info('Email queue processing completed', { 
+  logger.info('Email queue processing completed', {
     processed,
     duration: Date.now() - startTime,
-    stats: emailQueue.getStats()
+    stats: emailQueue.getStats(),
   });
 }
 
@@ -407,9 +421,11 @@ export async function queueCampaign(campaignId: string): Promise<void> {
     where: {
       status: 'ACTIVE',
       email: {
-        notIn: await prisma.suppression.findMany({
-          select: { email: true },
-        }).then(suppressions => suppressions.map(s => s.email)),
+        notIn: await prisma.suppression
+          .findMany({
+            select: { email: true },
+          })
+          .then((suppressions) => suppressions.map((s) => s.email)),
       },
     },
     select: {
@@ -418,7 +434,9 @@ export async function queueCampaign(campaignId: string): Promise<void> {
     },
   });
 
-  logger.info(`Queueing ${recipients.length} emails for campaign`, { campaignId });
+  logger.info(`Queueing ${recipients.length} emails for campaign`, {
+    campaignId,
+  });
 
   // Add each recipient to queue
   for (const recipient of recipients) {
@@ -437,8 +455,8 @@ export async function queueCampaign(campaignId: string): Promise<void> {
     data: { status: 'QUEUED' },
   });
 
-  logger.info('Campaign queued successfully', { 
-    campaignId, 
-    recipients: recipients.length 
+  logger.info('Campaign queued successfully', {
+    campaignId,
+    recipients: recipients.length,
   });
 }

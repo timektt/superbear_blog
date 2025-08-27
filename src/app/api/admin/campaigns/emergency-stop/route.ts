@@ -36,7 +36,6 @@ export async function POST(request: NextRequest) {
       message: result.message,
       affectedCampaigns: result.affectedCampaigns,
     });
-
   } catch (error) {
     logger.error('Emergency stop failed', error as Error);
     return NextResponse.json(

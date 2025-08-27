@@ -8,23 +8,27 @@ async function testPodcastNewsletterAPI() {
   try {
     // Test 1: Check if new models exist in database
     console.log('1. Testing database models...');
-    
+
     // Test PodcastEpisode model
     const podcastCount = await prisma.podcastEpisode.count();
-    console.log(`   ✅ PodcastEpisode model accessible (${podcastCount} records)`);
-    
+    console.log(
+      `   ✅ PodcastEpisode model accessible (${podcastCount} records)`
+    );
+
     // Test NewsletterIssue model
     const newsletterCount = await prisma.newsletterIssue.count();
-    console.log(`   ✅ NewsletterIssue model accessible (${newsletterCount} records)`);
+    console.log(
+      `   ✅ NewsletterIssue model accessible (${newsletterCount} records)`
+    );
 
     // Test 2: Check if relations work
     console.log('\n2. Testing model relations...');
-    
+
     // Get an author to test relations
     const author = await prisma.author.findFirst();
     if (author) {
       console.log(`   ✅ Author found: ${author.name}`);
-      
+
       // Test author relations
       const authorWithRelations = await prisma.author.findUnique({
         where: { id: author.id },
@@ -34,8 +38,10 @@ async function testPodcastNewsletterAPI() {
           newsletterIssues: true,
         },
       });
-      
-      console.log(`   ✅ Author relations work - Articles: ${authorWithRelations.articles.length}, Podcasts: ${authorWithRelations.podcasts.length}, Newsletter Issues: ${authorWithRelations.newsletterIssues.length}`);
+
+      console.log(
+        `   ✅ Author relations work - Articles: ${authorWithRelations.articles.length}, Podcasts: ${authorWithRelations.podcasts.length}, Newsletter Issues: ${authorWithRelations.newsletterIssues.length}`
+      );
     }
 
     // Test category relations
@@ -48,13 +54,15 @@ async function testPodcastNewsletterAPI() {
           podcasts: true,
         },
       });
-      
-      console.log(`   ✅ Category relations work - Articles: ${categoryWithRelations.articles.length}, Podcasts: ${categoryWithRelations.podcasts.length}`);
+
+      console.log(
+        `   ✅ Category relations work - Articles: ${categoryWithRelations.articles.length}, Podcasts: ${categoryWithRelations.podcasts.length}`
+      );
     }
 
     // Test 3: Create sample data
     console.log('\n3. Testing data creation...');
-    
+
     if (author) {
       // Create a test podcast episode
       const testPodcast = await prisma.podcastEpisode.create({
@@ -69,8 +77,10 @@ async function testPodcastNewsletterAPI() {
           authorId: author.id,
         },
       });
-      
-      console.log(`   ✅ Test podcast created: ${testPodcast.title} (ID: ${testPodcast.id})`);
+
+      console.log(
+        `   ✅ Test podcast created: ${testPodcast.title} (ID: ${testPodcast.id})`
+      );
 
       // Create a test newsletter issue
       const testNewsletter = await prisma.newsletterIssue.create({
@@ -78,18 +88,28 @@ async function testPodcastNewsletterAPI() {
           title: 'Test Newsletter Issue',
           slug: 'test-newsletter-issue-' + Date.now(),
           summary: 'This is a test newsletter issue',
-          content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Test content' }] }] },
+          content: {
+            type: 'doc',
+            content: [
+              {
+                type: 'paragraph',
+                content: [{ type: 'text', text: 'Test content' }],
+              },
+            ],
+          },
           issueNumber: 1,
           status: 'DRAFT',
           authorId: author.id,
         },
       });
-      
-      console.log(`   ✅ Test newsletter created: ${testNewsletter.title} (ID: ${testNewsletter.id})`);
+
+      console.log(
+        `   ✅ Test newsletter created: ${testNewsletter.title} (ID: ${testNewsletter.id})`
+      );
 
       // Test 4: Query with relations
       console.log('\n4. Testing queries with relations...');
-      
+
       const podcastWithRelations = await prisma.podcastEpisode.findUnique({
         where: { id: testPodcast.id },
         include: {
@@ -98,10 +118,12 @@ async function testPodcastNewsletterAPI() {
           tags: true,
         },
       });
-      
+
       console.log(`   ✅ Podcast query with relations successful`);
       console.log(`      Author: ${podcastWithRelations.author.name}`);
-      console.log(`      Category: ${podcastWithRelations.category?.name || 'None'}`);
+      console.log(
+        `      Category: ${podcastWithRelations.category?.name || 'None'}`
+      );
       console.log(`      Tags: ${podcastWithRelations.tags.length}`);
 
       const newsletterWithRelations = await prisma.newsletterIssue.findUnique({
@@ -110,13 +132,13 @@ async function testPodcastNewsletterAPI() {
           author: true,
         },
       });
-      
+
       console.log(`   ✅ Newsletter query with relations successful`);
       console.log(`      Author: ${newsletterWithRelations.author.name}`);
 
       // Test 5: Clean up test data
       console.log('\n5. Cleaning up test data...');
-      
+
       await prisma.podcastEpisode.delete({
         where: { id: testPodcast.id },
       });
@@ -128,8 +150,9 @@ async function testPodcastNewsletterAPI() {
       console.log(`   ✅ Test newsletter deleted`);
     }
 
-    console.log('\n🎉 All tests passed! Podcast and Newsletter API infrastructure is ready.');
-
+    console.log(
+      '\n🎉 All tests passed! Podcast and Newsletter API infrastructure is ready.'
+    );
   } catch (error) {
     console.error('❌ Test failed:', error);
     process.exit(1);

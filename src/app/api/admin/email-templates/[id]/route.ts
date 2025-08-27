@@ -25,7 +25,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -34,33 +34,35 @@ export async function GET(
       where: { id: params.id },
       include: {
         versions: {
-          orderBy: { version: 'desc' }
+          orderBy: { version: 'desc' },
         },
         campaigns: {
           select: {
             id: true,
             title: true,
             status: true,
-            createdAt: true
+            createdAt: true,
           },
           orderBy: { createdAt: 'desc' },
-          take: 5
+          take: 5,
         },
         _count: {
           select: {
             campaigns: true,
-            versions: true
-          }
-        }
-      }
+            versions: true,
+          },
+        },
+      },
     });
 
     if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(template);
-
   } catch (error) {
     console.error('Error fetching email template:', error);
     return NextResponse.json(
@@ -77,7 +79,7 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -87,11 +89,14 @@ export async function PUT(
 
     // Check if template exists
     const existingTemplate = await prisma.emailTemplate.findUnique({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     if (!existingTemplate) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
     }
 
     // If HTML content is being updated, create a new version
@@ -111,19 +116,18 @@ export async function PUT(
       include: {
         versions: {
           orderBy: { version: 'desc' },
-          take: 5
+          take: 5,
         },
         _count: {
           select: {
             campaigns: true,
-            versions: true
-          }
-        }
-      }
+            versions: true,
+          },
+        },
+      },
     });
 
     return NextResponse.json(updatedTemplate);
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -147,7 +151,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -157,13 +161,16 @@ export async function DELETE(
       where: { id: params.id },
       include: {
         _count: {
-          select: { campaigns: true }
-        }
-      }
+          select: { campaigns: true },
+        },
+      },
     });
 
     if (!template) {
-      return NextResponse.json({ error: 'Template not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Template not found' },
+        { status: 404 }
+      );
     }
 
     // Check if template is being used in campaigns
@@ -176,11 +183,10 @@ export async function DELETE(
 
     // Delete template (versions will be deleted due to cascade)
     await prisma.emailTemplate.delete({
-      where: { id: params.id }
+      where: { id: params.id },
     });
 
     return NextResponse.json({ message: 'Template deleted successfully' });
-
   } catch (error) {
     console.error('Error deleting email template:', error);
     return NextResponse.json(

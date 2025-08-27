@@ -2,22 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { getSafePrismaClient } from '@/lib/db-safe/client';
-import { 
-  generateUniqueSlug, 
-  validateSlug, 
-  isSlugAvailable, 
-  suggestAlternativeSlug 
+import {
+  generateUniqueSlug,
+  validateSlug,
+  isSlugAvailable,
+  suggestAlternativeSlug,
 } from '@/lib/slug-generator';
 import { z } from 'zod';
 
 const generateSlugSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  excludeId: z.string().optional()
+  excludeId: z.string().optional(),
 });
 
 const validateSlugSchema = z.object({
   slug: z.string().min(1, 'Slug is required'),
-  excludeId: z.string().optional()
+  excludeId: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -49,24 +49,28 @@ export async function POST(request: NextRequest) {
       case 'validate': {
         const { slug, excludeId } = validateSlugSchema.parse(body);
         const validation = validateSlug(slug);
-        
+
         if (!validation.valid) {
           return NextResponse.json({
             valid: false,
-            error: validation.error
+            error: validation.error,
           });
         }
 
         const available = await isSlugAvailable(prisma, slug, excludeId);
         return NextResponse.json({
           valid: available,
-          error: available ? undefined : 'This slug is already in use'
+          error: available ? undefined : 'This slug is already in use',
         });
       }
 
       case 'suggest': {
         const { title, excludeId } = generateSlugSchema.parse(body);
-        const suggestions = await suggestAlternativeSlug(prisma, title, excludeId);
+        const suggestions = await suggestAlternativeSlug(
+          prisma,
+          title,
+          excludeId
+        );
         return NextResponse.json({ suggestions });
       }
 
@@ -78,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Slug API error:', error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid request data', details: error.errors },

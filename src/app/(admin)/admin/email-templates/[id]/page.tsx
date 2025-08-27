@@ -9,10 +9,12 @@ interface EmailTemplatePageProps {
   };
 }
 
-export async function generateMetadata({ params }: EmailTemplatePageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: EmailTemplatePageProps): Promise<Metadata> {
   const template = await prisma.emailTemplate.findUnique({
     where: { id: params.id },
-    select: { name: true }
+    select: { name: true },
   });
 
   if (!template) {
@@ -27,11 +29,13 @@ export async function generateMetadata({ params }: EmailTemplatePageProps): Prom
   };
 }
 
-export default async function EmailTemplateEditPage({ params }: EmailTemplatePageProps) {
+export default async function EmailTemplateEditPage({
+  params,
+}: EmailTemplatePageProps) {
   // Verify template exists
   const template = await prisma.emailTemplate.findUnique({
     where: { id: params.id },
-    select: { id: true }
+    select: { id: true },
   });
 
   if (!template) {

@@ -16,7 +16,12 @@ interface Metrics {
 
 interface Alert {
   id: string;
-  type: 'queue_depth' | 'bounce_spike' | 'complaint_spike' | 'webhook_error' | 'send_rate_low';
+  type:
+    | 'queue_depth'
+    | 'bounce_spike'
+    | 'complaint_spike'
+    | 'webhook_error'
+    | 'send_rate_low';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
   timestamp: Date;
@@ -26,11 +31,19 @@ interface Alert {
 // Metrics thresholds for alerting
 const ALERT_THRESHOLDS = {
   queueDepthHigh: parseInt(process.env.ALERT_QUEUE_DEPTH_HIGH || '1000'),
-  queueDepthCritical: parseInt(process.env.ALERT_QUEUE_DEPTH_CRITICAL || '5000'),
+  queueDepthCritical: parseInt(
+    process.env.ALERT_QUEUE_DEPTH_CRITICAL || '5000'
+  ),
   bounceRateHigh: parseFloat(process.env.ALERT_BOUNCE_RATE_HIGH || '0.05'), // 5%
-  bounceRateCritical: parseFloat(process.env.ALERT_BOUNCE_RATE_CRITICAL || '0.10'), // 10%
-  complaintRateHigh: parseFloat(process.env.ALERT_COMPLAINT_RATE_HIGH || '0.001'), // 0.1%
-  complaintRateCritical: parseFloat(process.env.ALERT_COMPLAINT_RATE_CRITICAL || '0.005'), // 0.5%
+  bounceRateCritical: parseFloat(
+    process.env.ALERT_BOUNCE_RATE_CRITICAL || '0.10'
+  ), // 10%
+  complaintRateHigh: parseFloat(
+    process.env.ALERT_COMPLAINT_RATE_HIGH || '0.001'
+  ), // 0.1%
+  complaintRateCritical: parseFloat(
+    process.env.ALERT_COMPLAINT_RATE_CRITICAL || '0.005'
+  ), // 0.5%
   webhookLagHigh: parseInt(process.env.ALERT_WEBHOOK_LAG_HIGH || '300'), // 5 minutes
   sendRateLow: parseFloat(process.env.ALERT_SEND_RATE_LOW || '0.8'), // 80% of expected
 };
@@ -77,11 +90,13 @@ export class StructuredLogger {
 
   error(message: string, error?: Error, data?: any): void {
     this.formatLog('ERROR', message, {
-      error: error ? {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      } : undefined,
+      error: error
+        ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+        : undefined,
       ...data,
     });
   }
@@ -140,7 +155,6 @@ export async function collectMetrics(): Promise<Metrics> {
     await checkAlerts(metrics);
 
     return metrics;
-
   } catch (error) {
     logger.error('Failed to collect metrics', error as Error);
     throw error;
@@ -167,7 +181,10 @@ async function getQueueDepth(): Promise<number> {
 }
 
 // Get send rate by domain
-async function getSendRateByDomain(startTime: Date, endTime: Date): Promise<Record<string, number>> {
+async function getSendRateByDomain(
+  startTime: Date,
+  endTime: Date
+): Promise<Record<string, number>> {
   try {
     const deliveries = await prisma.campaignDelivery.findMany({
       where: {
@@ -183,8 +200,8 @@ async function getSendRateByDomain(startTime: Date, endTime: Date): Promise<Reco
     });
 
     const domainCounts: Record<string, number> = {};
-    
-    deliveries.forEach(delivery => {
+
+    deliveries.forEach((delivery) => {
       const domain = delivery.recipientEmail.split('@')[1]?.toLowerCase();
       if (domain) {
         domainCounts[domain] = (domainCounts[domain] || 0) + 1;
@@ -199,7 +216,10 @@ async function getSendRateByDomain(startTime: Date, endTime: Date): Promise<Reco
 }
 
 // Get delivery statistics
-async function getDeliveryStats(startTime: Date, endTime: Date): Promise<{ successRate: number; errorRate: number }> {
+async function getDeliveryStats(
+  startTime: Date,
+  endTime: Date
+): Promise<{ successRate: number; errorRate: number }> {
   try {
     const stats = await prisma.campaignDelivery.groupBy({
       by: ['status'],
@@ -218,7 +238,7 @@ async function getDeliveryStats(startTime: Date, endTime: Date): Promise<{ succe
     let successful = 0;
     let failed = 0;
 
-    stats.forEach(stat => {
+    stats.forEach((stat) => {
       const count = stat._count.status;
       total += count;
 
@@ -252,7 +272,10 @@ async function getWebhookLag(startTime: Date, endTime: Date): Promise<number> {
 }
 
 // Get bounce and complaint statistics
-async function getBounceComplaintStats(startTime: Date, endTime: Date): Promise<{ bounceRate: number; complaintRate: number }> {
+async function getBounceComplaintStats(
+  startTime: Date,
+  endTime: Date
+): Promise<{ bounceRate: number; complaintRate: number }> {
   try {
     const totalSent = await prisma.campaignDelivery.count({
       where: {
@@ -408,7 +431,7 @@ async function sendAlert(alert: Alert): Promise<void> {
   try {
     // Placeholder for external alerting integration
     // Could integrate with Slack, PagerDuty, email, etc.
-    
+
     if (process.env.SLACK_WEBHOOK_URL && alert.severity === 'critical') {
       // Send to Slack for critical alerts
       const response = await fetch(process.env.SLACK_WEBHOOK_URL, {
@@ -416,19 +439,28 @@ async function sendAlert(alert: Alert): Promise<void> {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: `🚨 Critical Alert: ${alert.message}`,
-          attachments: [{
-            color: 'danger',
-            fields: [
-              { title: 'Type', value: alert.type, short: true },
-              { title: 'Severity', value: alert.severity, short: true },
-              { title: 'Time', value: alert.timestamp.toISOString(), short: false },
-            ],
-          }],
+          attachments: [
+            {
+              color: 'danger',
+              fields: [
+                { title: 'Type', value: alert.type, short: true },
+                { title: 'Severity', value: alert.severity, short: true },
+                {
+                  title: 'Time',
+                  value: alert.timestamp.toISOString(),
+                  short: false,
+                },
+              ],
+            },
+          ],
         }),
       });
 
       if (!response.ok) {
-        logger.error('Failed to send Slack alert', new Error(`HTTP ${response.status}`));
+        logger.error(
+          'Failed to send Slack alert',
+          new Error(`HTTP ${response.status}`)
+        );
       }
     }
   } catch (error) {
@@ -439,17 +471,17 @@ async function sendAlert(alert: Alert): Promise<void> {
 // Get current alerts
 export function getCurrentAlerts(severity?: Alert['severity']): Alert[] {
   const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
-  
+
   return alertsStore
-    .filter(alert => alert.timestamp > cutoff)
-    .filter(alert => !severity || alert.severity === severity)
+    .filter((alert) => alert.timestamp > cutoff)
+    .filter((alert) => !severity || alert.severity === severity)
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 }
 
 // Get metrics history
 export function getMetricsHistory(hours = 24): any[] {
-  const cutoff = Date.now() - (hours * 60 * 60 * 1000);
-  
+  const cutoff = Date.now() - hours * 60 * 60 * 1000;
+
   return Array.from(metricsStore.entries())
     .filter(([timestamp]) => parseInt(timestamp.split('_')[1]) > cutoff)
     .map(([timestamp, metrics]) => ({
@@ -461,8 +493,8 @@ export function getMetricsHistory(hours = 24): any[] {
 
 // Cleanup old metrics and alerts
 export function cleanupOldData(): void {
-  const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-  
+  const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+
   // Cleanup metrics
   for (const [key] of metricsStore.entries()) {
     const timestamp = parseInt(key.split('_')[1]);
@@ -470,7 +502,7 @@ export function cleanupOldData(): void {
       metricsStore.delete(key);
     }
   }
-  
+
   // Cleanup alerts
   const alertCutoff = new Date(cutoff);
   for (let i = alertsStore.length - 1; i >= 0; i--) {

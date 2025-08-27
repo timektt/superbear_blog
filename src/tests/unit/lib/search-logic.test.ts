@@ -1,4 +1,8 @@
-import { searchArticles, parseSearchQuery, rankResults } from '@/lib/search/query';
+import {
+  searchArticles,
+  parseSearchQuery,
+  rankResults,
+} from '@/lib/search/query';
 import { prisma } from '@/lib/prisma';
 
 // Mock Prisma
@@ -21,7 +25,7 @@ describe('Search Logic', () => {
   describe('parseSearchQuery', () => {
     it('should parse simple search queries', () => {
       const result = parseSearchQuery('artificial intelligence');
-      
+
       expect(result).toEqual({
         terms: ['artificial', 'intelligence'],
         phrases: [],
@@ -32,7 +36,7 @@ describe('Search Logic', () => {
 
     it('should parse quoted phrases', () => {
       const result = parseSearchQuery('"machine learning" AI');
-      
+
       expect(result).toEqual({
         terms: ['AI'],
         phrases: ['machine learning'],
@@ -43,7 +47,7 @@ describe('Search Logic', () => {
 
     it('should parse exclude terms', () => {
       const result = parseSearchQuery('AI -blockchain -crypto');
-      
+
       expect(result).toEqual({
         terms: ['AI'],
         phrases: [],
@@ -54,7 +58,7 @@ describe('Search Logic', () => {
 
     it('should parse filter terms', () => {
       const result = parseSearchQuery('AI author:john category:tech tag:ml');
-      
+
       expect(result).toEqual({
         terms: ['AI'],
         phrases: [],
@@ -68,8 +72,10 @@ describe('Search Logic', () => {
     });
 
     it('should handle complex queries', () => {
-      const result = parseSearchQuery('"deep learning" AI -blockchain author:jane tag:neural');
-      
+      const result = parseSearchQuery(
+        '"deep learning" AI -blockchain author:jane tag:neural'
+      );
+
       expect(result).toEqual({
         terms: ['AI'],
         phrases: ['deep learning'],
@@ -83,7 +89,7 @@ describe('Search Logic', () => {
 
     it('should handle empty queries', () => {
       const result = parseSearchQuery('');
-      
+
       expect(result).toEqual({
         terms: [],
         phrases: [],
@@ -94,7 +100,7 @@ describe('Search Logic', () => {
 
     it('should normalize terms', () => {
       const result = parseSearchQuery('  ARTIFICIAL   Intelligence  ');
-      
+
       expect(result).toEqual({
         terms: ['artificial', 'intelligence'],
         phrases: [],
@@ -148,9 +154,24 @@ describe('Search Logic', () => {
             { published: true },
             {
               OR: [
-                { title: { contains: 'artificial intelligence', mode: 'insensitive' } },
-                { content: { contains: 'artificial intelligence', mode: 'insensitive' } },
-                { summary: { contains: 'artificial intelligence', mode: 'insensitive' } },
+                {
+                  title: {
+                    contains: 'artificial intelligence',
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  content: {
+                    contains: 'artificial intelligence',
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  summary: {
+                    contains: 'artificial intelligence',
+                    mode: 'insensitive',
+                  },
+                },
               ],
             },
           ],
@@ -180,9 +201,7 @@ describe('Search Logic', () => {
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            AND: expect.arrayContaining([
-              { category: { slug: 'ai' } },
-            ]),
+            AND: expect.arrayContaining([{ category: { slug: 'ai' } }]),
           }),
         })
       );
@@ -202,9 +221,7 @@ describe('Search Logic', () => {
       expect(mockPrisma.article.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            AND: expect.arrayContaining([
-              { author: { slug: 'jane-smith' } },
-            ]),
+            AND: expect.arrayContaining([{ author: { slug: 'jane-smith' } }]),
           }),
         })
       );
@@ -241,8 +258,8 @@ describe('Search Logic', () => {
 
       const result = await searchArticles({
         query: 'AI',
-        filters: { 
-          dateRange: { start: startDate, end: endDate } 
+        filters: {
+          dateRange: { start: startDate, end: endDate },
         },
         limit: 10,
         offset: 0,
@@ -297,13 +314,17 @@ describe('Search Logic', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrisma.article.findMany.mockRejectedValue(new Error('Database error'));
+      mockPrisma.article.findMany.mockRejectedValue(
+        new Error('Database error')
+      );
 
-      await expect(searchArticles({
-        query: 'AI',
-        limit: 10,
-        offset: 0,
-      })).rejects.toThrow('Database error');
+      await expect(
+        searchArticles({
+          query: 'AI',
+          limit: 10,
+          offset: 0,
+        })
+      ).rejects.toThrow('Database error');
     });
   });
 
@@ -312,7 +333,8 @@ describe('Search Logic', () => {
       {
         id: '1',
         title: 'Artificial Intelligence Guide',
-        content: 'This is a comprehensive guide about AI and machine learning...',
+        content:
+          'This is a comprehensive guide about AI and machine learning...',
         summary: 'Learn about AI',
         publishedAt: new Date('2024-01-15'),
         views: 1000,
@@ -341,7 +363,9 @@ describe('Search Logic', () => {
 
       // First result should have highest score (title + content match)
       expect(ranked[0].id).toBe('1');
-      expect(ranked[0].relevanceScore).toBeGreaterThan(ranked[1].relevanceScore);
+      expect(ranked[0].relevanceScore).toBeGreaterThan(
+        ranked[1].relevanceScore
+      );
     });
 
     it('should boost title matches', () => {
@@ -365,10 +389,12 @@ describe('Search Logic', () => {
       const ranked = rankResults(mockResults, query);
 
       // Higher view count should boost ranking
-      const firstResult = ranked.find(r => r.id === '1');
-      const thirdResult = ranked.find(r => r.id === '3');
-      
-      expect(firstResult?.relevanceScore).toBeGreaterThan(thirdResult?.relevanceScore || 0);
+      const firstResult = ranked.find((r) => r.id === '1');
+      const thirdResult = ranked.find((r) => r.id === '3');
+
+      expect(firstResult?.relevanceScore).toBeGreaterThan(
+        thirdResult?.relevanceScore || 0
+      );
     });
 
     it('should handle empty query', () => {

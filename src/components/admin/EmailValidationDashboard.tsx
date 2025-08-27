@@ -16,7 +16,7 @@ export default function EmailValidationDashboard() {
 
   const runValidation = async () => {
     if (!domain) return;
-    
+
     setLoading(true);
     try {
       const results = await EmailAuthValidation.validateDomainAuth(domain);
@@ -77,7 +77,9 @@ export default function EmailValidationDashboard() {
               <h3 className="font-medium text-gray-900 dark:text-white">
                 {getStatusIcon(validationResults.spf.valid)} SPF Record
               </h3>
-              <span className={`text-sm font-medium ${getStatusColor(validationResults.spf.valid)}`}>
+              <span
+                className={`text-sm font-medium ${getStatusColor(validationResults.spf.valid)}`}
+              >
                 {validationResults.spf.valid ? 'Valid' : 'Invalid'}
               </span>
             </div>
@@ -99,7 +101,9 @@ export default function EmailValidationDashboard() {
               <h3 className="font-medium text-gray-900 dark:text-white">
                 {getStatusIcon(validationResults.dkim.valid)} DKIM Record
               </h3>
-              <span className={`text-sm font-medium ${getStatusColor(validationResults.dkim.valid)}`}>
+              <span
+                className={`text-sm font-medium ${getStatusColor(validationResults.dkim.valid)}`}
+              >
                 {validationResults.dkim.valid ? 'Valid' : 'Invalid'}
               </span>
             </div>
@@ -121,7 +125,9 @@ export default function EmailValidationDashboard() {
               <h3 className="font-medium text-gray-900 dark:text-white">
                 {getStatusIcon(validationResults.dmarc.valid)} DMARC Record
               </h3>
-              <span className={`text-sm font-medium ${getStatusColor(validationResults.dmarc.valid)}`}>
+              <span
+                className={`text-sm font-medium ${getStatusColor(validationResults.dmarc.valid)}`}
+              >
                 {validationResults.dmarc.valid ? 'Valid' : 'Invalid'}
               </span>
             </div>
@@ -146,21 +152,28 @@ export default function EmailValidationDashboard() {
         </h3>
         <div className="space-y-3 text-sm">
           <div>
-            <strong className="text-blue-800 dark:text-blue-200">SPF Record:</strong>
+            <strong className="text-blue-800 dark:text-blue-200">
+              SPF Record:
+            </strong>
             <code className="block mt-1 p-2 bg-blue-100 dark:bg-blue-900/40 rounded text-blue-900 dark:text-blue-100">
               v=spf1 include:_spf.{domain} ~all
             </code>
           </div>
           <div>
-            <strong className="text-blue-800 dark:text-blue-200">DKIM Record:</strong>
+            <strong className="text-blue-800 dark:text-blue-200">
+              DKIM Record:
+            </strong>
             <p className="text-blue-700 dark:text-blue-300 mt-1">
               Add DKIM selector record provided by your email service provider
             </p>
           </div>
           <div>
-            <strong className="text-blue-800 dark:text-blue-200">DMARC Record:</strong>
+            <strong className="text-blue-800 dark:text-blue-200">
+              DMARC Record:
+            </strong>
             <code className="block mt-1 p-2 bg-blue-100 dark:bg-blue-900/40 rounded text-blue-900 dark:text-blue-100">
-              v=DMARC1; p=quarantine; rua=mailto:dmarc@{domain}; ruf=mailto:dmarc@{domain}; fo=1
+              v=DMARC1; p=quarantine; rua=mailto:dmarc@{domain};
+              ruf=mailto:dmarc@{domain}; fo=1
             </code>
           </div>
         </div>

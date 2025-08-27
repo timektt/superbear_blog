@@ -51,35 +51,54 @@ export async function generateRecommendations(
     }
 
     // Generate different types of recommendations
-    const [similarContent, sameCategory, sameAuthor, trending, popular] = await Promise.all([
-      getSimilarContentRecommendations(sourceArticle, limit),
-      getSameCategoryRecommendations(sourceArticle, limit),
-      getSameAuthorRecommendations(sourceArticle, limit),
-      getTrendingRecommendations(limit),
-      getPopularRecommendations(limit),
-    ]);
+    const [similarContent, sameCategory, sameAuthor, trending, popular] =
+      await Promise.all([
+        getSimilarContentRecommendations(sourceArticle, limit),
+        getSameCategoryRecommendations(sourceArticle, limit),
+        getSameAuthorRecommendations(sourceArticle, limit),
+        getTrendingRecommendations(limit),
+        getPopularRecommendations(limit),
+      ]);
 
     // Combine and score recommendations
     const allRecommendations = [
-      ...similarContent.map(r => ({ ...r, reason: 'Similar Content', baseScore: 0.9 })),
-      ...sameCategory.map(r => ({ ...r, reason: 'Same Category', baseScore: 0.7 })),
-      ...sameAuthor.map(r => ({ ...r, reason: 'Same Author', baseScore: 0.6 })),
-      ...trending.map(r => ({ ...r, reason: 'Trending Now', baseScore: 0.8 })),
-      ...popular.map(r => ({ ...r, reason: 'Popular', baseScore: 0.5 })),
+      ...similarContent.map((r) => ({
+        ...r,
+        reason: 'Similar Content',
+        baseScore: 0.9,
+      })),
+      ...sameCategory.map((r) => ({
+        ...r,
+        reason: 'Same Category',
+        baseScore: 0.7,
+      })),
+      ...sameAuthor.map((r) => ({
+        ...r,
+        reason: 'Same Author',
+        baseScore: 0.6,
+      })),
+      ...trending.map((r) => ({
+        ...r,
+        reason: 'Trending Now',
+        baseScore: 0.8,
+      })),
+      ...popular.map((r) => ({ ...r, reason: 'Popular', baseScore: 0.5 })),
     ];
 
     // Remove duplicates and excluded articles
     const uniqueRecommendations = allRecommendations
-      .filter((rec, index, self) => 
-        self.findIndex(r => r.articleId === rec.articleId) === index
+      .filter(
+        (rec, index, self) =>
+          self.findIndex((r) => r.articleId === rec.articleId) === index
       )
-      .filter(rec => 
-        rec.articleId !== sourceArticleId && 
-        !excludeArticleIds.includes(rec.articleId)
+      .filter(
+        (rec) =>
+          rec.articleId !== sourceArticleId &&
+          !excludeArticleIds.includes(rec.articleId)
       );
 
     // Calculate final scores
-    const scoredRecommendations = uniqueRecommendations.map(rec => {
+    const scoredRecommendations = uniqueRecommendations.map((rec) => {
       let finalScore = rec.baseScore;
 
       // Boost score based on view count
@@ -88,16 +107,23 @@ export async function generateRecommendations(
       }
 
       // Boost recent articles
-      const daysSincePublished = (Date.now() - rec.publishedAt.getTime()) / (1000 * 60 * 60 * 24);
+      const daysSincePublished =
+        (Date.now() - rec.publishedAt.getTime()) / (1000 * 60 * 60 * 24);
       if (daysSincePublished < 7) {
         finalScore += 0.1;
       }
 
       // Apply category filters
-      if (includeCategories.length > 0 && !includeCategories.includes(rec.category || '')) {
+      if (
+        includeCategories.length > 0 &&
+        !includeCategories.includes(rec.category || '')
+      ) {
         finalScore *= 0.5;
       }
-      if (excludeCategories.length > 0 && excludeCategories.includes(rec.category || '')) {
+      if (
+        excludeCategories.length > 0 &&
+        excludeCategories.includes(rec.category || '')
+      ) {
         finalScore *= 0.3;
       }
 
@@ -109,7 +135,7 @@ export async function generateRecommendations(
 
     // Filter by minimum score and sort
     const filteredRecommendations = scoredRecommendations
-      .filter(rec => rec.score >= minScore)
+      .filter((rec) => rec.score >= minScore)
       .sort((a, b) => b.score - a.score)
       .slice(0, limit);
 
@@ -117,9 +143,10 @@ export async function generateRecommendations(
     await storeRecommendations(sourceArticleId, filteredRecommendations);
 
     return filteredRecommendations;
-
   } catch (error) {
-    logger.error('Failed to generate recommendations', error as Error, { sourceArticleId });
+    logger.error('Failed to generate recommendations', error as Error, {
+      sourceArticleId,
+    });
     return [];
   }
 }
@@ -130,30 +157,31 @@ async function getSimilarContentRecommendations(
   limit: number
 ): Promise<Omit<RecommendationResult, 'score' | 'reason'>[]> {
   const tagIds = sourceArticle.tags.map((tag: any) => tag.id);
-  
+
   if (tagIds.length === 0) {
     return [];
   }
 
-  const similarArticles = await prisma?.article.findMany({
-    where: {
-      id: { not: sourceArticle.id },
-      status: 'PUBLISHED',
-      tags: {
-        some: {
-          id: { in: tagIds },
+  const similarArticles =
+    (await prisma?.article.findMany({
+      where: {
+        id: { not: sourceArticle.id },
+        status: 'PUBLISHED',
+        tags: {
+          some: {
+            id: { in: tagIds },
+          },
         },
       },
-    },
-    include: {
-      category: true,
-      stats: true,
-      tags: true,
-    },
-    take: limit * 2, // Get more to allow for filtering
-  }) || [];
+      include: {
+        category: true,
+        stats: true,
+        tags: true,
+      },
+      take: limit * 2, // Get more to allow for filtering
+    })) || [];
 
-  return similarArticles.map(article => ({
+  return similarArticles.map((article) => ({
     articleId: article.id,
     title: article.title,
     slug: article.slug,
@@ -168,25 +196,26 @@ async function getSameCategoryRecommendations(
   sourceArticle: any,
   limit: number
 ): Promise<Omit<RecommendationResult, 'score' | 'reason'>[]> {
-  const sameCategory = await prisma?.article.findMany({
-    where: {
-      id: { not: sourceArticle.id },
-      status: 'PUBLISHED',
-      categoryId: sourceArticle.categoryId,
-    },
-    include: {
-      category: true,
-      stats: true,
-    },
-    orderBy: {
-      stats: {
-        totalViews: 'desc',
+  const sameCategory =
+    (await prisma?.article.findMany({
+      where: {
+        id: { not: sourceArticle.id },
+        status: 'PUBLISHED',
+        categoryId: sourceArticle.categoryId,
       },
-    },
-    take: limit,
-  }) || [];
+      include: {
+        category: true,
+        stats: true,
+      },
+      orderBy: {
+        stats: {
+          totalViews: 'desc',
+        },
+      },
+      take: limit,
+    })) || [];
 
-  return sameCategory.map(article => ({
+  return sameCategory.map((article) => ({
     articleId: article.id,
     title: article.title,
     slug: article.slug,
@@ -201,23 +230,24 @@ async function getSameAuthorRecommendations(
   sourceArticle: any,
   limit: number
 ): Promise<Omit<RecommendationResult, 'score' | 'reason'>[]> {
-  const sameAuthor = await prisma?.article.findMany({
-    where: {
-      id: { not: sourceArticle.id },
-      status: 'PUBLISHED',
-      authorId: sourceArticle.authorId,
-    },
-    include: {
-      category: true,
-      stats: true,
-    },
-    orderBy: {
-      publishedAt: 'desc',
-    },
-    take: limit,
-  }) || [];
+  const sameAuthor =
+    (await prisma?.article.findMany({
+      where: {
+        id: { not: sourceArticle.id },
+        status: 'PUBLISHED',
+        authorId: sourceArticle.authorId,
+      },
+      include: {
+        category: true,
+        stats: true,
+      },
+      orderBy: {
+        publishedAt: 'desc',
+      },
+      take: limit,
+    })) || [];
 
-  return sameAuthor.map(article => ({
+  return sameAuthor.map((article) => ({
     articleId: article.id,
     title: article.title,
     slug: article.slug,
@@ -231,26 +261,27 @@ async function getSameAuthorRecommendations(
 async function getTrendingRecommendations(
   limit: number
 ): Promise<Omit<RecommendationResult, 'score' | 'reason'>[]> {
-  const trending = await prisma?.article.findMany({
-    where: {
-      status: 'PUBLISHED',
-      publishedAt: {
-        gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+  const trending =
+    (await prisma?.article.findMany({
+      where: {
+        status: 'PUBLISHED',
+        publishedAt: {
+          gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
+        },
       },
-    },
-    include: {
-      category: true,
-      stats: true,
-    },
-    orderBy: {
-      stats: {
-        viewsThisWeek: 'desc',
+      include: {
+        category: true,
+        stats: true,
       },
-    },
-    take: limit,
-  }) || [];
+      orderBy: {
+        stats: {
+          viewsThisWeek: 'desc',
+        },
+      },
+      take: limit,
+    })) || [];
 
-  return trending.map(article => ({
+  return trending.map((article) => ({
     articleId: article.id,
     title: article.title,
     slug: article.slug,
@@ -264,23 +295,24 @@ async function getTrendingRecommendations(
 async function getPopularRecommendations(
   limit: number
 ): Promise<Omit<RecommendationResult, 'score' | 'reason'>[]> {
-  const popular = await prisma?.article.findMany({
-    where: {
-      status: 'PUBLISHED',
-    },
-    include: {
-      category: true,
-      stats: true,
-    },
-    orderBy: {
-      stats: {
-        totalViews: 'desc',
+  const popular =
+    (await prisma?.article.findMany({
+      where: {
+        status: 'PUBLISHED',
       },
-    },
-    take: limit,
-  }) || [];
+      include: {
+        category: true,
+        stats: true,
+      },
+      orderBy: {
+        stats: {
+          totalViews: 'desc',
+        },
+      },
+      take: limit,
+    })) || [];
 
-  return popular.map(article => ({
+  return popular.map((article) => ({
     articleId: article.id,
     title: article.title,
     slug: article.slug,
@@ -302,7 +334,7 @@ async function storeRecommendations(
     });
 
     // Create new recommendations
-    const recommendationData = recommendations.map(rec => ({
+    const recommendationData = recommendations.map((rec) => ({
       sourceArticleId,
       targetArticleId: rec.articleId,
       score: rec.score,
@@ -312,9 +344,10 @@ async function storeRecommendations(
     await prisma?.contentRecommendation.createMany({
       data: recommendationData,
     });
-
   } catch (error) {
-    logger.error('Failed to store recommendations', error as Error, { sourceArticleId });
+    logger.error('Failed to store recommendations', error as Error, {
+      sourceArticleId,
+    });
   }
 }
 
@@ -351,7 +384,6 @@ export async function trackRecommendationClick(
         data: { clickRate },
       });
     }
-
   } catch (error) {
     logger.error('Failed to track recommendation click', error as Error, {
       sourceArticleId,
@@ -377,7 +409,6 @@ export async function trackRecommendationImpression(
         },
       },
     });
-
   } catch (error) {
     logger.error('Failed to track recommendation impressions', error as Error, {
       sourceArticleId,
@@ -389,33 +420,36 @@ export async function trackRecommendationImpression(
 // Get recommendation performance
 export async function getRecommendationPerformance(
   sourceArticleId?: string
-): Promise<Array<{
-  sourceArticleId: string;
-  targetArticleId: string;
-  sourceTitle: string;
-  targetTitle: string;
-  impressions: number;
-  clicks: number;
-  clickRate: number;
-  score: number;
-}>> {
+): Promise<
+  Array<{
+    sourceArticleId: string;
+    targetArticleId: string;
+    sourceTitle: string;
+    targetTitle: string;
+    impressions: number;
+    clicks: number;
+    clickRate: number;
+    score: number;
+  }>
+> {
   try {
-    const recommendations = await prisma?.contentRecommendation.findMany({
-      where: sourceArticleId ? { sourceArticleId } : {},
-      include: {
-        sourceArticle: {
-          select: { title: true },
+    const recommendations =
+      (await prisma?.contentRecommendation.findMany({
+        where: sourceArticleId ? { sourceArticleId } : {},
+        include: {
+          sourceArticle: {
+            select: { title: true },
+          },
+          targetArticle: {
+            select: { title: true },
+          },
         },
-        targetArticle: {
-          select: { title: true },
+        orderBy: {
+          clickRate: 'desc',
         },
-      },
-      orderBy: {
-        clickRate: 'desc',
-      },
-    }) || [];
+      })) || [];
 
-    return recommendations.map(rec => ({
+    return recommendations.map((rec) => ({
       sourceArticleId: rec.sourceArticleId,
       targetArticleId: rec.targetArticleId,
       sourceTitle: rec.sourceArticle.title,
@@ -425,7 +459,6 @@ export async function getRecommendationPerformance(
       clickRate: rec.clickRate || 0,
       score: rec.score,
     }));
-
   } catch (error) {
     logger.error('Failed to get recommendation performance', error as Error);
     return [];
@@ -438,10 +471,11 @@ export async function updateAllRecommendations(): Promise<{
   errors: number;
 }> {
   try {
-    const articles = await prisma?.article.findMany({
-      where: { status: 'PUBLISHED' },
-      select: { id: true },
-    }) || [];
+    const articles =
+      (await prisma?.article.findMany({
+        where: { status: 'PUBLISHED' },
+        select: { id: true },
+      })) || [];
 
     let updated = 0;
     let errors = 0;
@@ -452,16 +486,19 @@ export async function updateAllRecommendations(): Promise<{
         updated++;
       } catch (error) {
         errors++;
-        logger.error('Failed to update recommendations for article', error as Error, {
-          articleId: article.id,
-        });
+        logger.error(
+          'Failed to update recommendations for article',
+          error as Error,
+          {
+            articleId: article.id,
+          }
+        );
       }
     }
 
     logger.info('Batch recommendation update completed', { updated, errors });
 
     return { updated, errors };
-
   } catch (error) {
     logger.error('Failed to batch update recommendations', error as Error);
     return { updated: 0, errors: 1 };

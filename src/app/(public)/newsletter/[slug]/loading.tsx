@@ -6,7 +6,7 @@ export default function NewsletterIssueLoading() {
       <div className="mb-6">
         <Skeleton className="h-8 w-32" />
       </div>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div className="lg:col-span-3 space-y-6">
           {/* Header skeleton */}
@@ -20,12 +20,12 @@ export default function NewsletterIssueLoading() {
             <Skeleton className="h-6 w-full" />
             <Skeleton className="h-6 w-2/3" />
           </div>
-          
+
           {/* Action buttons skeleton */}
           <div className="flex gap-4 py-4 border-y">
             <Skeleton className="h-8 w-24" />
           </div>
-          
+
           {/* Content skeleton */}
           <div className="space-y-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -33,7 +33,7 @@ export default function NewsletterIssueLoading() {
             ))}
             <Skeleton className="h-4 w-3/4" />
           </div>
-          
+
           {/* CTA skeleton */}
           <div className="bg-muted/50 rounded-lg p-6">
             <div className="flex gap-4">
@@ -49,7 +49,7 @@ export default function NewsletterIssueLoading() {
             </div>
           </div>
         </div>
-        
+
         <aside className="space-y-6">
           {/* Recent issues skeleton */}
           <div className="space-y-4">
@@ -67,7 +67,7 @@ export default function NewsletterIssueLoading() {
             ))}
             <Skeleton className="h-8 w-full" />
           </div>
-          
+
           {/* Subscription sidebar skeleton */}
           <div className="border rounded-lg p-4 space-y-3">
             <Skeleton className="h-5 w-32" />

@@ -85,22 +85,31 @@ export default async function Home() {
           summary: featured.summary || '',
           category: featured.category?.name || 'Tech',
           author: featured.author?.name || 'SuperBear Reporter',
-          date: featured.createdAt ? new Date(featured.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
+          date: featured.createdAt
+            ? new Date(featured.createdAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
           imageUrl: featured.image || featured.imageUrl || '/og-default.svg',
           slug: featured.slug,
         }}
         headlines={headlines.length > 0 ? headlines : MOCK_TOP_HEADLINES}
-        latest={latest.length > 0 ? latest.map(article => ({
-          id: article.id,
-          title: article.title,
-          category: article.category?.name || 'Tech',
-          author: article.author?.name || 'SuperBear Reporter',
-          date: article.createdAt ? new Date(article.createdAt).toLocaleDateString() : new Date().toLocaleDateString(),
-          slug: article.slug,
-          imageUrl: article.image || article.imageUrl || '/og-default.svg',
-          snippet: article.summary || '',
-          tags: article.tags?.map(tag => tag.name) || [],
-        })) : MOCK_LATEST}
+        latest={
+          latest.length > 0
+            ? latest.map((article) => ({
+                id: article.id,
+                title: article.title,
+                category: article.category?.name || 'Tech',
+                author: article.author?.name || 'SuperBear Reporter',
+                date: article.createdAt
+                  ? new Date(article.createdAt).toLocaleDateString()
+                  : new Date().toLocaleDateString(),
+                slug: article.slug,
+                imageUrl:
+                  article.image || article.imageUrl || '/og-default.svg',
+                snippet: article.summary || '',
+                tags: article.tags?.map((tag) => tag.name) || [],
+              }))
+            : MOCK_LATEST
+        }
       />
     );
   } catch (error) {
@@ -158,8 +167,8 @@ function HomeView({
 }) {
   return (
     <>
-      {/* Above the Fold - TechCrunch Style Hero Band */}
-      <section className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+      {/* Above the Fold - Hero Band */}
+      <section className="bg-background border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             {/* Featured Article - Left 8 cols */}
@@ -175,16 +184,14 @@ function HomeView({
         </div>
       </section>
 
-      {/* Latest News Section - TechCrunch Style */}
-      <section className="bg-white dark:bg-gray-900 py-8">
+      {/* Latest News Section */}
+      <section className="bg-background py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Latest News
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground">Latest News</h2>
             <Link
               href="/news"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors duration-200"
             >
               See more
               <svg
@@ -230,48 +237,22 @@ function HomeView({
       <PodcastsBlock title="Podcasts" items={mockPodcastItems} />
 
       {/* Newsletter Subscription */}
-      <section className="bg-gray-50 dark:bg-gray-800 py-8 transition-colors duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Newsletter - Left 8 cols */}
-            <div className="lg:col-span-8">
-              <div className="bg-white dark:bg-gray-900 rounded-xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full mr-3"></div>
-                    Newsletter
-                  </h2>
-                </div>
-                <NewsletterSubscription
-                  source="homepage"
-                  variant="compact"
-                  utmSource="homepage"
-                  utmCampaign="main_section"
-                />
-              </div>
-            </div>
-
-            {/* Right Rail continues */}
-            <div className="lg:col-span-4">
-              <RightRail
-                title="Stay Connected"
-                items={[
-                  {
-                    title: 'Join 10,000+ developers',
-                    excerpt:
-                      'Get curated tech news and insights delivered weekly',
-                    timeAgo: 'Weekly',
-                    slug: '#newsletter',
-                  },
-                  {
-                    title: 'No spam, ever',
-                    excerpt: 'Unsubscribe anytime with one click',
-                    timeAgo: 'Promise',
-                    slug: '#privacy',
-                  },
-                ]}
-              />
-            </div>
+      <section className="bg-muted/30 py-12">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-card border border-border rounded-2xl p-6 text-center">
+            <h2 className="text-2xl font-bold text-card-foreground mb-3">
+              Stay Updated
+            </h2>
+            <p className="text-muted-foreground mb-6">
+              Get curated tech insights delivered weekly. No spam, unsubscribe
+              anytime.
+            </p>
+            <NewsletterSubscription
+              source="homepage"
+              variant="compact"
+              utmSource="homepage"
+              utmCampaign="main_section"
+            />
           </div>
         </div>
       </section>

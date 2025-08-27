@@ -5,19 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Eye, 
-  Clock, 
-  Share2, 
-  MousePointer, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  BarChart3,
+  TrendingUp,
+  Eye,
+  Clock,
+  Share2,
+  MousePointer,
   Users,
   RefreshCw,
   Calendar,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
 } from 'lucide-react';
 import { useToast } from '@/lib/hooks/useToast';
 import { useErrorHandler } from '@/lib/hooks/useErrorHandler';
@@ -29,10 +35,30 @@ interface AnalyticsDashboardProps {
 
 interface DashboardData {
   topPerforming: {
-    byViews: Array<{ articleId: string; title: string; slug: string; value: number }>;
-    byEngagement: Array<{ articleId: string; title: string; slug: string; value: number }>;
-    byShares: Array<{ articleId: string; title: string; slug: string; value: number }>;
-    byTime: Array<{ articleId: string; title: string; slug: string; value: number }>;
+    byViews: Array<{
+      articleId: string;
+      title: string;
+      slug: string;
+      value: number;
+    }>;
+    byEngagement: Array<{
+      articleId: string;
+      title: string;
+      slug: string;
+      value: number;
+    }>;
+    byShares: Array<{
+      articleId: string;
+      title: string;
+      slug: string;
+      value: number;
+    }>;
+    byTime: Array<{
+      articleId: string;
+      title: string;
+      slug: string;
+      value: number;
+    }>;
   };
   overallStats: {
     totalViews: number;
@@ -80,17 +106,21 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
 
   const fetchDashboardData = async (range: string = timeRange) => {
     setRefreshing(true);
-    
+
     const [result, error] = await handleAsync(
-      fetch(`/api/analytics/dashboard?range=${range}&limit=10`).then(async (response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: Failed to fetch analytics data`);
+      fetch(`/api/analytics/dashboard?range=${range}&limit=10`).then(
+        async (response) => {
+          if (!response.ok) {
+            throw new Error(
+              `HTTP ${response.status}: Failed to fetch analytics data`
+            );
+          }
+          return response.json();
         }
-        return response.json();
-      }),
-      { 
+      ),
+      {
         context: 'analytics-fetch',
-        showToast: true 
+        showToast: true,
       }
     );
 
@@ -150,7 +180,8 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
         <BarChart3 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
         <h3 className="text-lg font-semibold mb-2">No Analytics Data</h3>
         <p className="text-muted-foreground mb-4">
-          We couldn't load your analytics data. This might be due to a connection issue.
+          We couldn't load your analytics data. This might be due to a
+          connection issue.
         </p>
         <Button onClick={retryFetchData} variant="outline">
           <RefreshCw className="w-4 h-4 mr-2" />
@@ -166,7 +197,9 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-          <p className="text-muted-foreground">Track article performance and reader engagement</p>
+          <p className="text-muted-foreground">
+            Track article performance and reader engagement
+          </p>
         </div>
         <div className="flex items-center gap-4">
           <Select value={timeRange} onValueChange={handleTimeRangeChange}>
@@ -189,7 +222,9 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             onClick={() => fetchDashboardData()}
             disabled={refreshing}
           >
-            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`}
+            />
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
         </div>
@@ -203,7 +238,9 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             <Eye className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(data.overallStats.totalViews)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(data.overallStats.totalViews)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Across {data.overallStats.totalArticles} articles
             </p>
@@ -212,7 +249,9 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Time on Page</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Time on Page
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -220,7 +259,8 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               {formatTime(data.overallStats.avgTimeOnPage)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {formatPercentage(data.overallStats.avgCompletionRate)} completion rate
+              {formatPercentage(data.overallStats.avgCompletionRate)} completion
+              rate
             </p>
           </CardContent>
         </Card>
@@ -231,7 +271,9 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             <Share2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(data.overallStats.totalShares)}</div>
+            <div className="text-2xl font-bold">
+              {formatNumber(data.overallStats.totalShares)}
+            </div>
             <p className="text-xs text-muted-foreground">
               Across all platforms
             </p>
@@ -284,23 +326,31 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.topPerforming.byViews.slice(0, 5).map((article, index) => (
-                    <div key={article.articleId} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center">
-                          {index + 1}
-                        </Badge>
-                        <div>
-                          <p className="font-medium text-sm truncate max-w-48">
-                            {article.title}
-                          </p>
+                  {data.topPerforming.byViews
+                    .slice(0, 5)
+                    .map((article, index) => (
+                      <div
+                        key={article.articleId}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Badge
+                            variant="outline"
+                            className="w-6 h-6 p-0 flex items-center justify-center"
+                          >
+                            {index + 1}
+                          </Badge>
+                          <div>
+                            <p className="font-medium text-sm truncate max-w-48">
+                              {article.title}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">
+                          {formatNumber(article.value)}
                         </div>
                       </div>
-                      <div className="text-sm font-medium">
-                        {formatNumber(article.value)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -315,23 +365,31 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.topPerforming.byEngagement.slice(0, 5).map((article, index) => (
-                    <div key={article.articleId} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center">
-                          {index + 1}
-                        </Badge>
-                        <div>
-                          <p className="font-medium text-sm truncate max-w-48">
-                            {article.title}
-                          </p>
+                  {data.topPerforming.byEngagement
+                    .slice(0, 5)
+                    .map((article, index) => (
+                      <div
+                        key={article.articleId}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Badge
+                            variant="outline"
+                            className="w-6 h-6 p-0 flex items-center justify-center"
+                          >
+                            {index + 1}
+                          </Badge>
+                          <div>
+                            <p className="font-medium text-sm truncate max-w-48">
+                              {article.title}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">
+                          {formatPercentage(article.value)}
                         </div>
                       </div>
-                      <div className="text-sm font-medium">
-                        {formatPercentage(article.value)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -346,23 +404,31 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.topPerforming.byShares.slice(0, 5).map((article, index) => (
-                    <div key={article.articleId} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center">
-                          {index + 1}
-                        </Badge>
-                        <div>
-                          <p className="font-medium text-sm truncate max-w-48">
-                            {article.title}
-                          </p>
+                  {data.topPerforming.byShares
+                    .slice(0, 5)
+                    .map((article, index) => (
+                      <div
+                        key={article.articleId}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Badge
+                            variant="outline"
+                            className="w-6 h-6 p-0 flex items-center justify-center"
+                          >
+                            {index + 1}
+                          </Badge>
+                          <div>
+                            <p className="font-medium text-sm truncate max-w-48">
+                              {article.title}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">
+                          {formatNumber(article.value)}
                         </div>
                       </div>
-                      <div className="text-sm font-medium">
-                        {formatNumber(article.value)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -377,23 +443,31 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {data.topPerforming.byTime.slice(0, 5).map((article, index) => (
-                    <div key={article.articleId} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Badge variant="outline" className="w-6 h-6 p-0 flex items-center justify-center">
-                          {index + 1}
-                        </Badge>
-                        <div>
-                          <p className="font-medium text-sm truncate max-w-48">
-                            {article.title}
-                          </p>
+                  {data.topPerforming.byTime
+                    .slice(0, 5)
+                    .map((article, index) => (
+                      <div
+                        key={article.articleId}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <Badge
+                            variant="outline"
+                            className="w-6 h-6 p-0 flex items-center justify-center"
+                          >
+                            {index + 1}
+                          </Badge>
+                          <div>
+                            <p className="font-medium text-sm truncate max-w-48">
+                              {article.title}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-sm font-medium">
+                          {formatTime(article.value)}
                         </div>
                       </div>
-                      <div className="text-sm font-medium">
-                        {formatTime(article.value)}
-                      </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               </CardContent>
             </Card>
@@ -408,7 +482,10 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
             <CardContent>
               <div className="space-y-4">
                 {data.categoryStats.map((category) => (
-                  <div key={category.categoryId} className="border rounded-lg p-4">
+                  <div
+                    key={category.categoryId}
+                    className="border rounded-lg p-4"
+                  >
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="font-semibold">{category.categoryName}</h3>
                       <Badge variant="secondary">
@@ -418,19 +495,27 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground">Total Views</p>
-                        <p className="font-medium">{formatNumber(category.totalViews)}</p>
+                        <p className="font-medium">
+                          {formatNumber(category.totalViews)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Unique Views</p>
-                        <p className="font-medium">{formatNumber(category.uniqueViews)}</p>
+                        <p className="font-medium">
+                          {formatNumber(category.uniqueViews)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Avg. Time</p>
-                        <p className="font-medium">{formatTime(category.avgTimeOnPage)}</p>
+                        <p className="font-medium">
+                          {formatTime(category.avgTimeOnPage)}
+                        </p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Avg. Scroll</p>
-                        <p className="font-medium">{formatPercentage(category.avgScrollDepth)}</p>
+                        <p className="font-medium">
+                          {formatPercentage(category.avgScrollDepth)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -449,13 +534,17 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               <CardContent>
                 <div className="space-y-3">
                   {data.recentActivity.recentViews.map((view) => (
-                    <div key={view.id} className="flex items-center justify-between">
+                    <div
+                      key={view.id}
+                      className="flex items-center justify-between"
+                    >
                       <div>
                         <p className="font-medium text-sm truncate max-w-48">
                           {view.articleTitle}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {view.device} • {view.country} • {new Date(view.timestamp).toLocaleTimeString()}
+                          {view.device} • {view.country} •{' '}
+                          {new Date(view.timestamp).toLocaleTimeString()}
                         </p>
                       </div>
                     </div>
@@ -471,13 +560,17 @@ export function AnalyticsDashboard({ className }: AnalyticsDashboardProps) {
               <CardContent>
                 <div className="space-y-3">
                   {data.recentActivity.recentInteractions.map((interaction) => (
-                    <div key={interaction.id} className="flex items-center justify-between">
+                    <div
+                      key={interaction.id}
+                      className="flex items-center justify-between"
+                    >
                       <div>
                         <p className="font-medium text-sm truncate max-w-48">
                           {interaction.articleTitle}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {interaction.type} • {new Date(interaction.timestamp).toLocaleTimeString()}
+                          {interaction.type} •{' '}
+                          {new Date(interaction.timestamp).toLocaleTimeString()}
                         </p>
                       </div>
                       <Badge variant="outline" className="text-xs">

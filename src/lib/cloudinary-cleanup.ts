@@ -53,19 +53,21 @@ export async function deleteCloudinaryImage(
     }
 
     const result = await cloudinary.uploader.destroy(publicId);
-    
+
     if (result.result === 'ok') {
       console.log(`Successfully deleted image: ${publicId}`);
       return { success: true };
     } else {
-      console.warn(`Failed to delete image: ${publicId}, result: ${result.result}`);
+      console.warn(
+        `Failed to delete image: ${publicId}, result: ${result.result}`
+      );
       return { success: false, error: `Deletion failed: ${result.result}` };
     }
   } catch (error) {
     console.error(`Error deleting image ${publicId}:`, error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
@@ -77,7 +79,7 @@ export async function deleteCloudinaryImageByUrl(
   url: string
 ): Promise<{ success: boolean; error?: string }> {
   const publicId = extractPublicIdFromUrl(url);
-  
+
   if (!publicId) {
     return { success: false, error: 'Could not extract public ID from URL' };
   }
@@ -90,8 +92,8 @@ export async function deleteCloudinaryImageByUrl(
  */
 export async function deleteMultipleCloudinaryImages(
   publicIds: string[]
-): Promise<{ 
-  success: boolean; 
+): Promise<{
+  success: boolean;
   results: Array<{ publicId: string; success: boolean; error?: string }>;
   totalDeleted: number;
 }> {
@@ -101,7 +103,7 @@ export async function deleteMultipleCloudinaryImages(
   for (const publicId of publicIds) {
     const result = await deleteCloudinaryImage(publicId);
     results.push({ publicId, ...result });
-    
+
     if (result.success) {
       totalDeleted++;
     }
@@ -119,9 +121,14 @@ export async function deleteMultipleCloudinaryImages(
  */
 export async function deleteMultipleCloudinaryImagesByUrls(
   urls: string[]
-): Promise<{ 
-  success: boolean; 
-  results: Array<{ url: string; publicId?: string; success: boolean; error?: string }>;
+): Promise<{
+  success: boolean;
+  results: Array<{
+    url: string;
+    publicId?: string;
+    success: boolean;
+    error?: string;
+  }>;
   totalDeleted: number;
 }> {
   const results = [];
@@ -129,19 +136,19 @@ export async function deleteMultipleCloudinaryImagesByUrls(
 
   for (const url of urls) {
     const publicId = extractPublicIdFromUrl(url);
-    
+
     if (!publicId) {
-      results.push({ 
-        url, 
-        success: false, 
-        error: 'Could not extract public ID from URL' 
+      results.push({
+        url,
+        success: false,
+        error: 'Could not extract public ID from URL',
       });
       continue;
     }
 
     const result = await deleteCloudinaryImage(publicId);
     results.push({ url, publicId, ...result });
-    
+
     if (result.success) {
       totalDeleted++;
     }
@@ -159,7 +166,7 @@ export async function deleteMultipleCloudinaryImagesByUrls(
  */
 export function extractCloudinaryUrlsFromContent(content: any): string[] {
   const urls: string[] = [];
-  
+
   try {
     // Handle Tiptap JSON content
     if (typeof content === 'object' && content !== null) {
@@ -170,22 +177,22 @@ export function extractCloudinaryUrlsFromContent(content: any): string[] {
             urls.push(src);
           }
         }
-        
+
         if (node.content && Array.isArray(node.content)) {
           node.content.forEach(extractFromNode);
         }
       };
-      
+
       if (content.content && Array.isArray(content.content)) {
         content.content.forEach(extractFromNode);
       }
     }
-    
+
     // Handle HTML content
     if (typeof content === 'string') {
       const imgRegex = /<img[^>]+src="([^"]*cloudinary\.com[^"]*)"/g;
       let match;
-      
+
       while ((match = imgRegex.exec(content)) !== null) {
         urls.push(match[1]);
       }
@@ -193,7 +200,7 @@ export function extractCloudinaryUrlsFromContent(content: any): string[] {
   } catch (error) {
     console.error('Error extracting Cloudinary URLs from content:', error);
   }
-  
+
   return urls;
 }
 
@@ -231,7 +238,7 @@ export async function cleanupArticleImages(article: {
   // Delete images
   for (const imageUrl of uniqueImages) {
     const result = await deleteCloudinaryImageByUrl(imageUrl);
-    
+
     if (result.success) {
       deletedImages.push(imageUrl);
     } else {
@@ -266,17 +273,20 @@ export async function batchCleanupArticleImages(
 
   for (const article of articles) {
     const cleanup = await cleanupArticleImages(article);
-    
+
     results.push({
       articleId: article.id,
       deletedImages: cleanup.deletedImages,
       errors: cleanup.errors,
     });
-    
+
     totalImagesDeleted += cleanup.deletedImages.length;
   }
 
-  const totalErrors = results.reduce((sum, result) => sum + result.errors.length, 0);
+  const totalErrors = results.reduce(
+    (sum, result) => sum + result.errors.length,
+    0
+  );
 
   return {
     success: totalErrors === 0,
@@ -322,7 +332,7 @@ export async function getCloudinaryUsage(): Promise<{
 }> {
   try {
     const result = await cloudinary.api.usage();
-    
+
     return {
       success: true,
       usage: {

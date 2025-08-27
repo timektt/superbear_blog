@@ -65,7 +65,6 @@ export async function pauseCampaign(
     structuredLogger.info('Campaign paused successfully', { reason });
 
     return { success: true, message: 'Campaign paused successfully' };
-
   } catch (error) {
     structuredLogger.error('Failed to pause campaign', error as Error);
     return { success: false, message: 'Failed to pause campaign' };
@@ -121,7 +120,10 @@ export async function resumeCampaign(
         resumedAt: new Date(),
       });
 
-      return { success: true, message: 'Campaign completed (no pending deliveries)' };
+      return {
+        success: true,
+        message: 'Campaign completed (no pending deliveries)',
+      };
     }
 
     // Resume campaign
@@ -138,10 +140,14 @@ export async function resumeCampaign(
       resumedAt: new Date(),
     });
 
-    structuredLogger.info('Campaign resumed successfully', { pendingDeliveries });
+    structuredLogger.info('Campaign resumed successfully', {
+      pendingDeliveries,
+    });
 
-    return { success: true, message: `Campaign resumed with ${pendingDeliveries} pending deliveries` };
-
+    return {
+      success: true,
+      message: `Campaign resumed with ${pendingDeliveries} pending deliveries`,
+    };
   } catch (error) {
     structuredLogger.error('Failed to resume campaign', error as Error);
     return { success: false, message: 'Failed to resume campaign' };
@@ -167,7 +173,11 @@ export async function cancelCampaign(
     });
 
     if (!campaign) {
-      return { success: false, message: 'Campaign not found', cancelledDeliveries: 0 };
+      return {
+        success: false,
+        message: 'Campaign not found',
+        cancelledDeliveries: 0,
+      };
     }
 
     if (['COMPLETED', 'CANCELLED'].includes(campaign.status)) {
@@ -215,10 +225,13 @@ export async function cancelCampaign(
       message: 'Campaign cancelled successfully',
       cancelledDeliveries: cancelledDeliveries.count,
     };
-
   } catch (error) {
     structuredLogger.error('Failed to cancel campaign', error as Error);
-    return { success: false, message: 'Failed to cancel campaign', cancelledDeliveries: 0 };
+    return {
+      success: false,
+      message: 'Failed to cancel campaign',
+      cancelledDeliveries: 0,
+    };
   }
 }
 
@@ -229,12 +242,17 @@ export function shouldPauseCampaign(campaignId: string): boolean {
 }
 
 // Get campaign control status
-export function getCampaignControlStatus(campaignId: string): CampaignControlState | null {
+export function getCampaignControlStatus(
+  campaignId: string
+): CampaignControlState | null {
   return campaignControlState.get(campaignId) || null;
 }
 
 // Get all campaign control states
-export function getAllCampaignControlStates(): Map<string, CampaignControlState> {
+export function getAllCampaignControlStates(): Map<
+  string,
+  CampaignControlState
+> {
   return new Map(campaignControlState);
 }
 
@@ -277,7 +295,6 @@ export async function emergencyStopAllCampaigns(
       message: `Emergency stop completed. ${affectedCampaigns.length} campaigns paused.`,
       affectedCampaigns,
     };
-
   } catch (error) {
     structuredLogger.error('Emergency stop failed', error as Error);
     return {
@@ -347,7 +364,6 @@ export async function retryFailedDeliveries(
       message: `${updated.count} failed deliveries queued for retry`,
       retriedCount: updated.count,
     };
-
   } catch (error) {
     structuredLogger.error('Failed to retry deliveries', error as Error);
     return {
@@ -406,7 +422,6 @@ export async function moveToDeadLetterQueue(
       message: `${updated.count} deliveries moved to Dead Letter Queue`,
       movedCount: updated.count,
     };
-
   } catch (error) {
     structuredLogger.error('Failed to move deliveries to DLQ', error as Error);
     return {

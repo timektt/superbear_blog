@@ -52,10 +52,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!podcast) {
-      return NextResponse.json(
-        { error: 'Podcast not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Podcast not found' }, { status: 404 });
     }
 
     const response = {

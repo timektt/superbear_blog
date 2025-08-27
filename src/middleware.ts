@@ -3,6 +3,7 @@ import { getToken } from 'next-auth/jwt';
 import { rateLimit } from '@/lib/rate-limit';
 import { validateCSRFMiddleware, validateOrigin } from '@/lib/csrf';
 import { hasPermission, UserRole } from '@/lib/rbac';
+import { createRequestContext } from '@/lib/monitoring';
 
 // Define protected routes
 const protectedRoutes = ['/admin'];
@@ -25,25 +26,34 @@ const CSP_HEADER = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
-  // Generate or extract request ID for logging context
-  const requestId = request.headers.get('x-request-id') || 
-    `req_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  
+  const startTime = Date.now();
+
+  // Create comprehensive request context for monitoring
+  const requestContext = createRequestContext(request);
+
   // Security headers for all requests
   const response = NextResponse.next();
-  
-  // Add request ID to response headers for tracing
-  response.headers.set('x-request-id', requestId);
-  
+
+  // Add comprehensive monitoring headers for tracing
+  response.headers.set('x-request-id', requestContext.requestId);
+  response.headers.set('x-trace-id', requestContext.traceId);
+  response.headers.set('x-span-id', requestContext.spanId);
+  if (requestContext.parentSpanId) {
+    response.headers.set('x-parent-span-id', requestContext.parentSpanId);
+  }
+  response.headers.set('x-request-start', startTime.toString());
+
   // Enhanced security headers
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-XSS-Protection', '1; mode=block');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('Content-Security-Policy', CSP_HEADER);
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-  
+  response.headers.set(
+    'Permissions-Policy',
+    'camera=(), microphone=(), geolocation=()'
+  );
+
   // Add HSTS in production
   if (process.env.NODE_ENV === 'production') {
     response.headers.set(
@@ -51,7 +61,7 @@ export async function middleware(request: NextRequest) {
       'max-age=31536000; includeSubDomains; preload'
     );
   }
-  
+
   // Rate limiting for API routes
   if (pathname.startsWith('/api/')) {
     const rateLimitResult = await rateLimit(request);
@@ -61,7 +71,7 @@ export async function middleware(request: NextRequest) {
         { status: 429, headers: { 'Retry-After': '60' } }
       );
     }
-    
+
     // Add rate limit headers
     response.headers.set('X-RateLimit-Limit', rateLimitResult.limit.toString());
     response.headers.set(
@@ -70,34 +80,37 @@ export async function middleware(request: NextRequest) {
     );
     response.headers.set('X-RateLimit-Reset', rateLimitResult.reset.toString());
   }
-  
+
   // Enhanced CSRF protection for state-changing requests
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method)) {
     // Validate origin
     if (!validateOrigin(request)) {
       return NextResponse.json(
         { error: 'Invalid origin' },
-        { status: 403, headers: { 'x-request-id': requestId } }
+        { status: 403, headers: { 'x-request-id': requestContext.requestId } }
       );
     }
-    
+
     // CSRF token validation for admin routes
     if (pathname.startsWith('/api/admin')) {
       const token = await getToken({
         req: request,
         secret: process.env.NEXTAUTH_SECRET,
       });
-      
-      const csrfValidation = await validateCSRFMiddleware(request, token?.id as string);
+
+      const csrfValidation = await validateCSRFMiddleware(
+        request,
+        token?.id as string
+      );
       if (!csrfValidation.valid) {
         return NextResponse.json(
           { error: csrfValidation.error || 'CSRF validation failed' },
-          { status: 403, headers: { 'x-request-id': requestId } }
+          { status: 403, headers: { 'x-request-id': requestContext.requestId } }
         );
       }
     }
   }
-  
+
   // Authentication check for protected routes
   if (
     protectedRoutes.some((route) => pathname.startsWith(route)) ||
@@ -107,7 +120,7 @@ export async function middleware(request: NextRequest) {
       req: request,
       secret: process.env.NEXTAUTH_SECRET,
     });
-    
+
     if (!token) {
       // Redirect to login for protected pages
       if (pathname.startsWith('/admin')) {
@@ -115,17 +128,17 @@ export async function middleware(request: NextRequest) {
         loginUrl.searchParams.set('callbackUrl', pathname);
         return NextResponse.redirect(loginUrl);
       }
-      
+
       // Return 401 for API routes
       if (pathname.startsWith('/api/admin')) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }
     }
-    
+
     // Enhanced role-based access control
     if (token && pathname.startsWith('/api/admin')) {
       const userRole = token.role as UserRole;
-      
+
       // Permission-based access control
       const permissionMap: Record<string, string> = {
         '/api/admin/users': 'users:manage_roles',
@@ -135,7 +148,7 @@ export async function middleware(request: NextRequest) {
         '/api/admin/media/cleanup': 'media:delete',
         '/api/admin/slugs': 'articles:create',
       };
-      
+
       for (const [route, permission] of Object.entries(permissionMap)) {
         if (pathname.startsWith(route)) {
           if (!hasPermission(userRole, permission as any)) {
@@ -147,7 +160,7 @@ export async function middleware(request: NextRequest) {
           break;
         }
       }
-      
+
       // Method-specific permissions
       if (request.method === 'DELETE' && pathname.includes('/articles/')) {
         if (!hasPermission(userRole, 'articles:delete')) {
@@ -157,7 +170,7 @@ export async function middleware(request: NextRequest) {
           );
         }
       }
-      
+
       if (request.method === 'POST' && pathname.includes('/articles/')) {
         if (!hasPermission(userRole, 'articles:create')) {
           return NextResponse.json(
@@ -168,7 +181,7 @@ export async function middleware(request: NextRequest) {
       }
     }
   }
-  
+
   // Maintenance mode check
   if (
     process.env.ENABLE_MAINTENANCE_MODE === 'true' &&
@@ -177,7 +190,7 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL('/maintenance', request.url));
   }
-  
+
   return response;
 }
 

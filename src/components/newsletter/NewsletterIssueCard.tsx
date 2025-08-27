@@ -38,7 +38,7 @@ export function NewsletterIssueCard({ issue }: NewsletterIssueCardProps) {
             {issue.title}
           </h3>
         </CardHeader>
-        
+
         <CardContent className="pt-0">
           {issue.summary && (
             <p className="text-muted-foreground text-sm line-clamp-3 mb-4">

@@ -1,19 +1,22 @@
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
-// Bundle analyzer
+// Bundle analyzer - only enabled for build:analyze command
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE_BUNDLE === 'true',
+  enabled: process.env.ANALYZE === 'true',
 });
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
 
-
 const nextConfig: NextConfig = {
   // Enable experimental features for better performance
   experimental: {
-    optimizePackageImports: ['lucide-react', '@tiptap/react', '@tiptap/starter-kit'],
+    optimizePackageImports: [
+      'lucide-react',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+    ],
     optimizeCss: isProduction,
   },
 
@@ -100,7 +103,9 @@ const nextConfig: NextConfig = {
         form-action 'self';
         frame-ancestors 'none';
         upgrade-insecure-requests;
-      `.replace(/\s{2,}/g, ' ').trim();
+      `
+        .replace(/\s{2,}/g, ' ')
+        .trim();
 
       securityHeaders.push({
         key: 'Content-Security-Policy',
@@ -143,13 +148,31 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      // Cache API responses
+      // Cache API responses with compression hints
       {
         source: '/api/articles',
         headers: [
           {
             key: 'Cache-Control',
             value: 'public, s-maxage=60, stale-while-revalidate=120',
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding',
+          },
+        ],
+      },
+      // Cache search API with compression
+      {
+        source: '/api/search',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=300, stale-while-revalidate=600',
+          },
+          {
+            key: 'Vary',
+            value: 'Accept-Encoding',
           },
         ],
       },
@@ -268,20 +291,16 @@ const configWithAnalyzer = withBundleAnalyzer(nextConfig);
 
 // Apply Sentry configuration in production
 const finalConfig = isProduction
-  ? withSentryConfig(
-      configWithAnalyzer,
-      {
-        silent: true,
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-        widenClientFileUpload: true,
-        transpileClientSDK: true,
-        tunnelRoute: '/monitoring',
-        hideSourceMaps: true,
-        disableLogger: true,
-        automaticVercelMonitors: true,
-      }
-    )
+  ? withSentryConfig(configWithAnalyzer, {
+      silent: true,
+      org: process.env.SENTRY_ORG,
+      project: process.env.SENTRY_PROJECT,
+      widenClientFileUpload: true,
+      tunnelRoute: '/monitoring',
+      hideSourceMaps: true,
+      disableLogger: true,
+      automaticVercelMonitors: true,
+    })
   : configWithAnalyzer;
 
 export default finalConfig;

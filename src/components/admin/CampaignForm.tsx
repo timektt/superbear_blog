@@ -26,7 +26,7 @@ interface CampaignFormData {
 export default function CampaignForm() {
   const router = useRouter();
   const { showToast } = useToast();
-  
+
   const [formData, setFormData] = useState<CampaignFormData>({
     title: '',
     subject: '',
@@ -38,7 +38,7 @@ export default function CampaignForm() {
       subscribedBefore: '',
     },
   });
-  
+
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [loading, setLoading] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(true);
@@ -51,7 +51,7 @@ export default function CampaignForm() {
       try {
         const response = await fetch('/api/admin/email-templates');
         if (!response.ok) throw new Error('Failed to fetch templates');
-        
+
         const data = await response.json();
         setTemplates(data.templates || []);
       } catch (error) {
@@ -71,18 +71,26 @@ export default function CampaignForm() {
       try {
         const params = new URLSearchParams();
         if (formData.recipientFilter.status.length > 0) {
-          formData.recipientFilter.status.forEach(status => {
+          formData.recipientFilter.status.forEach((status) => {
             params.append('status', status);
           });
         }
         if (formData.recipientFilter.subscribedAfter) {
-          params.append('subscribedAfter', formData.recipientFilter.subscribedAfter);
+          params.append(
+            'subscribedAfter',
+            formData.recipientFilter.subscribedAfter
+          );
         }
         if (formData.recipientFilter.subscribedBefore) {
-          params.append('subscribedBefore', formData.recipientFilter.subscribedBefore);
+          params.append(
+            'subscribedBefore',
+            formData.recipientFilter.subscribedBefore
+          );
         }
 
-        const response = await fetch(`/api/admin/newsletter?count=true&${params.toString()}`);
+        const response = await fetch(
+          `/api/admin/newsletter?count=true&${params.toString()}`
+        );
         if (response.ok) {
           const data = await response.json();
           setRecipientCount(data.count || 0);
@@ -95,16 +103,23 @@ export default function CampaignForm() {
     updateRecipientCount();
   }, [formData.recipientFilter]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const handleFilterChange = (filterName: keyof CampaignFormData['recipientFilter'], value: any) => {
-    setFormData(prev => ({
+  const handleFilterChange = (
+    filterName: keyof CampaignFormData['recipientFilter'],
+    value: any
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       recipientFilter: {
         ...prev.recipientFilter,
@@ -114,20 +129,20 @@ export default function CampaignForm() {
   };
 
   const handleStatusChange = (status: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       recipientFilter: {
         ...prev.recipientFilter,
         status: checked
           ? [...prev.recipientFilter.status, status]
-          : prev.recipientFilter.status.filter(s => s !== status),
+          : prev.recipientFilter.status.filter((s) => s !== status),
       },
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent, sendNow = false) => {
     e.preventDefault();
-    
+
     if (!formData.title || !formData.subject || !formData.templateId) {
       showToast('Please fill in all required fields', 'error');
       return;
@@ -138,7 +153,11 @@ export default function CampaignForm() {
       return;
     }
 
-    if (isScheduled && formData.scheduledAt && new Date(formData.scheduledAt) <= new Date()) {
+    if (
+      isScheduled &&
+      formData.scheduledAt &&
+      new Date(formData.scheduledAt) <= new Date()
+    ) {
       showToast('Scheduled time must be in the future', 'error');
       return;
     }
@@ -154,8 +173,10 @@ export default function CampaignForm() {
         scheduledAt: isScheduled ? formData.scheduledAt : undefined,
         recipientFilter: {
           status: formData.recipientFilter.status,
-          subscribedAfter: formData.recipientFilter.subscribedAfter || undefined,
-          subscribedBefore: formData.recipientFilter.subscribedBefore || undefined,
+          subscribedAfter:
+            formData.recipientFilter.subscribedAfter || undefined,
+          subscribedBefore:
+            formData.recipientFilter.subscribedBefore || undefined,
         },
       };
 
@@ -177,9 +198,12 @@ export default function CampaignForm() {
 
       // If sending now, send the campaign immediately
       if (sendNow) {
-        const sendResponse = await fetch(`/api/admin/campaigns/${campaignId}/send`, {
-          method: 'POST',
-        });
+        const sendResponse = await fetch(
+          `/api/admin/campaigns/${campaignId}/send`,
+          {
+            method: 'POST',
+          }
+        );
 
         if (!sendResponse.ok) {
           const error = await sendResponse.json();
@@ -189,9 +213,9 @@ export default function CampaignForm() {
         showToast('Campaign created and sent successfully!', 'success');
       } else {
         showToast(
-          isScheduled 
-            ? 'Campaign created and scheduled successfully!' 
-            : 'Campaign created successfully!', 
+          isScheduled
+            ? 'Campaign created and scheduled successfully!'
+            : 'Campaign created successfully!',
           'success'
         );
       }
@@ -199,7 +223,10 @@ export default function CampaignForm() {
       router.push('/admin/campaigns');
     } catch (error) {
       console.error('Error creating campaign:', error);
-      showToast(error instanceof Error ? error.message : 'Failed to create campaign', 'error');
+      showToast(
+        error instanceof Error ? error.message : 'Failed to create campaign',
+        'error'
+      );
     } finally {
       setLoading(false);
     }
@@ -215,7 +242,9 @@ export default function CampaignForm() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Email Campaign</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Create Email Campaign
+        </h1>
         <button
           onClick={() => router.back()}
           className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -227,11 +256,16 @@ export default function CampaignForm() {
       <form onSubmit={(e) => handleSubmit(e, false)} className="space-y-8">
         {/* Campaign Details */}
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Campaign Details</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Campaign Details
+          </h2>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="title"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Campaign Title *
               </label>
               <input
@@ -247,7 +281,10 @@ export default function CampaignForm() {
             </div>
 
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Email Subject *
               </label>
               <input
@@ -264,7 +301,10 @@ export default function CampaignForm() {
           </div>
 
           <div className="mt-6">
-            <label htmlFor="templateId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label
+              htmlFor="templateId"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+            >
               Email Template *
             </label>
             {templatesLoading ? (
@@ -291,8 +331,10 @@ export default function CampaignForm() {
 
         {/* Scheduling */}
         <div className="bg-white dark:bg-gray-800 shadow-sm rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Scheduling</h2>
-          
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Scheduling
+          </h2>
+
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <input
@@ -303,7 +345,10 @@ export default function CampaignForm() {
                 onChange={() => setIsScheduled(false)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
               />
-              <label htmlFor="sendNow" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="sendNow"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Send immediately after creation
               </label>
             </div>
@@ -317,7 +362,10 @@ export default function CampaignForm() {
                 onChange={() => setIsScheduled(true)}
                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
               />
-              <label htmlFor="schedule" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label
+                htmlFor="schedule"
+                className="text-sm font-medium text-gray-700 dark:text-gray-300"
+              >
                 Schedule for later
               </label>
             </div>
@@ -343,7 +391,7 @@ export default function CampaignForm() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
             Recipients ({recipientCount.toLocaleString()})
           </h2>
-          
+
           <div className="space-y-6">
             {/* Subscription Status */}
             <div>
@@ -357,10 +405,15 @@ export default function CampaignForm() {
                       type="checkbox"
                       id={`status-${status}`}
                       checked={formData.recipientFilter.status.includes(status)}
-                      onChange={(e) => handleStatusChange(status, e.target.checked)}
+                      onChange={(e) =>
+                        handleStatusChange(status, e.target.checked)
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor={`status-${status}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                    <label
+                      htmlFor={`status-${status}`}
+                      className="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                    >
                       {status}
                     </label>
                   </div>
@@ -371,27 +424,37 @@ export default function CampaignForm() {
             {/* Date Filters */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="subscribedAfter" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="subscribedAfter"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Subscribed After
                 </label>
                 <input
                   type="date"
                   id="subscribedAfter"
                   value={formData.recipientFilter.subscribedAfter}
-                  onChange={(e) => handleFilterChange('subscribedAfter', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('subscribedAfter', e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
 
               <div>
-                <label htmlFor="subscribedBefore" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="subscribedBefore"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Subscribed Before
                 </label>
                 <input
                   type="date"
                   id="subscribedBefore"
                   value={formData.recipientFilter.subscribedBefore}
-                  onChange={(e) => handleFilterChange('subscribedBefore', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('subscribedBefore', e.target.value)
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
@@ -408,13 +471,17 @@ export default function CampaignForm() {
           >
             Cancel
           </button>
-          
+
           <button
             type="submit"
             disabled={loading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating...' : isScheduled ? 'Schedule Campaign' : 'Create & Send'}
+            {loading
+              ? 'Creating...'
+              : isScheduled
+                ? 'Schedule Campaign'
+                : 'Create & Send'}
           </button>
         </div>
       </form>

@@ -88,13 +88,17 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     );
 
-    expect(screen.queryByText('Error Details (Development)')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Error Details (Development)')
+    ).not.toBeInTheDocument();
 
     process.env.NODE_ENV = originalEnv;
   });
 
   it('should call console.error when error occurs', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     render(
       <ErrorBoundary>
@@ -110,7 +114,7 @@ describe('ErrorBoundary', () => {
     // Mock window.location.reload
     const originalLocation = window.location;
     const mockReload = jest.fn();
-    
+
     // @ts-expect-error
     delete window.location;
     window.location = { ...originalLocation, reload: mockReload };

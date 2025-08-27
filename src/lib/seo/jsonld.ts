@@ -37,7 +37,9 @@ export function generatePersonJsonLd(author: any, baseUrl: string) {
   };
 }
 
-export function generateBreadcrumbJsonLd(items: Array<{ name: string; url: string }>) {
+export function generateBreadcrumbJsonLd(
+  items: Array<{ name: string; url: string }>
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',

@@ -21,7 +21,7 @@ const createTemplateSchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -45,20 +45,20 @@ export async function GET(request: NextRequest) {
         include: {
           versions: {
             orderBy: { version: 'desc' },
-            take: 1
+            take: 1,
           },
           _count: {
             select: {
               campaigns: true,
-              versions: true
-            }
-          }
+              versions: true,
+            },
+          },
         },
         orderBy: { updatedAt: 'desc' },
         skip,
-        take: limit
+        take: limit,
       }),
-      prisma.emailTemplate.count({ where })
+      prisma.emailTemplate.count({ where }),
     ]);
 
     return NextResponse.json({
@@ -67,10 +67,9 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
-
   } catch (error) {
     console.error('Error fetching email templates:', error);
     return NextResponse.json(
@@ -84,7 +83,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -98,17 +97,17 @@ export async function POST(request: NextRequest) {
         ...validatedData,
         designConfig: validatedData.designConfig || DEFAULT_DESIGN_CONFIG,
         createdBy: session.user.id || session.user.email || 'system',
-        status: TemplateStatus.DRAFT
+        status: TemplateStatus.DRAFT,
       },
       include: {
         versions: true,
         _count: {
           select: {
             campaigns: true,
-            versions: true
-          }
-        }
-      }
+            versions: true,
+          },
+        },
+      },
     });
 
     // Create initial version
@@ -118,12 +117,11 @@ export async function POST(request: NextRequest) {
         version: 1,
         htmlContent: validatedData.htmlContent,
         textContent: validatedData.textContent,
-        designConfig: template.designConfig
-      }
+        designConfig: template.designConfig,
+      },
     });
 
     return NextResponse.json(template, { status: 201 });
-
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -3,12 +3,12 @@ import { authOptions } from './auth';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { 
-  UserRole, 
-  Permission, 
-  hasPermission, 
-  checkResourcePermission, 
-  ResourcePermissionCheck 
+import {
+  UserRole,
+  Permission,
+  hasPermission,
+  checkResourcePermission,
+  ResourcePermissionCheck,
 } from './rbac';
 
 export interface AuthenticatedUser {
@@ -18,15 +18,17 @@ export interface AuthenticatedUser {
   role: UserRole;
 }
 
-export async function getAuthenticatedUser(request?: NextRequest): Promise<AuthenticatedUser | null> {
+export async function getAuthenticatedUser(
+  request?: NextRequest
+): Promise<AuthenticatedUser | null> {
   const session = await getServerSession(authOptions);
   if (!session?.user) return null;
-  
+
   return {
     id: session.user.id,
     email: session.user.email || '',
     name: session.user.name || '',
-    role: session.user.role as UserRole
+    role: session.user.role as UserRole,
   };
 }
 
@@ -57,7 +59,10 @@ export function isAuthor(user: AuthenticatedUser | null): boolean {
 /**
  * Check if user has a specific permission
  */
-export function userHasPermission(user: AuthenticatedUser | null, permission: Permission): boolean {
+export function userHasPermission(
+  user: AuthenticatedUser | null,
+  permission: Permission
+): boolean {
   if (!user) return false;
   return hasPermission(user.role, permission);
 }
@@ -70,7 +75,10 @@ export function userHasResourcePermission(
   check: Omit<ResourcePermissionCheck, 'currentUserId'>
 ): boolean {
   if (!user) return false;
-  return checkResourcePermission(user.role, { ...check, currentUserId: user.id });
+  return checkResourcePermission(user.role, {
+    ...check,
+    currentUserId: user.id,
+  });
 }
 
 /**
@@ -89,7 +97,9 @@ export async function requireAuth() {
 /**
  * Require authentication middleware
  */
-export async function requireAuthUser(request?: NextRequest): Promise<AuthenticatedUser> {
+export async function requireAuthUser(
+  request?: NextRequest
+): Promise<AuthenticatedUser> {
   const user = await getAuthenticatedUser(request);
   if (!user) {
     throw new Error('Authentication required');
@@ -114,7 +124,9 @@ export async function requirePermission(
 /**
  * Require admin role middleware
  */
-export async function requireAdmin(request?: NextRequest): Promise<AuthenticatedUser> {
+export async function requireAdmin(
+  request?: NextRequest
+): Promise<AuthenticatedUser> {
   const user = await requireAuthUser(request);
   if (!isAdmin(user)) {
     throw new Error('Admin access required');
@@ -125,7 +137,9 @@ export async function requireAdmin(request?: NextRequest): Promise<Authenticated
 /**
  * Require super admin role middleware
  */
-export async function requireSuperAdmin(request?: NextRequest): Promise<AuthenticatedUser> {
+export async function requireSuperAdmin(
+  request?: NextRequest
+): Promise<AuthenticatedUser> {
   const user = await requireAuthUser(request);
   if (!isSuperAdmin(user)) {
     throw new Error('Super admin access required');
@@ -194,7 +208,8 @@ export function withAdmin<T extends any[]>(
       const user = await requireAdmin();
       return await handler(user, ...args);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Admin access required';
+      const message =
+        error instanceof Error ? error.message : 'Admin access required';
       const status = message.includes('Authentication') ? 401 : 403;
       return createAuthError(message, status);
     }

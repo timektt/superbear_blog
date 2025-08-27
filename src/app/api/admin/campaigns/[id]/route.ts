@@ -12,7 +12,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -27,7 +27,10 @@ export async function GET(
     });
 
     if (!campaign) {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      );
     }
 
     // Get campaign statistics
@@ -37,9 +40,10 @@ export async function GET(
       campaign,
       stats,
     });
-
   } catch (error) {
-    logger.error('Failed to fetch campaign', error as Error, { campaignId: params.id });
+    logger.error('Failed to fetch campaign', error as Error, {
+      campaignId: params.id,
+    });
     return NextResponse.json(
       { error: 'Failed to fetch campaign' },
       { status: 500 }
@@ -54,26 +58,33 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     await deleteCampaign(params.id);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Campaign deleted successfully' 
+      message: 'Campaign deleted successfully',
+    });
+  } catch (error) {
+    logger.error('Failed to delete campaign', error as Error, {
+      campaignId: params.id,
     });
 
-  } catch (error) {
-    logger.error('Failed to delete campaign', error as Error, { campaignId: params.id });
-    
     if (error instanceof Error && error.message === 'Campaign not found') {
-      return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Campaign not found' },
+        { status: 404 }
+      );
     }
 
-    if (error instanceof Error && error.message.includes('Cannot delete campaign')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('Cannot delete campaign')
+    ) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 

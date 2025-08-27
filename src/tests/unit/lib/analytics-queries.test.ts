@@ -1,8 +1,8 @@
-import { 
-  getCategoryPerformance, 
-  getArticleAnalytics, 
+import {
+  getCategoryPerformance,
+  getArticleAnalytics,
   getEngagementMetrics,
-  getTrafficSources 
+  getTrafficSources,
 } from '@/lib/analytics/queries';
 import { prisma } from '@/lib/prisma';
 
@@ -71,9 +71,7 @@ describe('Analytics Queries', () => {
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-01-31');
 
-      const mockCategories = [
-        { id: '1', name: 'AI', slug: 'ai' },
-      ];
+      const mockCategories = [{ id: '1', name: 'AI', slug: 'ai' }];
 
       const mockViews = [
         { articleId: '1', createdAt: new Date('2024-01-15') },
@@ -115,7 +113,9 @@ describe('Analytics Queries', () => {
     });
 
     it('should handle database errors', async () => {
-      mockPrisma.category.findMany.mockRejectedValue(new Error('Database error'));
+      mockPrisma.category.findMany.mockRejectedValue(
+        new Error('Database error')
+      );
 
       await expect(getCategoryPerformance()).rejects.toThrow('Database error');
     });
@@ -247,9 +247,13 @@ describe('Analytics Queries', () => {
 
   describe('Error Handling', () => {
     it('should handle database connection errors', async () => {
-      mockPrisma.category.findMany.mockRejectedValue(new Error('Connection failed'));
+      mockPrisma.category.findMany.mockRejectedValue(
+        new Error('Connection failed')
+      );
 
-      await expect(getCategoryPerformance()).rejects.toThrow('Connection failed');
+      await expect(getCategoryPerformance()).rejects.toThrow(
+        'Connection failed'
+      );
     });
 
     it('should handle malformed data gracefully', async () => {

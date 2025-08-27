@@ -12,7 +12,13 @@ import { z } from 'zod';
 
 const NewsletterIssueFormSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
-  slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
+  slug: z
+    .string()
+    .min(1, 'Slug is required')
+    .regex(
+      /^[a-z0-9-]+$/,
+      'Slug must contain only lowercase letters, numbers, and hyphens'
+    ),
   summary: z.string().max(500).optional(),
   content: z.any(), // Tiptap JSON content
   status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']),
@@ -28,7 +34,12 @@ interface NewsletterIssueFormProps {
   isLoading?: boolean;
 }
 
-export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = false }: NewsletterIssueFormProps) {
+export function NewsletterIssueForm({
+  issue,
+  onSubmit,
+  onCancel,
+  isLoading = false,
+}: NewsletterIssueFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<NewsletterIssueFormData>>({
@@ -88,7 +99,7 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
       });
       if (response.ok) {
         const data = await response.json();
-        setFormData(prev => ({ ...prev, slug: data.slug }));
+        setFormData((prev) => ({ ...prev, slug: data.slug }));
       }
     } catch (error) {
       console.error('Failed to generate slug:', error);
@@ -100,11 +111,14 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
     setIsSaving(true);
     try {
-      const response = await fetch(`/api/admin/newsletter/issues/${issue.id}/auto-save`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `/api/admin/newsletter/issues/${issue.id}/auto-save`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        }
+      );
 
       if (response.ok) {
         setLastSaved(new Date());
@@ -124,9 +138,9 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        error.errors.forEach((err) => {
-          if (err.path) {
-            newErrors[err.path[0]] = err.message;
+        error.issues.forEach((issue) => {
+          if (issue.path && issue.path.length > 0) {
+            newErrors[issue.path[0] as string] = issue.message;
           }
         });
         setErrors(newErrors);
@@ -137,7 +151,7 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       toast({ title: 'Please fix validation errors', variant: 'destructive' });
       return;
@@ -145,9 +159,14 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
     try {
       await onSubmit(formData as NewsletterIssueFormData);
-      toast({ title: `Newsletter issue ${issue ? 'updated' : 'created'} successfully` });
+      toast({
+        title: `Newsletter issue ${issue ? 'updated' : 'created'} successfully`,
+      });
     } catch (error) {
-      toast({ title: 'Failed to save newsletter issue', variant: 'destructive' });
+      toast({
+        title: 'Failed to save newsletter issue',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -159,7 +178,7 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
     const updatedData = { ...formData, status: 'PUBLISHED' as const };
     setFormData(updatedData);
-    
+
     try {
       await onSubmit(updatedData as NewsletterIssueFormData);
       toast({ title: 'Newsletter issue scheduled for publishing' });
@@ -170,18 +189,28 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
   const handleSendNow = async () => {
     if (formData.status !== 'PUBLISHED') {
-      toast({ title: 'Newsletter must be published before sending', variant: 'destructive' });
+      toast({
+        title: 'Newsletter must be published before sending',
+        variant: 'destructive',
+      });
       return;
     }
 
-    if (!confirm('Are you sure you want to send this newsletter to all subscribers?')) {
+    if (
+      !confirm(
+        'Are you sure you want to send this newsletter to all subscribers?'
+      )
+    ) {
       return;
     }
 
     try {
-      const response = await fetch(`/api/admin/newsletter/issues/${issue.id}/send`, {
-        method: 'POST',
-      });
+      const response = await fetch(
+        `/api/admin/newsletter/issues/${issue.id}/send`,
+        {
+          method: 'POST',
+        }
+      );
 
       if (response.ok) {
         toast({ title: 'Newsletter sent successfully' });
@@ -200,7 +229,9 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">
-              {issue ? `Edit Newsletter Issue #${issue.issueNumber}` : `Create Newsletter Issue #${nextIssueNumber}`}
+              {issue
+                ? `Edit Newsletter Issue #${issue.issueNumber}`
+                : `Create Newsletter Issue #${nextIssueNumber}`}
             </h1>
             {lastSaved && (
               <p className="text-sm text-gray-500 mt-1">
@@ -209,22 +240,28 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
               </p>
             )}
           </div>
-          
+
           <div className="flex gap-2">
             <Button variant="outline" onClick={onCancel} disabled={isLoading}>
               Cancel
             </Button>
-            
+
             {formData.status === 'DRAFT' && (
               <Button
                 variant="outline"
-                onClick={() => setFormData(prev => ({ ...prev, status: 'PUBLISHED', publishedAt: new Date() }))}
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    status: 'PUBLISHED',
+                    publishedAt: new Date(),
+                  }))
+                }
                 disabled={isLoading}
               >
                 Publish Now
               </Button>
             )}
-            
+
             {formData.status === 'PUBLISHED' && issue && !issue.sentAt && (
               <Button
                 variant="default"
@@ -234,7 +271,7 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
                 Send to Subscribers
               </Button>
             )}
-            
+
             <Button onClick={handleSubmit} disabled={isLoading}>
               {isLoading ? 'Saving...' : issue ? 'Update' : 'Create'}
             </Button>
@@ -245,32 +282,49 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-2">Title *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Title *
+                </label>
                 <Input
                   value={formData.title}
-                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   placeholder="Enter newsletter title"
                   className={errors.title ? 'border-red-500' : ''}
                 />
-                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
+                {errors.title && (
+                  <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+                )}
               </div>
 
               <div>
                 <label className="block text-sm font-medium mb-2">Slug *</label>
                 <Input
                   value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
+                  }
                   placeholder="newsletter-issue-slug"
                   className={errors.slug ? 'border-red-500' : ''}
                 />
-                {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug}</p>}
+                {errors.slug && (
+                  <p className="text-red-500 text-sm mt-1">{errors.slug}</p>
+                )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Summary</label>
+                <label className="block text-sm font-medium mb-2">
+                  Summary
+                </label>
                 <textarea
                   value={formData.summary}
-                  onChange={(e) => setFormData(prev => ({ ...prev, summary: e.target.value }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      summary: e.target.value,
+                    }))
+                  }
                   placeholder="Brief newsletter summary (max 500 characters)"
                   className="w-full p-3 border rounded-md resize-none"
                   rows={3}
@@ -282,28 +336,41 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Content *</label>
+                <label className="block text-sm font-medium mb-2">
+                  Content *
+                </label>
                 <div className="border rounded-md">
                   <Editor
                     content={formData.content}
-                    onChange={(content) => setFormData(prev => ({ ...prev, content }))}
+                    onChange={(content) =>
+                      setFormData((prev) => ({ ...prev, content }))
+                    }
                     placeholder="Write your newsletter content here..."
                   />
                 </div>
-                {errors.content && <p className="text-red-500 text-sm mt-1">{errors.content}</p>}
+                {errors.content && (
+                  <p className="text-red-500 text-sm mt-1">{errors.content}</p>
+                )}
               </div>
             </div>
 
             <div className="space-y-6">
               <Card className="p-4">
                 <h3 className="font-medium mb-4">Publishing Options</h3>
-                
+
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2">Status</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Status
+                    </label>
                     <Select
                       value={formData.status}
-                      onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as any }))}
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: value as any,
+                        }))
+                      }
                     >
                       <option value="DRAFT">Draft</option>
                       <option value="PUBLISHED">Published</option>
@@ -313,26 +380,38 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
                   {formData.status === 'PUBLISHED' && (
                     <div>
-                      <label className="block text-sm font-medium mb-2">Publish Date</label>
+                      <label className="block text-sm font-medium mb-2">
+                        Publish Date
+                      </label>
                       <Input
                         type="datetime-local"
-                        value={formData.publishedAt ? formData.publishedAt.toISOString().slice(0, 16) : ''}
-                        onChange={(e) => setFormData(prev => ({ 
-                          ...prev, 
-                          publishedAt: e.target.value ? new Date(e.target.value) : undefined 
-                        }))}
+                        value={
+                          formData.publishedAt
+                            ? formData.publishedAt.toISOString().slice(0, 16)
+                            : ''
+                        }
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            publishedAt: e.target.value
+                              ? new Date(e.target.value)
+                              : undefined,
+                          }))
+                        }
                       />
-                      
-                      {formData.publishedAt && formData.publishedAt > new Date() && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full mt-2"
-                          onClick={handleSchedulePublish}
-                        >
-                          Schedule for {formData.publishedAt.toLocaleDateString()}
-                        </Button>
-                      )}
+
+                      {formData.publishedAt &&
+                        formData.publishedAt > new Date() && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="w-full mt-2"
+                            onClick={handleSchedulePublish}
+                          >
+                            Schedule for{' '}
+                            {formData.publishedAt.toLocaleDateString()}
+                          </Button>
+                        )}
                     </div>
                   )}
                 </div>
@@ -340,27 +419,33 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
 
               <Card className="p-4">
                 <h3 className="font-medium mb-4">Issue Information</h3>
-                
+
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Issue Number:</span>
-                    <span className="font-medium">#{issue?.issueNumber || nextIssueNumber}</span>
+                    <span className="font-medium">
+                      #{issue?.issueNumber || nextIssueNumber}
+                    </span>
                   </div>
-                  
+
                   {issue?.createdAt && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Created:</span>
-                      <span>{new Date(issue.createdAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(issue.createdAt).toLocaleDateString()}
+                      </span>
                     </div>
                   )}
-                  
+
                   {issue?.updatedAt && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Updated:</span>
-                      <span>{new Date(issue.updatedAt).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(issue.updatedAt).toLocaleDateString()}
+                      </span>
                     </div>
                   )}
-                  
+
                   {issue?.sentAt && (
                     <div className="flex justify-between">
                       <span className="text-gray-600">Sent:</span>
@@ -373,17 +458,19 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
               {formData.status === 'PUBLISHED' && (
                 <Card className="p-4">
                   <h3 className="font-medium mb-4">Preview & Send</h3>
-                  
+
                   <div className="space-y-3">
                     <Button
                       type="button"
                       variant="outline"
                       className="w-full"
-                      onClick={() => window.open(`/newsletter/${formData.slug}`, '_blank')}
+                      onClick={() =>
+                        window.open(`/newsletter/${formData.slug}`, '_blank')
+                      }
                     >
                       Preview Newsletter
                     </Button>
-                    
+
                     {issue && !issue.sentAt && (
                       <Button
                         type="button"
@@ -394,7 +481,7 @@ export function NewsletterIssueForm({ issue, onSubmit, onCancel, isLoading = fal
                         Send to Subscribers
                       </Button>
                     )}
-                    
+
                     {issue?.sentAt && (
                       <div className="text-center text-sm text-green-600">
                         ✓ Sent to subscribers

@@ -9,7 +9,9 @@ interface NewsletterIssueEditFormProps {
   issue: any;
 }
 
-export function NewsletterIssueEditForm({ issue }: NewsletterIssueEditFormProps) {
+export function NewsletterIssueEditForm({
+  issue,
+}: NewsletterIssueEditFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,10 +35,10 @@ export function NewsletterIssueEditForm({ issue }: NewsletterIssueEditFormProps)
       }
     } catch (error) {
       console.error('Error updating newsletter issue:', error);
-      toast({ 
-        title: 'Failed to update newsletter issue', 
+      toast({
+        title: 'Failed to update newsletter issue',
         description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive' 
+        variant: 'destructive',
       });
       throw error;
     } finally {

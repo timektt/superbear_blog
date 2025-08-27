@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = createNewsletterIssueSchema.safeParse(body);
     if (!validationResult.success) {

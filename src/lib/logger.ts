@@ -163,13 +163,23 @@ class Logger {
       ...context,
       api: { method, url, statusCode, duration },
     };
-    
+
     if (statusCode >= 400) {
-      this.error(`API ${method} ${url} - ${statusCode} (${duration}ms)`, undefined, apiContext);
+      this.error(
+        `API ${method} ${url} - ${statusCode} (${duration}ms)`,
+        undefined,
+        apiContext
+      );
     } else if (statusCode >= 300) {
-      this.warn(`API ${method} ${url} - ${statusCode} (${duration}ms)`, apiContext);
+      this.warn(
+        `API ${method} ${url} - ${statusCode} (${duration}ms)`,
+        apiContext
+      );
     } else {
-      this.info(`API ${method} ${url} - ${statusCode} (${duration}ms)`, apiContext);
+      this.info(
+        `API ${method} ${url} - ${statusCode} (${duration}ms)`,
+        apiContext
+      );
     }
   }
 }

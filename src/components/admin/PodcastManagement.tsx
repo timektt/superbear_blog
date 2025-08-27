@@ -71,7 +71,10 @@ export function PodcastManagement() {
       }
     } catch (error) {
       console.error('Error updating podcast status:', error);
-      toast({ title: 'Failed to update podcast status', variant: 'destructive' });
+      toast({
+        title: 'Failed to update podcast status',
+        variant: 'destructive',
+      });
     }
   };
 

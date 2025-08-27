@@ -14,12 +14,12 @@ interface AudioPlayerProps {
   showControls?: boolean;
 }
 
-export function AudioPlayer({ 
-  audioUrl, 
-  title, 
-  duration, 
-  autoPlay = false, 
-  showControls = true 
+export function AudioPlayer({
+  audioUrl,
+  title,
+  duration,
+  autoPlay = false,
+  showControls = true,
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -130,7 +130,7 @@ export function AudioPlayer({
   return (
     <div className="bg-card border rounded-lg p-4 space-y-4">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
-      
+
       <div className="flex items-center space-x-4">
         <Button
           variant="outline"

@@ -51,12 +51,14 @@ export function pageTitle(title: string, includeBase = true): string {
 }
 
 export function pageDescription(description: string): string {
-  return description.length > 160 ? `${description.substring(0, 157)}...` : description;
+  return description.length > 160
+    ? `${description.substring(0, 157)}...`
+    : description;
 }
 
 export function ogImage(url?: string, title?: string): string {
   if (url) return url;
-  
+
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
   if (title) {
     // In a real app, you might generate dynamic OG images
@@ -105,16 +107,20 @@ export function generateMetaTags(seo: SEOData): Metadata {
       url,
       siteName,
       locale,
-      images: image ? [{
-        url: image,
-        width: 1200,
-        height: 630,
-        alt: title,
-      }] : [],
+      images: image
+        ? [
+            {
+              url: image,
+              width: 1200,
+              height: 630,
+              alt: title,
+            },
+          ]
+        : [],
       ...(publishedTime && { publishedTime }),
       ...(modifiedTime && { modifiedTime }),
-      ...(author && { 
-        authors: authorUrl ? [{ name: author, url: authorUrl }] : [author] 
+      ...(author && {
+        authors: authorUrl ? [{ name: author, url: authorUrl }] : [author],
       }),
       ...(section && { section }),
       ...(tags.length > 0 && { tags }),
@@ -124,7 +130,9 @@ export function generateMetaTags(seo: SEOData): Metadata {
       title,
       description,
       images: image ? [image] : [],
-      creator: author ? `@${author.replace(/\s+/g, '').toLowerCase()}` : undefined,
+      creator: author
+        ? `@${author.replace(/\s+/g, '').toLowerCase()}`
+        : undefined,
     },
     robots: {
       index: !noindex,
@@ -165,12 +173,14 @@ export function generateArticleStructuredData(seo: ArticleSEO): object {
     '@id': url,
     headline: title,
     description,
-    image: image ? {
-      '@type': 'ImageObject',
-      url: image,
-      width: 1200,
-      height: 630,
-    } : undefined,
+    image: image
+      ? {
+          '@type': 'ImageObject',
+          url: image,
+          width: 1200,
+          height: 630,
+        }
+      : undefined,
     url,
     datePublished: publishedTime,
     dateModified: modifiedTime || publishedTime,
@@ -196,7 +206,7 @@ export function generateArticleStructuredData(seo: ArticleSEO): object {
     },
     ...(content && { articleBody: content }),
     ...(wordCount && { wordCount }),
-    ...(readingTime && { 
+    ...(readingTime && {
       timeRequired: `PT${readingTime}M`,
       estimatedReadingTime: `${readingTime} minutes`,
     }),
@@ -270,7 +280,8 @@ export function generateOrganizationStructuredData(): object {
     '@type': 'Organization',
     '@id': 'https://superbear.com#organization',
     name: 'SuperBear',
-    description: 'A CMS-based tech news platform focused on delivering filtered, in-depth content for developers, AI builders, and tech entrepreneurs.',
+    description:
+      'A CMS-based tech news platform focused on delivering filtered, in-depth content for developers, AI builders, and tech entrepreneurs.',
     url: 'https://superbear.com',
     logo: {
       '@type': 'ImageObject',
@@ -365,17 +376,21 @@ export function createListPageMetadata(
 
 export function createSearchPageMetadata(query?: string): Metadata {
   const title = query ? `Search results for "${query}"` : 'Search';
-  const description = query 
+  const description = query
     ? `Find articles about ${query} on SuperBear Blog`
     : 'Search for tech news, AI updates, developer tools, and startup insights';
-  
-  return createListPageMetadata(title, description, `/search${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+
+  return createListPageMetadata(
+    title,
+    description,
+    `/search${query ? `?q=${encodeURIComponent(query)}` : ''}`
+  );
 }
 
 export function createTagPageMetadata(tagName: string): Metadata {
   const title = `#${tagName}`;
   const description = `Articles tagged with ${tagName} - Latest tech news and insights`;
-  
+
   return createListPageMetadata(title, description, `/tag/${tagName}`);
 }
 
@@ -400,11 +415,15 @@ export function calculateReadingTime(content: string): number {
 /**
  * Generate social media sharing URLs
  */
-export function generateSharingUrls(url: string, title: string, description?: string) {
+export function generateSharingUrls(
+  url: string,
+  title: string,
+  description?: string
+) {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || '');
-  
+
   return {
     twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,

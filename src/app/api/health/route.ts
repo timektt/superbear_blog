@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import { getSafePrismaClient } from '@/lib/db-safe/client';
 import { logger } from '@/lib/logger';
 import { safeEnv } from '@/lib/env';
-import { withCircuitBreaker, getCircuitBreakerStats } from '@/lib/circuit-breaker';
+import {
+  withCircuitBreaker,
+  getCircuitBreakerStats,
+} from '@/lib/circuit-breaker';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -37,22 +40,25 @@ export async function GET(): Promise<NextResponse<HealthResponse>> {
       async () => {
         const dbStart = Date.now();
         const prisma = getSafePrismaClient();
-        
+
         if (!prisma) {
           throw new Error('Database client unavailable');
         }
 
         // Race between query and timeout
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Database timeout')), safeEnv.DB_HEALTHCHECK_TIMEOUT_MS);
+          setTimeout(
+            () => reject(new Error('Database timeout')),
+            safeEnv.DB_HEALTHCHECK_TIMEOUT_MS
+          );
         });
 
         const queryPromise = prisma.$queryRaw`SELECT 1 as health_check`;
-        
+
         await Promise.race([queryPromise, timeoutPromise]);
-        
+
         const responseTime = Date.now() - dbStart;
-        
+
         // Determine status based on response time
         if (responseTime < 500) {
           return { status: 'ok' as const, responseTime };
@@ -111,13 +117,14 @@ export async function GET(): Promise<NextResponse<HealthResponse>> {
   }
 
   // Return appropriate HTTP status
-  const httpStatus = overallStatus === 'ok' ? 200 : overallStatus === 'degraded' ? 200 : 503;
-  
-  return NextResponse.json(healthResponse, { 
+  const httpStatus =
+    overallStatus === 'ok' ? 200 : overallStatus === 'degraded' ? 200 : 503;
+
+  return NextResponse.json(healthResponse, {
     status: httpStatus,
     headers: {
       'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'Pragma': 'no-cache',
+      Pragma: 'no-cache',
     },
   });
 }

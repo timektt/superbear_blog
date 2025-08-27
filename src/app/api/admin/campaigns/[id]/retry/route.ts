@@ -20,10 +20,7 @@ export async function POST(
     const { maxRetries } = await request.json();
     const campaignId = params.id;
 
-    const result = await retryFailedDeliveries(
-      campaignId,
-      maxRetries || 3
-    );
+    const result = await retryFailedDeliveries(campaignId, maxRetries || 3);
 
     if (!result.success) {
       return NextResponse.json({ error: result.message }, { status: 400 });
@@ -40,7 +37,6 @@ export async function POST(
       message: result.message,
       retriedCount: result.retriedCount,
     });
-
   } catch (error) {
     logger.error('Failed to retry deliveries', error as Error);
     return NextResponse.json(

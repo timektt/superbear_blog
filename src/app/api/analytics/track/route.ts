@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { 
-  trackArticleView, 
-  trackArticleInteraction, 
+import {
+  trackArticleView,
+  trackArticleInteraction,
   updateReadingSession,
-  generateSessionId 
+  generateSessionId,
 } from '@/lib/analytics-core';
 import { checkRateLimit } from '@/lib/security-enhanced';
 import { logger } from '@/lib/logger';
@@ -17,15 +17,21 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     // Rate limiting for analytics endpoints
-    const rateLimitResult = await checkRateLimit(request, 'webhook', 'analytics');
+    const rateLimitResult = await checkRateLimit(
+      request,
+      'webhook',
+      'analytics'
+    );
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded' },
-        { 
+        {
           status: 429,
           headers: {
             'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': new Date(rateLimitResult.resetTime).toISOString(),
+            'X-RateLimit-Reset': new Date(
+              rateLimitResult.resetTime
+            ).toISOString(),
           },
         }
       );
@@ -35,10 +41,7 @@ export async function POST(request: NextRequest) {
     try {
       body = await request.json();
     } catch (error) {
-      return NextResponse.json(
-        { error: 'Invalid JSON body' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
     }
 
     const { type, articleId, sessionId, ...eventData } = body;
@@ -52,16 +55,18 @@ export async function POST(request: NextRequest) {
         if (!global.devAnalyticsLogged) {
           global.devAnalyticsLogged = new Set();
         }
-        
+
         if (!global.devAnalyticsLogged.has(logKey)) {
-          logger.info('Analytics in development mode - using defaults for missing fields');
+          logger.info(
+            'Analytics in development mode - using defaults for missing fields'
+          );
           global.devAnalyticsLogged.add(logKey);
         }
 
-        return NextResponse.json({ 
-          success: true, 
+        return NextResponse.json({
+          success: true,
           mode: 'development',
-          message: 'Analytics tracking disabled in development mode'
+          message: 'Analytics tracking disabled in development mode',
         });
       }
     }
@@ -70,20 +75,20 @@ export async function POST(request: NextRequest) {
     if (!type || !articleId) {
       const userAgent = request.headers.get('user-agent') || '';
       const referer = request.headers.get('referer') || '';
-      
+
       // Skip logging for common bot/crawler requests
       const isBot = /bot|crawler|spider|scraper/i.test(userAgent);
       if (!isBot) {
-        logger.warn('Analytics tracking failed - missing required fields', { 
-          type, 
-          articleId, 
+        logger.warn('Analytics tracking failed - missing required fields', {
+          type,
+          articleId,
           userAgent: userAgent.substring(0, 100),
           referer,
           bodyKeys: Object.keys(body),
-          body: JSON.stringify(body).substring(0, 500)
+          body: JSON.stringify(body).substring(0, 500),
         });
       }
-      
+
       return NextResponse.json(
         { error: 'Missing required fields: type, articleId' },
         { status: 400 }
@@ -93,21 +98,24 @@ export async function POST(request: NextRequest) {
     // Validate article ID format
     if (!articleId || typeof articleId !== 'string' || articleId.length < 10) {
       if (IS_DEVELOPMENT) {
-        return NextResponse.json({ 
-          success: true, 
+        return NextResponse.json({
+          success: true,
           skipped: true,
-          reason: 'Invalid article ID in development mode'
+          reason: 'Invalid article ID in development mode',
         });
       }
-      
-      logger.warn('Analytics tracking skipped - invalid article ID', { articleId });
+
+      logger.warn('Analytics tracking skipped - invalid article ID', {
+        articleId,
+      });
       return NextResponse.json({ success: true, skipped: true });
     }
 
     // Get client IP and user agent for session generation
-    const clientIP = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
+    const clientIP =
+      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
     const userAgent = request.headers.get('user-agent') || '';
 
     // Generate session ID if not provided
@@ -125,7 +133,9 @@ export async function POST(request: NextRequest) {
         referrer: eventData.referrer,
         country: await getCountryFromIP(clientIP),
         device: eventData.metadata?.device,
-        timestamp: eventData.timestamp ? new Date(eventData.timestamp) : undefined,
+        timestamp: eventData.timestamp
+          ? new Date(eventData.timestamp)
+          : undefined,
         metadata: eventData.metadata,
       });
 
@@ -137,22 +147,25 @@ export async function POST(request: NextRequest) {
         articlesRead: 1,
         pagesViewed: 1,
       });
-
     } else if (type === 'interaction') {
       // Track article interaction
-      await trackArticleInteraction({
-        articleId,
-        sessionId: finalSessionId,
-        type: 'interaction',
-        interactionType: eventData.interactionType,
-        elementId: eventData.elementId,
-        linkUrl: eventData.linkUrl,
-        socialPlatform: eventData.socialPlatform,
-        scrollPosition: eventData.scrollPosition,
-        timeFromStart: eventData.timeFromStart,
-        timestamp: eventData.timestamp ? new Date(eventData.timestamp) : undefined,
-      }, eventData.viewId);
-
+      await trackArticleInteraction(
+        {
+          articleId,
+          sessionId: finalSessionId,
+          type: 'interaction',
+          interactionType: eventData.interactionType,
+          elementId: eventData.elementId,
+          linkUrl: eventData.linkUrl,
+          socialPlatform: eventData.socialPlatform,
+          scrollPosition: eventData.scrollPosition,
+          timeFromStart: eventData.timeFromStart,
+          timestamp: eventData.timestamp
+            ? new Date(eventData.timestamp)
+            : undefined,
+        },
+        eventData.viewId
+      );
     } else {
       return NextResponse.json(
         { error: 'Invalid event type' },
@@ -161,7 +174,6 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(result);
-
   } catch (error) {
     return handleApiError(error);
   }
@@ -171,18 +183,22 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json();
-    const { viewId, timeOnPage, scrollDepth, linksClicked, socialShares, bounced } = body;
+    const {
+      viewId,
+      timeOnPage,
+      scrollDepth,
+      linksClicked,
+      socialShares,
+      bounced,
+    } = body;
 
     if (!viewId) {
-      return NextResponse.json(
-        { error: 'Missing viewId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing viewId' }, { status: 400 });
     }
 
     // Update view record with final metrics
     const { prisma } = await import('@/lib/prisma');
-    
+
     await prisma.articleView.update({
       where: { id: viewId },
       data: {
@@ -195,7 +211,6 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     logger.error('Analytics update failed', error as Error);
     return NextResponse.json(

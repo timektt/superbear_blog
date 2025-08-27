@@ -48,7 +48,8 @@ test.describe('Media Handling', () => {
 
     // Mock image upload API
     await page.route('**/api/upload-image', async (route) => {
-      uploadedImageUrl = 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg';
+      uploadedImageUrl =
+        'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg';
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
@@ -104,14 +105,16 @@ test.describe('Media Handling', () => {
     await expect(errorMessage).toContainText('Invalid file format');
   });
 
-  test('should remove image when delete button is clicked', async ({ page }) => {
+  test('should remove image when delete button is clicked', async ({
+    page,
+  }) => {
     // Mock successful image upload first
     await page.route('**/api/upload-image', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ 
-          url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg' 
+        body: JSON.stringify({
+          url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg',
         }),
       });
     });
@@ -141,7 +144,9 @@ test.describe('Media Handling', () => {
     await expect(imagePreview).not.toBeVisible();
   });
 
-  test('should delete associated image when article is deleted', async ({ page }) => {
+  test('should delete associated image when article is deleted', async ({
+    page,
+  }) => {
     let imageDeleteCalled = false;
 
     // Mock articles list with image
@@ -155,8 +160,9 @@ test.describe('Media Handling', () => {
               id: 'article-1',
               title: 'Test Article',
               status: 'DRAFT',
-              image: 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg',
-            }
+              image:
+                'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg',
+            },
           ]),
         });
       }
@@ -169,9 +175,9 @@ test.describe('Media Handling', () => {
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             success: true,
-            message: 'Article and associated image deleted successfully' 
+            message: 'Article and associated image deleted successfully',
           }),
         });
       }
@@ -181,7 +187,7 @@ test.describe('Media Handling', () => {
 
     // Delete the article
     await page.click('[data-testid="delete-article-article-1"]');
-    
+
     // Confirm deletion
     await page.click('[data-testid="confirm-delete"]');
 
@@ -197,7 +203,7 @@ test.describe('Media Handling', () => {
 
     // Try to upload a non-image file
     const fileInput = page.locator('input[type="file"]');
-    
+
     // Check if file input has accept attribute for images
     const acceptAttribute = await fileInput.getAttribute('accept');
     expect(acceptAttribute).toContain('image/');
@@ -207,12 +213,12 @@ test.describe('Media Handling', () => {
     // Mock slow image upload
     await page.route('**/api/upload-image', async (route) => {
       // Simulate slow upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ 
-          url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg' 
+        body: JSON.stringify({
+          url: 'https://res.cloudinary.com/demo/image/upload/v1234567890/test-image.jpg',
         }),
       });
     });

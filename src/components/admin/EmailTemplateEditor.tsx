@@ -22,7 +22,10 @@ interface TemplateData {
   designConfig: unknown;
 }
 
-export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplateEditorProps) {
+export default function EmailTemplateEditor({
+  templateId,
+  onSave,
+}: EmailTemplateEditorProps) {
   const [template, setTemplate] = useState<TemplateData>({
     name: '',
     subject: '',
@@ -31,7 +34,7 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
     status: TemplateStatus.DRAFT,
     htmlContent: '',
     textContent: '',
-    designConfig: DEFAULT_DESIGN_CONFIG
+    designConfig: DEFAULT_DESIGN_CONFIG,
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -65,7 +68,7 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
           status: data.status,
           htmlContent: data.htmlContent,
           textContent: data.textContent || '',
-          designConfig: data.designConfig || DEFAULT_DESIGN_CONFIG
+          designConfig: data.designConfig || DEFAULT_DESIGN_CONFIG,
         });
       } else {
         showToast('Failed to load template', 'error');
@@ -80,28 +83,34 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
 
   // Save template
   const handleSave = async () => {
-    if (!template.name.trim() || !template.subject.trim() || !template.htmlContent.trim()) {
+    if (
+      !template.name.trim() ||
+      !template.subject.trim() ||
+      !template.htmlContent.trim()
+    ) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
     try {
       setSaving(true);
-      const url = templateId 
+      const url = templateId
         ? `/api/admin/email-templates/${templateId}`
         : '/api/admin/email-templates';
-      
+
       const method = templateId ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(template)
+        body: JSON.stringify(template),
       });
 
       if (response.ok) {
         showToast(
-          templateId ? 'Template updated successfully' : 'Template created successfully',
+          templateId
+            ? 'Template updated successfully'
+            : 'Template created successfully',
           'success'
         );
         onSave?.();
@@ -134,17 +143,20 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
         return;
       }
 
-      const response = await fetch(`/api/admin/email-templates/${templateId}/preview`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          mode: previewMode,
-          variables: {
-            subscriber: { name: 'John Doe' },
-            campaign: { subject: template.subject }
-          }
-        })
-      });
+      const response = await fetch(
+        `/api/admin/email-templates/${templateId}/preview`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mode: previewMode,
+            variables: {
+              subscriber: { name: 'John Doe' },
+              campaign: { subject: template.subject },
+            },
+          }),
+        }
+      );
 
       const data = await response.json();
 
@@ -221,7 +233,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                 <input
                   type="text"
                   value={template.name}
-                  onChange={(e) => setTemplate({ ...template, name: e.target.value })}
+                  onChange={(e) =>
+                    setTemplate({ ...template, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="e.g., Weekly Newsletter"
                 />
@@ -233,7 +247,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                 <input
                   type="text"
                   value={template.subject}
-                  onChange={(e) => setTemplate({ ...template, subject: e.target.value })}
+                  onChange={(e) =>
+                    setTemplate({ ...template, subject: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="e.g., Your Weekly Tech Update - {{campaign.date}}"
                 />
@@ -244,7 +260,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                 </label>
                 <textarea
                   value={template.description}
-                  onChange={(e) => setTemplate({ ...template, description: e.target.value })}
+                  onChange={(e) =>
+                    setTemplate({ ...template, description: e.target.value })
+                  }
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Brief description of this template"
@@ -257,7 +275,12 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                   </label>
                   <select
                     value={template.category}
-                    onChange={(e) => setTemplate({ ...template, category: e.target.value as TemplateCategory })}
+                    onChange={(e) =>
+                      setTemplate({
+                        ...template,
+                        category: e.target.value as TemplateCategory,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="NEWSLETTER">Newsletter</option>
@@ -274,7 +297,12 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                   </label>
                   <select
                     value={template.status}
-                    onChange={(e) => setTemplate({ ...template, status: e.target.value as TemplateStatus })}
+                    onChange={(e) =>
+                      setTemplate({
+                        ...template,
+                        status: e.target.value as TemplateStatus,
+                      })
+                    }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="DRAFT">Draft</option>
@@ -293,7 +321,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
             </h2>
             <textarea
               value={template.htmlContent}
-              onChange={(e) => setTemplate({ ...template, htmlContent: e.target.value })}
+              onChange={(e) =>
+                setTemplate({ ...template, htmlContent: e.target.value })
+              }
               rows={20}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
               placeholder="Enter your HTML email template here..."
@@ -301,11 +331,21 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
             <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
               <p>Available variables:</p>
               <ul className="list-disc list-inside mt-1 space-y-1">
-                <li><code>{'{{subscriber.name}}'}</code> - Subscriber name</li>
-                <li><code>{'{{articles.featured}}'}</code> - Featured article</li>
-                <li><code>{'{{articles.latest}}'}</code> - Latest articles array</li>
-                <li><code>{'{{site.name}}'}</code> - Site name</li>
-                <li><code>{'{{campaign.unsubscribeUrl}}'}</code> - Unsubscribe URL</li>
+                <li>
+                  <code>{'{{subscriber.name}}'}</code> - Subscriber name
+                </li>
+                <li>
+                  <code>{'{{articles.featured}}'}</code> - Featured article
+                </li>
+                <li>
+                  <code>{'{{articles.latest}}'}</code> - Latest articles array
+                </li>
+                <li>
+                  <code>{'{{site.name}}'}</code> - Site name
+                </li>
+                <li>
+                  <code>{'{{campaign.unsubscribeUrl}}'}</code> - Unsubscribe URL
+                </li>
               </ul>
             </div>
           </div>
@@ -317,7 +357,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
             </h2>
             <textarea
               value={template.textContent}
-              onChange={(e) => setTemplate({ ...template, textContent: e.target.value })}
+              onChange={(e) =>
+                setTemplate({ ...template, textContent: e.target.value })
+              }
               rows={10}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
               placeholder="Plain text version of your email (optional - will be auto-generated if not provided)"
@@ -378,12 +420,17 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                     📊 Email Size: {(previewSize / 1024).toFixed(1)} KB
                   </span>
                   <div className="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div 
+                    <div
                       className={`h-2 rounded-full ${
-                        previewSize > 102 * 1024 ? 'bg-red-500' : 
-                        previewSize > 90 * 1024 ? 'bg-yellow-500' : 'bg-green-500'
+                        previewSize > 102 * 1024
+                          ? 'bg-red-500'
+                          : previewSize > 90 * 1024
+                            ? 'bg-yellow-500'
+                            : 'bg-green-500'
                       }`}
-                      style={{ width: `${Math.min((previewSize / (102 * 1024)) * 100, 100)}%` }}
+                      style={{
+                        width: `${Math.min((previewSize / (102 * 1024)) * 100, 100)}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
@@ -396,7 +443,7 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
             <div className="border border-gray-200 dark:border-gray-600 rounded-md min-h-[400px] p-4 bg-gray-50 dark:bg-gray-900">
               {previewContent ? (
                 previewMode === 'html' ? (
-                  <div 
+                  <div
                     dangerouslySetInnerHTML={{ __html: previewContent }}
                     className="prose prose-sm max-w-none"
                   />
@@ -407,7 +454,9 @@ export default function EmailTemplateEditor({ templateId, onSave }: EmailTemplat
                 )
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
-                  {templateId ? 'Click "Preview" to see your template' : 'Save template first to generate preview'}
+                  {templateId
+                    ? 'Click "Preview" to see your template'
+                    : 'Save template first to generate preview'}
                 </div>
               )}
             </div>

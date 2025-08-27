@@ -9,7 +9,7 @@ export async function POST(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -30,24 +30,33 @@ export async function POST(
     });
 
     if (!issue) {
-      return NextResponse.json({ error: 'Newsletter issue not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Newsletter issue not found' },
+        { status: 404 }
+      );
     }
 
     if (issue.status !== 'PUBLISHED') {
-      return NextResponse.json({ 
-        error: 'Newsletter must be published before sending' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Newsletter must be published before sending',
+        },
+        { status: 400 }
+      );
     }
 
     if (issue.sentAt) {
-      return NextResponse.json({ 
-        error: 'Newsletter has already been sent' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'Newsletter has already been sent',
+        },
+        { status: 400 }
+      );
     }
 
     // Get all newsletter subscribers
     const subscribers = await prisma.newsletterSubscriber.findMany({
-      where: { 
+      where: {
         isActive: true,
         isVerified: true,
       },
@@ -55,37 +64,44 @@ export async function POST(
     });
 
     if (subscribers.length === 0) {
-      return NextResponse.json({ 
-        error: 'No active subscribers found' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: 'No active subscribers found',
+        },
+        { status: 400 }
+      );
     }
 
     // Here you would integrate with your email service (e.g., SendGrid, Mailgun, etc.)
     // For now, we'll simulate the sending process
-    
+
     // In a real implementation, you would:
     // 1. Queue the emails for sending
     // 2. Use a background job processor
     // 3. Handle bounces and unsubscribes
     // 4. Track delivery status
-    
-    console.log(`Sending newsletter "${issue.title}" to ${subscribers.length} subscribers`);
-    
+
+    console.log(
+      `Sending newsletter "${issue.title}" to ${subscribers.length} subscribers`
+    );
+
     // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Update the newsletter issue with sent timestamp
     const updatedIssue = await prisma.newsletterIssue.update({
       where: { id: params.id },
-      data: { 
+      data: {
         sentAt: new Date(),
       },
     });
 
     // Log the send event (in a real app, you'd want more detailed logging)
-    console.log(`Newsletter issue ${issue.id} sent successfully to ${subscribers.length} subscribers`);
+    console.log(
+      `Newsletter issue ${issue.id} sent successfully to ${subscribers.length} subscribers`
+    );
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       message: `Newsletter sent to ${subscribers.length} subscribers`,
       sentAt: updatedIssue.sentAt,

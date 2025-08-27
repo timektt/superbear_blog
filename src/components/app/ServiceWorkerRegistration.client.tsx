@@ -19,7 +19,7 @@ function ServiceWorkerRegistration() {
         });
     }
   }, []);
-  
+
   return null;
 }
 

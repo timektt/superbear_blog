@@ -37,13 +37,9 @@ export default function ListPageLayout({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {title}
-            </h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
             {subtitle && (
-              <p className="text-lg text-muted-foreground">
-                {subtitle}
-              </p>
+              <p className="text-lg text-muted-foreground">{subtitle}</p>
             )}
             {total > 0 && (
               <p className="text-sm text-muted-foreground mt-2">
@@ -102,7 +98,7 @@ export default function ListPageLayout({
               <div className="lg:col-span-4">
                 <RightRail
                   title="Most Popular"
-                  items={mostPopular.map(item => ({
+                  items={mostPopular.map((item) => ({
                     title: item.title,
                     category: item.category,
                     imageUrl: item.imageUrl,

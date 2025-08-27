@@ -233,10 +233,10 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : 'An unexpected error occurred';
-      
+
       setError(errorMessage);
       setFormError(errorMessage);
-      
+
       showError(
         mode === 'create'
           ? 'Failed to create article'

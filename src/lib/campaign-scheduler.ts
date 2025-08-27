@@ -5,32 +5,40 @@ import { logger } from '@/lib/logger';
 export async function processScheduledCampaigns(): Promise<void> {
   try {
     logger.info('Processing scheduled campaigns...');
-    
+
     const scheduledCampaigns = await getScheduledCampaigns();
-    
+
     if (scheduledCampaigns.length === 0) {
       logger.info('No scheduled campaigns to process');
       return;
     }
 
-    logger.info(`Found ${scheduledCampaigns.length} scheduled campaigns to process`);
+    logger.info(
+      `Found ${scheduledCampaigns.length} scheduled campaigns to process`
+    );
 
     // Process each campaign
     for (const campaign of scheduledCampaigns) {
       try {
-        logger.info(`Processing campaign: ${campaign.title}`, { campaignId: campaign.id });
-        
-        await sendCampaign(campaign.id);
-        
-        logger.info(`Successfully sent scheduled campaign: ${campaign.title}`, { 
+        logger.info(`Processing campaign: ${campaign.title}`, {
           campaignId: campaign.id,
-          recipients: campaign.recipients 
+        });
+
+        await sendCampaign(campaign.id);
+
+        logger.info(`Successfully sent scheduled campaign: ${campaign.title}`, {
+          campaignId: campaign.id,
+          recipients: campaign.recipients,
         });
       } catch (error) {
-        logger.error(`Failed to send scheduled campaign: ${campaign.title}`, error as Error, {
-          campaignId: campaign.id,
-        });
-        
+        logger.error(
+          `Failed to send scheduled campaign: ${campaign.title}`,
+          error as Error,
+          {
+            campaignId: campaign.id,
+          }
+        );
+
         // Continue processing other campaigns even if one fails
         continue;
       }
@@ -47,7 +55,7 @@ export async function processScheduledCampaigns(): Promise<void> {
 export function shouldRunScheduler(): boolean {
   const now = new Date();
   const minutes = now.getMinutes();
-  
+
   // Run every 5 minutes (0, 5, 10, 15, etc.)
   return minutes % 5 === 0;
 }
@@ -56,21 +64,21 @@ export function shouldRunScheduler(): boolean {
 export function getNextScheduledRun(): Date {
   const now = new Date();
   const nextRun = new Date(now);
-  
+
   // Round up to next 5-minute interval
   const minutes = now.getMinutes();
   const nextMinutes = Math.ceil(minutes / 5) * 5;
-  
+
   if (nextMinutes >= 60) {
     nextRun.setHours(nextRun.getHours() + 1);
     nextRun.setMinutes(0);
   } else {
     nextRun.setMinutes(nextMinutes);
   }
-  
+
   nextRun.setSeconds(0);
   nextRun.setMilliseconds(0);
-  
+
   return nextRun;
 }
 
@@ -108,10 +116,10 @@ export async function runCampaignScheduler(): Promise<SchedulerStatus> {
   }
 
   try {
-    updateSchedulerStatus({ 
-      isRunning: true, 
+    updateSchedulerStatus({
+      isRunning: true,
       lastRun: new Date(),
-      errors: [] 
+      errors: [],
     });
 
     // Get count of scheduled campaigns
@@ -122,21 +130,21 @@ export async function runCampaignScheduler(): Promise<SchedulerStatus> {
     await processScheduledCampaigns();
 
     // Update next run time
-    updateSchedulerStatus({ 
+    updateSchedulerStatus({
       isRunning: false,
-      nextRun: getNextScheduledRun() 
+      nextRun: getNextScheduledRun(),
     });
 
     logger.info('Campaign scheduler completed successfully');
     return schedulerStatus;
-
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    
-    updateSchedulerStatus({ 
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error';
+
+    updateSchedulerStatus({
       isRunning: false,
       nextRun: getNextScheduledRun(),
-      errors: [errorMessage] 
+      errors: [errorMessage],
     });
 
     logger.error('Campaign scheduler failed', error as Error);

@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
         pages: Math.ceil(total / limit),
       },
     });
-
   } catch (error) {
     logger.error('Failed to get DLQ items', error as Error);
     return NextResponse.json(
@@ -99,7 +98,6 @@ export async function POST(request: NextRequest) {
       message: result.message,
       movedCount: result.movedCount,
     });
-
   } catch (error) {
     logger.error('Failed to move deliveries to DLQ', error as Error);
     return NextResponse.json(

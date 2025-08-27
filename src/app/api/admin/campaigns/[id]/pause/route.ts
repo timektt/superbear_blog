@@ -40,7 +40,6 @@ export async function POST(
       success: true,
       message: result.message,
     });
-
   } catch (error) {
     logger.error('Failed to pause campaign', error as Error);
     return NextResponse.json(

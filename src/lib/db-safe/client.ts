@@ -15,7 +15,10 @@ export function getSafePrismaClient(): PrismaClient | null {
   if (!prismaClient) {
     try {
       prismaClient = new PrismaClient({
-        log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+        log:
+          process.env.NODE_ENV === 'development'
+            ? ['error', 'warn']
+            : ['error'],
       });
     } catch (error) {
       console.warn('Failed to initialize Prisma client:', error);
@@ -31,7 +34,7 @@ export function getSafePrismaClient(): PrismaClient | null {
  */
 export async function testDatabaseConnection(): Promise<boolean> {
   const client = getSafePrismaClient();
-  
+
   if (!client) {
     return false;
   }

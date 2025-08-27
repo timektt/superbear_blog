@@ -8,15 +8,18 @@ interface ExtendedThemeProviderProps extends ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ children, ...props }: ExtendedThemeProviderProps) {
+export function ThemeProvider({
+  children,
+  ...props
+}: ExtendedThemeProviderProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Prevent theme transition flash during initial load
     document.documentElement.classList.add('theme-transition-disable');
-    
+
     setMounted(true);
-    
+
     // Re-enable transitions after a short delay
     const timer = setTimeout(() => {
       document.documentElement.classList.remove('theme-transition-disable');
@@ -50,13 +53,11 @@ export function ThemeProvider({ children, ...props }: ExtendedThemeProviderProps
       value={{
         light: 'light',
         dark: 'dark',
-        system: 'system'
+        system: 'system',
       }}
       {...props}
     >
-      <div className="theme-ready">
-        {children}
-      </div>
+      <div className="theme-ready">{children}</div>
     </NextThemesProvider>
   );
 }

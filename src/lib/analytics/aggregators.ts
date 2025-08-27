@@ -57,7 +57,7 @@ export async function aggregateCampaignAnalytics(
   campaignId?: string
 ): Promise<CampaignAnalytics[]> {
   const prisma = getSafePrismaClient();
-  
+
   if (!prisma) {
     // Return mock data when database is unavailable
     return generateMockCampaignAnalytics(startDate, endDate, campaignId);
@@ -107,15 +107,15 @@ export async function aggregateCampaignAnalytics(
     for (const campaign of campaigns) {
       const deliveries = campaign.deliveries;
       const events = campaign.events;
-      
+
       const metrics = {
         sent: deliveries.length,
-        delivered: deliveries.filter(d => d.deliveredAt).length,
-        opened: deliveries.filter(d => d.openedAt).length,
-        clicked: deliveries.filter(d => d.clickedAt).length,
-        bounced: deliveries.filter(d => d.bouncedAt).length,
-        complained: deliveries.filter(d => d.complainedAt).length,
-        unsubscribed: events.filter(e => e.type === 'UNSUBSCRIBED').length,
+        delivered: deliveries.filter((d) => d.deliveredAt).length,
+        opened: deliveries.filter((d) => d.openedAt).length,
+        clicked: deliveries.filter((d) => d.clickedAt).length,
+        bounced: deliveries.filter((d) => d.bouncedAt).length,
+        complained: deliveries.filter((d) => d.complainedAt).length,
+        unsubscribed: events.filter((e) => e.type === 'UNSUBSCRIBED').length,
       };
 
       campaignMetrics.set(campaign.id, {
@@ -148,7 +148,10 @@ export async function getAnalyticsSummary(
   startDate: Date,
   endDate: Date
 ): Promise<AnalyticsSummary> {
-  const campaignAnalytics = await aggregateCampaignAnalytics(startDate, endDate);
+  const campaignAnalytics = await aggregateCampaignAnalytics(
+    startDate,
+    endDate
+  );
 
   const summary = campaignAnalytics.reduce(
     (acc, campaign) => {
@@ -180,7 +183,8 @@ export async function getAnalyticsSummary(
   // Calculate rates
   if (summary.totalSent > 0) {
     summary.deliveryRate = (summary.totalDelivered / summary.totalSent) * 100;
-    summary.unsubscribeRate = (summary.totalUnsubscribed / summary.totalSent) * 100;
+    summary.unsubscribeRate =
+      (summary.totalUnsubscribed / summary.totalSent) * 100;
   }
 
   if (summary.totalDelivered > 0) {
@@ -203,18 +207,18 @@ export async function getEngagementMetrics(
   endDate?: Date
 ): Promise<EngagementMetrics[]> {
   const prisma = getSafePrismaClient();
-  
+
   if (!prisma) {
     return generateMockEngagementMetrics(articleId, startDate, endDate);
   }
 
   try {
     const whereClause: any = {};
-    
+
     if (articleId) {
       whereClause.articleId = articleId;
     }
-    
+
     if (startDate || endDate) {
       whereClause.timestamp = {};
       if (startDate) whereClause.timestamp.gte = startDate;
@@ -226,7 +230,9 @@ export async function getEngagementMetrics(
       where: articleId ? { id: articleId } : { status: 'PUBLISHED' },
       include: {
         views: {
-          where: whereClause.timestamp ? { timestamp: whereClause.timestamp } : {},
+          where: whereClause.timestamp
+            ? { timestamp: whereClause.timestamp }
+            : {},
           include: {
             interactions: true,
           },
@@ -234,10 +240,10 @@ export async function getEngagementMetrics(
       },
     });
 
-    return articles.map(article => {
+    return articles.map((article) => {
       const views = article.views;
       const totalViews = views.length;
-      
+
       if (totalViews === 0) {
         return {
           articleId: article.id,
@@ -256,16 +262,30 @@ export async function getEngagementMetrics(
       }
 
       // Calculate engagement metrics
-      const totalTimeOnPage = views.reduce((sum, view) => sum + (view.timeOnPage || 0), 0);
-      const totalScrollDepth = views.reduce((sum, view) => sum + (view.scrollDepth || 0), 0);
-      const bounces = views.filter(view => view.bounced).length;
-      const viewsWithInteractions = views.filter(view => view.interactions.length > 0).length;
-      
+      const totalTimeOnPage = views.reduce(
+        (sum, view) => sum + (view.timeOnPage || 0),
+        0
+      );
+      const totalScrollDepth = views.reduce(
+        (sum, view) => sum + (view.scrollDepth || 0),
+        0
+      );
+      const bounces = views.filter((view) => view.bounced).length;
+      const viewsWithInteractions = views.filter(
+        (view) => view.interactions.length > 0
+      ).length;
+
       // Count specific interaction types
-      const allInteractions = views.flatMap(view => view.interactions);
-      const socialShares = allInteractions.filter(i => i.type === 'SOCIAL_SHARE').length;
-      const linkClicks = allInteractions.filter(i => i.type === 'LINK_CLICK').length;
-      const newsletterSignups = views.filter(view => view.newsletterSignup).length;
+      const allInteractions = views.flatMap((view) => view.interactions);
+      const socialShares = allInteractions.filter(
+        (i) => i.type === 'SOCIAL_SHARE'
+      ).length;
+      const linkClicks = allInteractions.filter(
+        (i) => i.type === 'LINK_CLICK'
+      ).length;
+      const newsletterSignups = views.filter(
+        (view) => view.newsletterSignup
+      ).length;
 
       return {
         articleId: article.id,
@@ -321,7 +341,7 @@ function generateMockCampaignAnalytics(
 
   return mockCampaigns
     .filter((_, index) => !campaignId || index === 0)
-    .map(campaign => ({
+    .map((campaign) => ({
       ...campaign,
       period: {
         start: startDate,
@@ -363,7 +383,7 @@ function generateMockEngagementMetrics(
 
   return mockMetrics
     .filter((_, index) => !articleId || index === 0)
-    .map(metrics => ({
+    .map((metrics) => ({
       ...metrics,
       period: {
         start: startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),

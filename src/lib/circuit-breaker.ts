@@ -119,7 +119,9 @@ class CircuitBreaker {
       this.state = 'closed';
       this.failures = 0;
       this.nextAttemptTime = undefined;
-      logger.info('Circuit breaker reset to closed state after successful operation');
+      logger.info(
+        'Circuit breaker reset to closed state after successful operation'
+      );
     }
   }
 
@@ -145,8 +147,7 @@ class CircuitBreaker {
 
   private shouldAttemptReset(): boolean {
     return (
-      this.nextAttemptTime !== undefined &&
-      Date.now() >= this.nextAttemptTime
+      this.nextAttemptTime !== undefined && Date.now() >= this.nextAttemptTime
     );
   }
 }

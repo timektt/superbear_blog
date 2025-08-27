@@ -4,12 +4,13 @@ import { getDashboardAnalytics, getCategoryPerformance, getViewMetrics } from '@
 import { getAnalyticsSummary, getEngagementMetrics } from '@/lib/analytics/aggregators';
 import { handleApiError } from '@/lib/errors/handlers';
 import { logger } from '@/lib/logger';
+import { compressedApiRoute } from '@/lib/compression';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 // GET /api/admin/campaigns/analytics - Get enhanced analytics with time filtering
-export async function GET(request: NextRequest) {
+async function getHandler(request: NextRequest) {
   try {
     // Check admin authentication
     const authResult = await checkAdminAuth(request);
@@ -122,7 +123,7 @@ export async function GET(request: NextRequest) {
 }
 
 // POST /api/admin/campaigns/analytics - Refresh analytics data with time filtering
-export async function POST(request: NextRequest) {
+async function postHandler(request: NextRequest) {
   try {
     // Check admin authentication
     const authResult = await checkAdminAuth(request);
@@ -229,4 +230,13 @@ export async function POST(request: NextRequest) {
     logger.error('Failed to refresh campaign analytics', error as Error);
     return handleApiError(error);
   }
-}
+}ex
+port const GET = compressedApiRoute(getHandler, {
+  threshold: 2048, // Compress analytics responses larger than 2KB
+  level: 8, // High compression for analytics data
+});
+
+export const POST = compressedApiRoute(postHandler, {
+  threshold: 2048, // Compress analytics responses larger than 2KB
+  level: 8, // High compression for analytics data
+});

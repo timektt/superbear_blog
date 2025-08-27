@@ -43,11 +43,11 @@ export function useToast() {
   // Convenience methods
   const success = useCallback(
     (title: string, description?: string, options?: Partial<ToastOptions>) => {
-      return toast({ 
-        title, 
-        description, 
+      return toast({
+        title,
+        description,
         variant: 'success',
-        ...options 
+        ...options,
       });
     },
     [toast]
@@ -55,11 +55,11 @@ export function useToast() {
 
   const error = useCallback(
     (title: string, description?: string, options?: Partial<ToastOptions>) => {
-      return toast({ 
-        title, 
-        description, 
+      return toast({
+        title,
+        description,
         variant: 'destructive',
-        ...options 
+        ...options,
       });
     },
     [toast]
@@ -67,11 +67,11 @@ export function useToast() {
 
   const warning = useCallback(
     (title: string, description?: string, options?: Partial<ToastOptions>) => {
-      return toast({ 
-        title, 
-        description, 
+      return toast({
+        title,
+        description,
         variant: 'warning',
-        ...options 
+        ...options,
       });
     },
     [toast]
@@ -79,11 +79,11 @@ export function useToast() {
 
   const info = useCallback(
     (title: string, description?: string, options?: Partial<ToastOptions>) => {
-      return toast({ 
-        title, 
-        description, 
+      return toast({
+        title,
+        description,
         variant: 'default',
-        ...options 
+        ...options,
       });
     },
     [toast]

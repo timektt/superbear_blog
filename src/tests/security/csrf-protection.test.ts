@@ -7,7 +7,9 @@ jest.mock('next-auth', () => ({
   getServerSession: jest.fn(),
 }));
 
-const mockGetServerSession = getServerSession as jest.MockedFunction<typeof getServerSession>;
+const mockGetServerSession = getServerSession as jest.MockedFunction<
+  typeof getServerSession
+>;
 
 describe('CSRF Protection', () => {
   beforeEach(() => {
@@ -17,11 +19,11 @@ describe('CSRF Protection', () => {
   describe('CSRF Token Generation', () => {
     it('should generate valid CSRF tokens', () => {
       const token = generateCSRFToken();
-      
+
       expect(token).toBeTruthy();
       expect(typeof token).toBe('string');
       expect(token.length).toBeGreaterThan(20);
-      
+
       // Should be base64 encoded
       expect(token).toMatch(/^[A-Za-z0-9+/]+=*$/);
     });
@@ -29,18 +31,18 @@ describe('CSRF Protection', () => {
     it('should generate unique tokens', () => {
       const token1 = generateCSRFToken();
       const token2 = generateCSRFToken();
-      
+
       expect(token1).not.toBe(token2);
     });
 
     it('should generate tokens with sufficient entropy', () => {
       const tokens = new Set();
-      
+
       // Generate 100 tokens and ensure they're all unique
       for (let i = 0; i < 100; i++) {
         tokens.add(generateCSRFToken());
       }
-      
+
       expect(tokens.size).toBe(100);
     });
   });
@@ -48,7 +50,7 @@ describe('CSRF Protection', () => {
   describe('CSRF Token Validation', () => {
     it('should validate correct CSRF tokens', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -64,7 +66,7 @@ describe('CSRF Protection', () => {
     it('should reject mismatched CSRF tokens', async () => {
       const headerToken = generateCSRFToken();
       const cookieToken = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -79,7 +81,7 @@ describe('CSRF Protection', () => {
 
     it('should reject requests without CSRF token header', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -93,7 +95,7 @@ describe('CSRF Protection', () => {
 
     it('should reject requests without CSRF token cookie', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -120,7 +122,7 @@ describe('CSRF Protection', () => {
 
     it('should reject malformed CSRF tokens', async () => {
       const malformedToken = 'invalid-token-format';
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -169,7 +171,7 @@ describe('CSRF Protection', () => {
 
       const response = await handler(req);
       expect(response.status).toBe(403);
-      
+
       const responseData = await response.json();
       expect(responseData.error).toBe('Invalid CSRF token');
     });
@@ -226,7 +228,7 @@ describe('CSRF Protection', () => {
     it('should handle token rotation', async () => {
       const oldToken = generateCSRFToken();
       const newToken = generateCSRFToken();
-      
+
       // Simulate token rotation scenario
       const { req: oldReq } = createMocks({
         method: 'POST',
@@ -247,7 +249,7 @@ describe('CSRF Protection', () => {
       // Both should be valid with their respective tokens
       expect(await validateCSRFToken(oldReq)).toBe(true);
       expect(await validateCSRFToken(newReq)).toBe(true);
-      
+
       // Cross-validation should fail
       const { req: crossReq } = createMocks({
         method: 'POST',
@@ -264,7 +266,7 @@ describe('CSRF Protection', () => {
       // This would require implementing token expiration
       // For now, we test the concept
       const expiredToken = generateCSRFToken();
-      
+
       // Simulate expired token (implementation dependent)
       const { req } = createMocks({
         method: 'POST',
@@ -284,7 +286,7 @@ describe('CSRF Protection', () => {
   describe('CSRF Protection Edge Cases', () => {
     it('should handle requests with multiple CSRF headers', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -300,7 +302,7 @@ describe('CSRF Protection', () => {
 
     it('should handle requests with malformed cookies', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -315,7 +317,7 @@ describe('CSRF Protection', () => {
 
     it('should handle very long CSRF tokens', async () => {
       const longToken = 'a'.repeat(1000);
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -331,7 +333,7 @@ describe('CSRF Protection', () => {
 
     it('should handle special characters in tokens', async () => {
       const specialToken = 'token-with-special-chars-!@#$%^&*()';
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -349,7 +351,7 @@ describe('CSRF Protection', () => {
   describe('CSRF Protection Performance', () => {
     it('should validate tokens efficiently', async () => {
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -360,28 +362,28 @@ describe('CSRF Protection', () => {
 
       // Measure validation time
       const startTime = Date.now();
-      
+
       for (let i = 0; i < 100; i++) {
         await validateCSRFToken(req);
       }
-      
+
       const endTime = Date.now();
       const avgTime = (endTime - startTime) / 100;
-      
+
       // Should validate quickly (under 10ms per validation)
       expect(avgTime).toBeLessThan(10);
     });
 
     it('should generate tokens efficiently', () => {
       const startTime = Date.now();
-      
+
       for (let i = 0; i < 1000; i++) {
         generateCSRFToken();
       }
-      
+
       const endTime = Date.now();
       const avgTime = (endTime - startTime) / 1000;
-      
+
       // Should generate quickly (under 1ms per token)
       expect(avgTime).toBeLessThan(1);
     });
@@ -394,7 +396,7 @@ describe('CSRF Protection', () => {
       });
 
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {
@@ -411,7 +413,7 @@ describe('CSRF Protection', () => {
       mockGetServerSession.mockResolvedValue(null);
 
       const token = generateCSRFToken();
-      
+
       const { req } = createMocks({
         method: 'POST',
         headers: {

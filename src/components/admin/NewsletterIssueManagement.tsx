@@ -27,7 +27,10 @@ export function NewsletterIssueManagement() {
       }
     } catch (error) {
       console.error('Error fetching newsletter issues:', error);
-      toast({ title: 'Failed to load newsletter issues', variant: 'destructive' });
+      toast({
+        title: 'Failed to load newsletter issues',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +54,10 @@ export function NewsletterIssueManagement() {
       }
     } catch (error) {
       console.error('Error deleting newsletter issue:', error);
-      toast({ title: 'Failed to delete newsletter issue', variant: 'destructive' });
+      toast({
+        title: 'Failed to delete newsletter issue',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -71,7 +77,10 @@ export function NewsletterIssueManagement() {
       }
     } catch (error) {
       console.error('Error updating newsletter issue status:', error);
-      toast({ title: 'Failed to update newsletter issue status', variant: 'destructive' });
+      toast({
+        title: 'Failed to update newsletter issue status',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -90,10 +99,10 @@ export function NewsletterIssueManagement() {
       }
     } catch (error) {
       console.error('Error sending newsletter:', error);
-      toast({ 
-        title: 'Failed to send newsletter', 
+      toast({
+        title: 'Failed to send newsletter',
         description: error instanceof Error ? error.message : 'Unknown error',
-        variant: 'destructive' 
+        variant: 'destructive',
       });
     }
   };

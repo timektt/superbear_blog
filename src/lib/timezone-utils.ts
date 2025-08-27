@@ -63,7 +63,10 @@ export function getNextAvailableSendTime(
   timezone: string = defaultTimezoneConfig.defaultTimezone,
   quietHours: QuietHours = defaultTimezoneConfig.quietHours
 ): Date {
-  if (!defaultTimezoneConfig.enableQuietHours || !isWithinQuietHours(timezone, quietHours)) {
+  if (
+    !defaultTimezoneConfig.enableQuietHours ||
+    !isWithinQuietHours(timezone, quietHours)
+  ) {
     return new Date(); // Can send now
   }
 
@@ -83,15 +86,18 @@ export function getNextAvailableSendTime(
     if (currentHour < endHour) {
       hoursUntilEnd = endHour - currentHour;
     } else {
-      hoursUntilEnd = (24 - currentHour) + endHour;
+      hoursUntilEnd = 24 - currentHour + endHour;
     }
 
     // Add the hours to current time
-    const nextSendTime = new Date(now.getTime() + hoursUntilEnd * 60 * 60 * 1000);
+    const nextSendTime = new Date(
+      now.getTime() + hoursUntilEnd * 60 * 60 * 1000
+    );
     return nextSendTime;
-
   } catch (error) {
-    logger.error('Failed to calculate next send time', error as Error, { timezone });
+    logger.error('Failed to calculate next send time', error as Error, {
+      timezone,
+    });
     return new Date(); // Default to now if calculation fails
   }
 }
@@ -116,10 +122,12 @@ export function convertToUserTimezone(utcDate: Date, timezone: string): string {
 }
 
 // Get recipient timezone from preferences or fallback
-export async function getRecipientTimezone(recipientId: string): Promise<string> {
+export async function getRecipientTimezone(
+  recipientId: string
+): Promise<string> {
   try {
     const { prisma } = await import('@/lib/prisma');
-    
+
     const preferences = await prisma.newsletterPreferences.findUnique({
       where: { recipientId },
       select: { timezone: true },
@@ -127,7 +135,9 @@ export async function getRecipientTimezone(recipientId: string): Promise<string>
 
     return preferences?.timezone || defaultTimezoneConfig.defaultTimezone;
   } catch (error) {
-    logger.error('Failed to get recipient timezone', error as Error, { recipientId });
+    logger.error('Failed to get recipient timezone', error as Error, {
+      recipientId,
+    });
     return defaultTimezoneConfig.defaultTimezone;
   }
 }
@@ -137,15 +147,23 @@ export async function filterRecipientsForQuietHours(
   recipientIds: string[]
 ): Promise<{
   canSendNow: string[];
-  delayedSends: Array<{ recipientId: string; nextSendTime: Date; timezone: string }>;
+  delayedSends: Array<{
+    recipientId: string;
+    nextSendTime: Date;
+    timezone: string;
+  }>;
 }> {
   const canSendNow: string[] = [];
-  const delayedSends: Array<{ recipientId: string; nextSendTime: Date; timezone: string }> = [];
+  const delayedSends: Array<{
+    recipientId: string;
+    nextSendTime: Date;
+    timezone: string;
+  }> = [];
 
   for (const recipientId of recipientIds) {
     try {
       const timezone = await getRecipientTimezone(recipientId);
-      
+
       if (!isWithinQuietHours(timezone)) {
         canSendNow.push(recipientId);
       } else {
@@ -157,7 +175,11 @@ export async function filterRecipientsForQuietHours(
         });
       }
     } catch (error) {
-      logger.error('Failed to check quiet hours for recipient', error as Error, { recipientId });
+      logger.error(
+        'Failed to check quiet hours for recipient',
+        error as Error,
+        { recipientId }
+      );
       // Default to allowing send if check fails
       canSendNow.push(recipientId);
     }
@@ -177,7 +199,11 @@ export function isValidTimezone(timezone: string): boolean {
 }
 
 // Get common timezones list
-export function getCommonTimezones(): Array<{ value: string; label: string; offset: string }> {
+export function getCommonTimezones(): Array<{
+  value: string;
+  label: string;
+  offset: string;
+}> {
   const timezones = [
     'America/New_York',
     'America/Chicago',
@@ -196,10 +222,13 @@ export function getCommonTimezones(): Array<{ value: string; label: string; offs
   return timezones.map((tz) => {
     try {
       const now = new Date();
-      const offset = new Intl.DateTimeFormat('en-US', {
-        timeZone: tz,
-        timeZoneName: 'short',
-      }).formatToParts(now).find(part => part.type === 'timeZoneName')?.value || '';
+      const offset =
+        new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          timeZoneName: 'short',
+        })
+          .formatToParts(now)
+          .find((part) => part.type === 'timeZoneName')?.value || '';
 
       return {
         value: tz,

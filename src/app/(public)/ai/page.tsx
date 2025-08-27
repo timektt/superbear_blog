@@ -57,7 +57,7 @@ function CategoryPageSkeleton() {
           <div className="h-8 bg-muted rounded w-32 mb-2 animate-pulse"></div>
           <div className="h-5 bg-muted rounded w-80 animate-pulse"></div>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8">
             <div className="bg-card rounded-xl p-6 border border-border">

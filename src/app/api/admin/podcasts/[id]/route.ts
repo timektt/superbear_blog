@@ -45,10 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!podcast) {
-      return NextResponse.json(
-        { error: 'Podcast not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Podcast not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -87,7 +84,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    
+
     // Validate request body
     const validationResult = updatePodcastSchema.safeParse(body);
     if (!validationResult.success) {
@@ -108,10 +105,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!existingPodcast) {
-      return NextResponse.json(
-        { error: 'Podcast not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Podcast not found' }, { status: 404 });
     }
 
     // Check if slug already exists (if updating slug)
@@ -130,19 +124,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     // Prepare update data
     const updateData: any = {};
-    
+
     if (data.title !== undefined) updateData.title = data.title;
     if (data.slug !== undefined) updateData.slug = data.slug;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.summary !== undefined) updateData.summary = data.summary;
     if (data.audioUrl !== undefined) updateData.audioUrl = data.audioUrl;
     if (data.coverImage !== undefined) updateData.coverImage = data.coverImage;
     if (data.duration !== undefined) updateData.duration = data.duration;
-    if (data.episodeNumber !== undefined) updateData.episodeNumber = data.episodeNumber;
-    if (data.seasonNumber !== undefined) updateData.seasonNumber = data.seasonNumber;
+    if (data.episodeNumber !== undefined)
+      updateData.episodeNumber = data.episodeNumber;
+    if (data.seasonNumber !== undefined)
+      updateData.seasonNumber = data.seasonNumber;
     if (data.status !== undefined) updateData.status = data.status;
     if (data.publishedAt !== undefined) {
-      updateData.publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
+      updateData.publishedAt = data.publishedAt
+        ? new Date(data.publishedAt)
+        : null;
     }
     if (data.authorId !== undefined) updateData.authorId = data.authorId;
     if (data.categoryId !== undefined) updateData.categoryId = data.categoryId;
@@ -224,10 +223,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     });
 
     if (!existingPodcast) {
-      return NextResponse.json(
-        { error: 'Podcast not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Podcast not found' }, { status: 404 });
     }
 
     // Delete podcast episode

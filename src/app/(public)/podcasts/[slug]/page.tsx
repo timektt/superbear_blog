@@ -17,14 +17,17 @@ interface PodcastPageProps {
 }
 
 async function getPodcast(slug: string) {
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/podcasts/${slug}`, {
-    next: { revalidate: 300 },
-  });
-  
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/podcasts/${slug}`,
+    {
+      next: { revalidate: 300 },
+    }
+  );
+
   if (!response.ok) {
     return null;
   }
-  
+
   return response.json();
 }
 
@@ -32,31 +35,39 @@ async function getRelatedPodcasts(categoryId?: string, currentId?: string) {
   const params = new URLSearchParams();
   if (categoryId) params.set('category', categoryId);
   params.set('limit', '3');
-  
-  const response = await fetch(`${process.env.NEXTAUTH_URL}/api/podcasts?${params}`, {
-    next: { revalidate: 300 },
-  });
-  
+
+  const response = await fetch(
+    `${process.env.NEXTAUTH_URL}/api/podcasts?${params}`,
+    {
+      next: { revalidate: 300 },
+    }
+  );
+
   if (!response.ok) {
     return [];
   }
-  
+
   const data = await response.json();
   return (data.podcasts || []).filter((p: any) => p.id !== currentId);
 }
 
-export async function generateMetadata({ params }: PodcastPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PodcastPageProps): Promise<Metadata> {
   const podcast = await getPodcast(params.slug);
-  
+
   if (!podcast) {
     return {
       title: 'Podcast Not Found',
     };
   }
-  
+
   return {
     title: `${podcast.title} | SuperBear Blog`,
-    description: podcast.description || podcast.summary || `Listen to ${podcast.title} on SuperBear Blog`,
+    description:
+      podcast.description ||
+      podcast.summary ||
+      `Listen to ${podcast.title} on SuperBear Blog`,
     openGraph: {
       title: podcast.title,
       description: podcast.description || podcast.summary,
@@ -81,15 +92,15 @@ export async function generateStaticParams() {
 export default async function PodcastPage({ params }: PodcastPageProps) {
   const [podcast, relatedPodcasts] = await Promise.all([
     getPodcast(params.slug),
-    getPodcast(params.slug).then(p => 
+    getPodcast(params.slug).then((p) =>
       p ? getRelatedPodcasts(p.category?.id, p.id) : []
     ),
   ]);
-  
+
   if (!podcast) {
     notFound();
   }
-  
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'PodcastEpisode',
@@ -113,14 +124,14 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
       encodingFormat: 'audio/mpeg',
     },
   };
-  
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+
       <article className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button variant="ghost" size="sm" asChild>
@@ -130,7 +141,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
             </Link>
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <header className="space-y-4">
@@ -141,9 +152,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                   </Badge>
                 )}
                 {podcast.category && (
-                  <Badge variant="outline">
-                    {podcast.category.name}
-                  </Badge>
+                  <Badge variant="outline">{podcast.category.name}</Badge>
                 )}
                 <div className="flex items-center">
                   <Calendar className="w-4 h-4 mr-1" />
@@ -158,23 +167,23 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                   </div>
                 )}
               </div>
-              
+
               <h1 className="text-3xl font-bold leading-tight">
                 {podcast.title}
               </h1>
-              
+
               <div className="flex items-center text-muted-foreground">
                 <User className="w-4 h-4 mr-2" />
                 <span>By {podcast.author.name}</span>
               </div>
             </header>
-            
+
             <AudioPlayer
               audioUrl={podcast.audioUrl}
               title={podcast.title}
               duration={podcast.duration}
             />
-            
+
             {podcast.summary && (
               <div className="prose prose-gray max-w-none">
                 <h2 className="text-xl font-semibold mb-3">Summary</h2>
@@ -183,7 +192,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                 </p>
               </div>
             )}
-            
+
             {podcast.description && (
               <div className="prose prose-gray max-w-none">
                 <h2 className="text-xl font-semibold mb-3">Show Notes</h2>
@@ -192,7 +201,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                 </div>
               </div>
             )}
-            
+
             <div className="flex items-center gap-4 pt-4 border-t">
               <Button variant="outline" size="sm">
                 <Share2 className="w-4 h-4 mr-2" />
@@ -200,7 +209,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
               </Button>
             </div>
           </div>
-          
+
           <aside className="space-y-6">
             {podcast.coverImage && (
               <div className="aspect-square relative rounded-lg overflow-hidden">
@@ -213,7 +222,7 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                 />
               </div>
             )}
-            
+
             {podcast.tags && podcast.tags.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-3">Tags</h3>
@@ -226,14 +235,17 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                 </div>
               </div>
             )}
-            
+
             {relatedPodcasts.length > 0 && (
               <div>
                 <h3 className="font-semibold mb-4">Related Episodes</h3>
                 <div className="space-y-4">
                   {relatedPodcasts.slice(0, 3).map((relatedPodcast: any) => (
-                    <div key={relatedPodcast.id} className="border rounded-lg p-3">
-                      <Link 
+                    <div
+                      key={relatedPodcast.id}
+                      className="border rounded-lg p-3"
+                    >
+                      <Link
                         href={`/podcasts/${relatedPodcast.slug}`}
                         className="block hover:bg-muted/50 transition-colors -m-3 p-3 rounded-lg"
                       >
@@ -254,7 +266,9 @@ export default async function PodcastPage({ params }: PodcastPageProps) {
                             </h4>
                             <div className="text-xs text-muted-foreground">
                               {relatedPodcast.episodeNumber && (
-                                <span>Episode {relatedPodcast.episodeNumber}</span>
+                                <span>
+                                  Episode {relatedPodcast.episodeNumber}
+                                </span>
                               )}
                               {relatedPodcast.duration && (
                                 <span className="ml-2">

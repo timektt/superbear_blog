@@ -30,7 +30,7 @@ export const safeEnv = envSchema.parse(process.env);
  */
 export function isDatabaseConfigured(): boolean {
   const databaseUrl = safeEnv.DATABASE_URL;
-  
+
   if (!databaseUrl || databaseUrl.trim() === '') {
     return false;
   }
@@ -38,22 +38,22 @@ export function isDatabaseConfigured(): boolean {
   try {
     // Parse URL to validate format
     const url = new URL(databaseUrl);
-    
+
     // Support common database protocols
     const supportedProtocols = [
-      'file:', 
-      'postgres:', 
-      'postgresql:', 
-      'mysql:', 
-      'sqlite:', 
+      'file:',
+      'postgres:',
+      'postgresql:',
+      'mysql:',
+      'sqlite:',
       'mongodb:',
-      'redis:'
+      'redis:',
     ];
-    
-    const isValidProtocol = supportedProtocols.some(protocol => 
-      url.protocol === protocol
+
+    const isValidProtocol = supportedProtocols.some(
+      (protocol) => url.protocol === protocol
     );
-    
+
     if (!isValidProtocol) {
       return false;
     }

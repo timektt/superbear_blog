@@ -32,19 +32,19 @@ interface SearchResult {
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   const query = searchParams.get('q') || '';
   const tag = searchParams.get('tag') || '';
   const category = searchParams.get('category') || '';
   const author = searchParams.get('author') || '';
   const sortBy = searchParams.get('sortBy') || 'relevance';
-  
+
   const [results, setResults] = useState<SearchResult>({
     articles: [],
     total: 0,
     facets: { tags: [], authors: [], categories: [] },
     query: { q: query, tag, category, author, sortBy },
-    pagination: { limit: 20, offset: 0, hasMore: false }
+    pagination: { limit: 20, offset: 0, hasMore: false },
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function SearchPage() {
   const performSearch = async (offset = 0) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
@@ -68,21 +68,21 @@ export default function SearchPage() {
       if (sortBy) params.set('sortBy', sortBy);
       params.set('limit', '20');
       params.set('offset', offset.toString());
-      
+
       const response = await fetch(`/api/search?${params.toString()}`);
       if (!response.ok) {
         throw new Error('Search failed');
       }
-      
+
       const data = await response.json();
-      
+
       if (offset === 0) {
         setResults(data);
       } else {
         // Append results for pagination
-        setResults(prev => ({
+        setResults((prev) => ({
           ...data,
-          articles: [...prev.articles, ...data.articles]
+          articles: [...prev.articles, ...data.articles],
         }));
       }
     } catch (err) {
@@ -99,21 +99,21 @@ export default function SearchPage() {
 
   const updateURL = (params: Record<string, string>) => {
     const url = new URL(window.location.href);
-    
+
     // Clear existing search params
     url.searchParams.delete('q');
     url.searchParams.delete('tag');
     url.searchParams.delete('category');
     url.searchParams.delete('author');
     url.searchParams.delete('sortBy');
-    
+
     // Add new params
     Object.entries(params).forEach(([key, value]) => {
       if (value) {
         url.searchParams.set(key, value);
       }
     });
-    
+
     router.push(url.pathname + url.search);
   };
 
@@ -137,10 +137,7 @@ export default function SearchPage() {
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             Search Articles
           </h1>
-          <SearchBar 
-            className="w-full max-w-2xl"
-            onSearch={handleSearch}
-          />
+          <SearchBar className="w-full max-w-2xl" onSearch={handleSearch} />
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -168,13 +165,15 @@ export default function SearchPage() {
                 </h3>
                 <select
                   value={sortBy}
-                  onChange={(e) => updateURL({ 
-                    q: query, 
-                    tag, 
-                    category, 
-                    author, 
-                    sortBy: e.target.value 
-                  })}
+                  onChange={(e) =>
+                    updateURL({
+                      q: query,
+                      tag,
+                      category,
+                      author,
+                      sortBy: e.target.value,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                 >
                   <option value="relevance">Relevance</option>
@@ -193,12 +192,14 @@ export default function SearchPage() {
                     {results.facets.categories.slice(0, 5).map((cat) => (
                       <button
                         key={cat.slug}
-                        onClick={() => updateURL({ 
-                          q: query, 
-                          category: category === cat.slug ? '' : cat.slug,
-                          tag,
-                          author 
-                        })}
+                        onClick={() =>
+                          updateURL({
+                            q: query,
+                            category: category === cat.slug ? '' : cat.slug,
+                            tag,
+                            author,
+                          })
+                        }
                         className={`flex items-center justify-between w-full text-left px-2 py-1 rounded text-sm ${
                           category === cat.slug
                             ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
@@ -223,12 +224,14 @@ export default function SearchPage() {
                     {results.facets.tags.slice(0, 8).map((tagItem) => (
                       <button
                         key={tagItem.slug}
-                        onClick={() => updateURL({ 
-                          q: query, 
-                          tag: tag === tagItem.slug ? '' : tagItem.slug,
-                          category,
-                          author 
-                        })}
+                        onClick={() =>
+                          updateURL({
+                            q: query,
+                            tag: tag === tagItem.slug ? '' : tagItem.slug,
+                            category,
+                            author,
+                          })
+                        }
                         className={`flex items-center justify-between w-full text-left px-2 py-1 rounded text-sm ${
                           tag === tagItem.slug
                             ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
@@ -253,12 +256,15 @@ export default function SearchPage() {
                     {results.facets.authors.slice(0, 5).map((authorItem) => (
                       <button
                         key={authorItem.name}
-                        onClick={() => updateURL({ 
-                          q: query, 
-                          author: author === authorItem.name ? '' : authorItem.name,
-                          tag,
-                          category 
-                        })}
+                        onClick={() =>
+                          updateURL({
+                            q: query,
+                            author:
+                              author === authorItem.name ? '' : authorItem.name,
+                            tag,
+                            category,
+                          })
+                        }
                         className={`flex items-center justify-between w-full text-left px-2 py-1 rounded text-sm ${
                           author === authorItem.name
                             ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300'
@@ -281,13 +287,12 @@ export default function SearchPage() {
               <div className="mb-6">
                 <div className="flex items-center justify-between">
                   <p className="text-gray-600 dark:text-gray-400">
-                    {loading && results.articles.length === 0 
-                      ? 'Searching...' 
-                      : `${results.total} results`
-                    }
+                    {loading && results.articles.length === 0
+                      ? 'Searching...'
+                      : `${results.total} results`}
                     {query && ` for "${query}"`}
                   </p>
-                  
+
                   {hasActiveFilters && (
                     <div className="flex flex-wrap gap-2">
                       {category && (
@@ -305,7 +310,9 @@ export default function SearchPage() {
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                           Tag: {tag}
                           <button
-                            onClick={() => updateURL({ q: query, category, author })}
+                            onClick={() =>
+                              updateURL({ q: query, category, author })
+                            }
                             className="ml-1 text-green-600 dark:text-green-400 hover:text-green-500"
                           >
                             ×
@@ -316,7 +323,9 @@ export default function SearchPage() {
                         <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200">
                           Author: {author}
                           <button
-                            onClick={() => updateURL({ q: query, tag, category })}
+                            onClick={() =>
+                              updateURL({ q: query, tag, category })
+                            }
                             className="ml-1 text-purple-600 dark:text-purple-400 hover:text-purple-500"
                           >
                             ×
@@ -354,7 +363,7 @@ export default function SearchPage() {
                     <ArticleCard key={article.id} article={article} />
                   ))}
                 </div>
-                
+
                 {results.pagination.hasMore && (
                   <div className="mt-8 text-center">
                     <button
@@ -370,8 +379,18 @@ export default function SearchPage() {
             ) : hasResults ? (
               <div className="text-center py-12">
                 <div className="text-gray-400 dark:text-gray-500 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -392,8 +411,18 @@ export default function SearchPage() {
             ) : (
               <div className="text-center py-12">
                 <div className="text-gray-400 dark:text-gray-500 mb-4">
-                  <svg className="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  <svg
+                    className="mx-auto h-12 w-12"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
