@@ -1,212 +1,96 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { withPermission } from '@/lib/auth-utils';
-import { getSafePrismaClient } from '@/lib/db-safe/client';
-import {
-  cleanupArticleImages,
-  batchCleanupArticleImages,
-  deleteCloudinaryImageByUrl,
-  validateCloudinaryConfig,
-  getCloudinaryUsage,
-} from '@/lib/cloudinary-cleanup';
-import { z } from 'zod';
+import { cleanupEngine } from '@/lib/media/cleanup-engine';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
-const cleanupSchema = z.object({
-  type: z.enum(['single', 'batch', 'orphaned']),
-  articleId: z.string().optional(),
-  articleIds: z.array(z.string()).optional(),
-  imageUrl: z.string().optional(),
-});
+export async function POST(request: NextRequest) {
+  try {
+    // Check authentication and admin role
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-export const POST = withPermission(
-  'media:delete',
-  async (user, request: NextRequest) => {
-    try {
-      // Validate Cloudinary configuration
-      const configValidation = validateCloudinaryConfig();
-      if (!configValidation.valid) {
-        return NextResponse.json(
-          { error: configValidation.error },
-          { status: 500 }
-        );
-      }
+    // Parse request body
+    const body = await request.json();
+    const { publicIds, dryRun = false } = body;
 
-      const prisma = getSafePrismaClient();
-      if (!prisma) {
-        return NextResponse.json(
-          { error: 'Database unavailable' },
-          { status: 503 }
-        );
-      }
-
-      const body = await request.json();
-      const { type, articleId, articleIds, imageUrl } =
-        cleanupSchema.parse(body);
-
-      switch (type) {
-        case 'single': {
-          if (!articleId) {
-            return NextResponse.json(
-              { error: 'Article ID is required for single cleanup' },
-              { status: 400 }
-            );
-          }
-
-          const article = await prisma.article.findUnique({
-            where: { id: articleId },
-            select: { id: true, image: true, content: true },
-          });
-
-          if (!article) {
-            return NextResponse.json(
-              { error: 'Article not found' },
-              { status: 404 }
-            );
-          }
-
-          const result = await cleanupArticleImages(article);
-
-          return NextResponse.json({
-            success: result.success,
-            deletedImages: result.deletedImages,
-            errors: result.errors,
-            message: `Cleaned up ${result.deletedImages.length} images for article ${articleId}`,
-          });
-        }
-
-        case 'batch': {
-          if (!articleIds || articleIds.length === 0) {
-            return NextResponse.json(
-              { error: 'Article IDs are required for batch cleanup' },
-              { status: 400 }
-            );
-          }
-
-          const articles = await prisma.article.findMany({
-            where: { id: { in: articleIds } },
-            select: { id: true, image: true, content: true },
-          });
-
-          if (articles.length === 0) {
-            return NextResponse.json(
-              { error: 'No articles found' },
-              { status: 404 }
-            );
-          }
-
-          const result = await batchCleanupArticleImages(articles);
-
-          return NextResponse.json({
-            success: result.success,
-            totalArticles: result.totalArticles,
-            totalImagesDeleted: result.totalImagesDeleted,
-            results: result.results,
-            message: `Batch cleanup completed: ${result.totalImagesDeleted} images deleted from ${result.totalArticles} articles`,
-          });
-        }
-
-        case 'orphaned': {
-          // Find and clean up orphaned images (images not referenced by any article)
-          const allArticles = await prisma.article.findMany({
-            select: { id: true, image: true, content: true },
-          });
-
-          // This is a simplified implementation
-          // In production, you'd want to scan Cloudinary for all images
-          // and compare with database references
-
-          return NextResponse.json({
-            success: true,
-            message: 'Orphaned image cleanup not yet implemented',
-            note: 'This feature requires scanning all Cloudinary images and comparing with database references',
-          });
-        }
-
-        default:
-          return NextResponse.json(
-            { error: 'Invalid cleanup type' },
-            { status: 400 }
-          );
-      }
-    } catch (error) {
-      console.error('Media cleanup error:', error);
-
-      if (error instanceof z.ZodError) {
-        return NextResponse.json(
-          { error: 'Invalid request data', details: error.errors },
-          { status: 400 }
-        );
-      }
-
+    // Validate input
+    if (!Array.isArray(publicIds) || publicIds.length === 0) {
       return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
+        { error: 'publicIds must be a non-empty array' },
+        { status: 400 }
       );
     }
-  }
-);
 
-// Delete specific image by URL
-export const DELETE = withPermission(
-  'media:delete',
-  async (user, request: NextRequest) => {
-    try {
-      const { searchParams } = new URL(request.url);
-      const imageUrl = searchParams.get('url');
-
-      if (!imageUrl) {
-        return NextResponse.json(
-          { error: 'Image URL is required' },
-          { status: 400 }
-        );
-      }
-
-      const result = await deleteCloudinaryImageByUrl(imageUrl);
-
-      if (result.success) {
-        return NextResponse.json({
-          success: true,
-          message: 'Image deleted successfully',
-        });
-      } else {
-        return NextResponse.json(
-          { error: result.error || 'Failed to delete image' },
-          { status: 400 }
-        );
-      }
-    } catch (error) {
-      console.error('Image deletion error:', error);
+    if (publicIds.some((id: unknown) => typeof id !== 'string' || !id.trim())) {
       return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
+        { error: 'All publicIds must be non-empty strings' },
+        { status: 400 }
       );
     }
+
+    // Perform cleanup
+    const result = await cleanupEngine.cleanupOrphans(publicIds, dryRun);
+
+    return NextResponse.json({
+      success: true,
+      data: result
+    });
+
+  } catch (error) {
+    console.error('Error during cleanup operation:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Cleanup operation failed',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
-);
+}
 
-// Get Cloudinary usage statistics
-export const GET = withPermission(
-  'media:upload',
-  async (user, request: NextRequest) => {
-    try {
-      const usage = await getCloudinaryUsage();
+export async function GET(request: NextRequest) {
+  try {
+    // Check authentication
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
-      if (usage.success) {
-        return NextResponse.json({
-          success: true,
-          usage: usage.usage,
-        });
-      } else {
-        return NextResponse.json(
-          { error: usage.error || 'Failed to fetch usage statistics' },
-          { status: 500 }
-        );
-      }
-    } catch (error) {
-      console.error('Usage statistics error:', error);
+    // Parse query parameters
+    const { searchParams } = new URL(request.url);
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : 50;
+
+    if (isNaN(limit) || limit < 1 || limit > 100) {
       return NextResponse.json(
-        { error: 'Internal server error' },
-        { status: 500 }
+        { error: 'Limit must be between 1 and 100' },
+        { status: 400 }
       );
     }
+
+    // Get cleanup history
+    const history = await cleanupEngine.getCleanupHistory(limit);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        history,
+        total: history.length
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching cleanup history:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to fetch cleanup history',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
-);
+}

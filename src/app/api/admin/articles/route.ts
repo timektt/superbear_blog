@@ -11,6 +11,7 @@ import {
   createArticleSchema,
   generateSlugFromTitle,
 } from '@/lib/validations/article';
+import { mediaTracker } from '@/lib/media/media-tracker';
 
 export async function GET(request: NextRequest) {
   try {
@@ -204,6 +205,33 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Track media references after article creation
+    try {
+      // Track content images
+      await mediaTracker.updateContentReferences(
+        'article',
+        article.id,
+        validatedData.content,
+        'content'
+      );
+
+      // Track cover image if present
+      if (validatedData.image) {
+        const publicIds = mediaTracker.extractImageReferences(validatedData.image);
+        if (publicIds.length > 0) {
+          await mediaTracker.updateContentReferences(
+            'article',
+            article.id,
+            `<img data-public-id="${publicIds[0]}" />`,
+            'cover_image'
+          );
+        }
+      }
+    } catch (trackingError) {
+      console.error('Failed to track media references for new article:', trackingError);
+      // Don't fail the article creation for tracking errors
+    }
 
     return createSuccessResponse(article, 201);
   } catch (error) {
