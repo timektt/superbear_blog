@@ -8,6 +8,7 @@ import {
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { updateArticleSchema } from '@/lib/validations/article';
+import { mediaTracker } from '@/lib/media/media-tracker';
 
 // Cloudinary configuration
 const cloudinary = require('cloudinary').v2;
@@ -147,6 +148,46 @@ export async function PATCH(
       },
     });
 
+    // Track media references after article update
+    try {
+      // Track content images if content was updated
+      if (validatedData.content) {
+        await mediaTracker.updateContentReferences(
+          'article',
+          article.id,
+          validatedData.content,
+          'content'
+        );
+      }
+
+      // Track cover image if it was updated
+      if (validatedData.image !== undefined) {
+        if (validatedData.image) {
+          // New or updated cover image
+          const publicIds = mediaTracker.extractImageReferences(validatedData.image);
+          if (publicIds.length > 0) {
+            await mediaTracker.updateContentReferences(
+              'article',
+              article.id,
+              `<img data-public-id="${publicIds[0]}" />`,
+              'cover_image'
+            );
+          }
+        } else {
+          // Cover image was removed
+          await mediaTracker.updateContentReferences(
+            'article',
+            article.id,
+            '',
+            'cover_image'
+          );
+        }
+      }
+    } catch (trackingError) {
+      console.error('Failed to track media references for updated article:', trackingError);
+      // Don't fail the article update for tracking errors
+    }
+
     return createSuccessResponse(article);
   } catch (error) {
     console.error('Error updating article:', error);
@@ -189,27 +230,23 @@ export async function DELETE(
       return createErrorResponse('Article not found', 404);
     }
 
+    // Clean up media references before deleting article
+    try {
+      // Remove all media references for this article
+      await mediaTracker.updateContentReferences('article', id, '', 'content');
+      await mediaTracker.updateContentReferences('article', id, '', 'cover_image');
+    } catch (trackingError) {
+      console.error('Failed to clean up media references:', trackingError);
+      // Don't fail the deletion for tracking errors
+    }
+
     // Delete article (this will also remove tag relationships due to Prisma's cascade)
     await prisma.article.delete({
       where: { id },
     });
 
-    // Clean up associated images from Cloudinary
-    if (existingArticle.image) {
-      try {
-        // Extract public_id from Cloudinary URL
-        const urlParts = existingArticle.image.split('/');
-        const fileWithExtension = urlParts[urlParts.length - 1];
-        const publicId = fileWithExtension.split('.')[0];
-
-        // Delete from Cloudinary
-        await cloudinary.uploader.destroy(publicId);
-        console.log(`Deleted image from Cloudinary: ${publicId}`);
-      } catch (imageError) {
-        console.error('Error deleting image from Cloudinary:', imageError);
-        // Don't fail the entire operation if image deletion fails
-      }
-    }
+    // Note: We no longer directly delete from Cloudinary here
+    // The cleanup system will handle orphaned images through the media management system
 
     return createSuccessResponse({
       message: 'Article deleted successfully',

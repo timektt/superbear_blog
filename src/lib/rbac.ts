@@ -30,7 +30,12 @@ export type Permission =
   | 'categories:manage'
   | 'tags:manage'
   | 'media:upload'
+  | 'media:view'
   | 'media:delete'
+  | 'media:bulk_delete'
+  | 'media:manage'
+  | 'media:cleanup'
+  | 'media:admin'
 
   // Campaign permissions
   | 'campaigns:create'
@@ -68,7 +73,12 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'categories:manage',
     'tags:manage',
     'media:upload',
+    'media:view',
     'media:delete',
+    'media:bulk_delete',
+    'media:manage',
+    'media:cleanup',
+    'media:admin',
     'campaigns:create',
     'campaigns:read',
     'campaigns:update',
@@ -97,7 +107,11 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'categories:manage',
     'tags:manage',
     'media:upload',
+    'media:view',
     'media:delete',
+    'media:bulk_delete',
+    'media:manage',
+    'media:cleanup',
     'campaigns:create',
     'campaigns:read',
     'campaigns:update',
@@ -121,7 +135,9 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'categories:manage',
     'tags:manage',
     'media:upload',
+    'media:view',
     'media:delete',
+    'media:manage',
     'campaigns:create',
     'campaigns:read',
     'campaigns:update',
@@ -138,6 +154,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'users:read',
     'tags:manage',
     'media:upload',
+    'media:view',
     'campaigns:read',
     'newsletter:analytics',
   ],
@@ -147,6 +164,7 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'articles:read',
     'users:read',
     'system:analytics',
+    'media:view',
     'campaigns:read',
     'newsletter:analytics',
   ],

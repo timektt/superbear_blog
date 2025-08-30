@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Editor } from '@/components/editor/Editor';
 import { useEditorState } from '@/components/editor/useEditor';
@@ -15,6 +15,10 @@ import {
   validateSlug,
 } from '@/lib/validations/article';
 import { createEmptyDocument } from '@/lib/editor-utils';
+import { uploadService, type UploadProgress } from '@/lib/media/upload-service';
+import { mediaTracker } from '@/lib/media/media-tracker';
+import { useMediaTracking, useMediaUploadTracking } from '@/lib/hooks/useMediaTracking';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface Author {
   id: string;
@@ -43,9 +47,242 @@ interface ArticleFormProps {
   mode: 'create' | 'edit';
 }
 
+interface EnhancedImageUploaderProps {
+  onImageUpload: (file: File) => void;
+  currentImage?: string;
+  onImageRemove?: () => void;
+  uploadProgress?: UploadProgress | null;
+  isUploading?: boolean;
+  className?: string;
+}
+
+function EnhancedImageUploader({
+  onImageUpload,
+  currentImage,
+  onImageRemove,
+  uploadProgress,
+  isUploading = false,
+  className = '',
+}: EnhancedImageUploaderProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  const handleFileUpload = (file: File) => {
+    setError(null);
+    
+    // Validate file type and size
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    onImageUpload(file);
+  };
+
+  const handleRemoveImage = () => {
+    if (onImageRemove) {
+      onImageRemove();
+    }
+    setError(null);
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const getProgressPercentage = () => {
+    return uploadProgress?.progress || 0;
+  };
+
+  const getProgressStatus = () => {
+    if (!uploadProgress) return '';
+    
+    switch (uploadProgress.status) {
+      case 'pending':
+        return 'Preparing upload...';
+      case 'uploading':
+        return `Uploading... ${Math.round(uploadProgress.progress)}%`;
+      case 'processing':
+        return 'Processing image...';
+      case 'completed':
+        return 'Upload complete!';
+      case 'failed':
+        return `Upload failed: ${uploadProgress.error}`;
+      case 'cancelled':
+        return 'Upload cancelled';
+      default:
+        return '';
+    }
+  };
+
+  return (
+    <div className={`space-y-4 ${className}`}>
+      {currentImage ? (
+        <div className="relative">
+          <div className="relative rounded-lg overflow-hidden border border-gray-200">
+            <img
+              src={currentImage}
+              alt="Uploaded image"
+              className="w-full h-48 object-cover"
+            />
+            {isUploading && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="text-center text-white">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                  <p className="text-sm">{getProgressStatus()}</p>
+                  {uploadProgress && (
+                    <div className="w-32 bg-gray-200 rounded-full h-2 mt-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${getProgressPercentage()}%` }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {!isUploading && (
+              <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-200"
+                  title="Remove image"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="mt-2 flex justify-between items-center">
+            <span className="text-sm text-gray-600">Current image</span>
+            {!isUploading && (
+              <button
+                type="button"
+                onClick={openFileDialog}
+                className="text-sm text-blue-600 hover:text-blue-700"
+              >
+                Replace image
+              </button>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div
+          className={`
+            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
+            ${
+              isDragging
+                ? 'border-blue-400 bg-blue-50'
+                : 'border-gray-300 hover:border-gray-400'
+            }
+            ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
+          `}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={!isUploading ? openFileDialog : undefined}
+        >
+          <div className="space-y-4">
+            {isUploading ? (
+              <div className="flex flex-col items-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="text-sm text-gray-600 mt-2">{getProgressStatus()}</p>
+                {uploadProgress && (
+                  <div className="w-48 bg-gray-200 rounded-full h-2 mt-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getProgressPercentage()}%` }}
+                    ></div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-center">
+                  {isDragging ? (
+                    <Upload className="w-12 h-12 text-blue-500" />
+                  ) : (
+                    <ImageIcon className="w-12 h-12 text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-gray-900">
+                    {isDragging ? 'Drop image here' : 'Upload cover image'}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Drag and drop or click to select
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    JPEG, PNG, WebP, GIF up to 10MB
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-3">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={handleFileSelect}
+        className="hidden"
+        disabled={isUploading}
+      />
+    </div>
+  );
+}
+
 function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
   const router = useRouter();
-  const { toasts, removeToast, showSuccess, showError } = useToast();
+  const { toasts, removeToast, success, error } = useToast();
+
+  // Media tracking hooks
+  const { validateImageReferences, updateCoverImageReference } = useMediaTracking();
+  const { trackUpload } = useMediaUploadTracking();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -66,9 +303,10 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     tagIds: initialData?.tags?.map((tag) => tag.id) || [],
   });
 
-  // const [imagePublicId, setImagePublicId] = useState<string>('');
-
-  // TODO: Use imagePublicId for image deletion when removing images
+  // Media tracking state
+  const [imagePublicId, setImagePublicId] = useState<string>('');
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
@@ -110,7 +348,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
         }
       } catch (error) {
         console.error('Failed to fetch form options:', error);
-        showError(
+        error(
           'Failed to load form options',
           'Please refresh the page and try again.'
         );
@@ -163,15 +401,52 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     handleInputChange('tagIds', newTags);
   };
 
-  const handleImageUpload = (imageUrl: string, publicId: string) => {
-    setFormData((prev) => ({ ...prev, image: imageUrl }));
-    // TODO: Store publicId for potential image deletion
-    console.log('Image uploaded with publicId:', publicId);
+  const handleImageUpload = async (file: File) => {
+    setIsImageUploading(true);
+    setUploadProgress(null);
+
+    try {
+      const result = await uploadService.uploadImage(file, {
+        folder: 'superbear_blog/covers',
+        onProgress: (progress) => {
+          setUploadProgress(progress);
+        },
+        onError: (error) => {
+          console.error('Upload error:', error);
+          error('Upload failed', error.message);
+        },
+      });
+
+      if (result.success && result.data) {
+        // Update form data with new image URL
+        setFormData((prev) => ({ ...prev, image: result.data!.url }));
+        setImagePublicId(result.data.publicId);
+
+        // Track the upload in media tracker
+        await trackUpload(result.data, {
+          contentType: 'article',
+          contentId: initialData?.id,
+          referenceContext: 'cover_image',
+          uploadedBy: 'current_user', // TODO: Get actual user ID from auth
+        });
+
+        success('Image uploaded successfully', 'Cover image has been uploaded and is ready to use.');
+      } else {
+        error('Upload failed', result.error || 'Failed to upload image');
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
+      error('Upload failed', errorMessage);
+    } finally {
+      setIsImageUploading(false);
+      setUploadProgress(null);
+    }
   };
 
   const handleImageRemove = () => {
     setFormData((prev) => ({ ...prev, image: '' }));
-    // setImagePublicId('');
+    setImagePublicId('');
+    setUploadProgress(null);
   };
 
   const validateForm = (): boolean => {
@@ -183,11 +458,32 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     }
   };
 
+  const validateMediaReferences = async (): Promise<boolean> => {
+    try {
+      const validation = await validateImageReferences(formData.content);
+      if (!validation.valid) {
+        setError(`Missing images detected: ${validation.missingImages.join(', ')}`);
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error('Failed to validate media references:', err);
+      // Don't block submission for validation errors
+      return true;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       setError('Please fix all validation errors before submitting');
+      return;
+    }
+
+    // Validate media references
+    const mediaValid = await validateMediaReferences();
+    if (!mediaValid) {
       return;
     }
 
@@ -218,8 +514,10 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
 
       const result = await response.json();
 
+      // Media tracking is now handled by the API routes
+
       // Show success notification
-      showSuccess(
+      success(
         mode === 'create'
           ? 'Article created successfully!'
           : 'Article updated successfully!',
@@ -237,7 +535,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
       setError(errorMessage);
       setFormError(errorMessage);
 
-      showError(
+      error(
         mode === 'create'
           ? 'Failed to create article'
           : 'Failed to update article',
@@ -390,10 +688,12 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Cover Image
               </label>
-              <ImageUploader
+              <EnhancedImageUploader
                 onImageUpload={handleImageUpload}
                 currentImage={formData.image}
                 onImageRemove={handleImageRemove}
+                uploadProgress={uploadProgress}
+                isUploading={isImageUploading}
               />
             </div>
 
