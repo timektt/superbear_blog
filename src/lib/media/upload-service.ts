@@ -1,5 +1,8 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { fileValidator, type FileValidationResult, type ValidationOptions } from './file-validator';
+import { UploadPerformanceMonitor, UploadTimer, NetworkPerformanceDetector } from './upload-performance';
+import { CloudinaryOptimizer } from './upload-optimizer';
+import { mediaCache } from './media-cache';
 
 // Configure Cloudinary if not already configured
 if (!cloudinary.config().cloud_name) {
@@ -101,6 +104,8 @@ export class UploadService {
    */
   async uploadImage(file: File, options: UploadOptions = {}): Promise<UploadResult> {
     const uploadId = this.generateUploadId();
+    const timer = new UploadTimer();
+    
     const {
       folder = 'superbear_blog',
       onProgress,
@@ -115,6 +120,11 @@ export class UploadService {
       skipValidation = false
     } = options;
 
+    // Get optimal settings based on network conditions
+    const networkSettings = NetworkPerformanceDetector.getOptimalUploadSettings();
+    const effectiveQuality = quality === 'auto' ? 
+      (networkSettings.compressionQuality > 0.7 ? 'good' : 'eco') : quality;
+
     // Initialize progress tracking
     const progress: UploadProgress = {
       uploadId,
@@ -128,6 +138,13 @@ export class UploadService {
 
     this.activeUploads.set(uploadId, progress);
     this.notifyProgress(progress, onProgress);
+
+    // Cache initial progress
+    await mediaCache.cacheUploadProgress(uploadId, {
+      uploadId,
+      progress: 0,
+      status: 'uploading',
+    });
 
     let validationResult: FileValidationResult | undefined;
     let fileToUpload = file;
@@ -182,12 +199,14 @@ export class UploadService {
         throw new Error('Upload cancelled');
       }
 
-      // Upload with retry mechanism
+      timer.mark('upload_start');
+
+      // Upload with retry mechanism and optimized settings
       const result = await this.uploadWithRetry(
         fileData,
         {
           folder,
-          quality,
+          quality: effectiveQuality,
           maxWidth,
           maxHeight,
           filename: fileToUpload.name
@@ -197,11 +216,41 @@ export class UploadService {
         onProgress
       );
 
+      timer.mark('upload_complete');
+
       progress.status = 'completed';
       progress.progress = 100;
       progress.endTime = new Date();
       this.updateProgress(uploadId, progress);
       this.notifyProgress(progress, onProgress);
+
+      // Record performance metrics
+      await UploadPerformanceMonitor.recordMetrics({
+        uploadId,
+        filename: file.name,
+        fileSize: file.size,
+        compressionRatio: file.size / fileToUpload.size,
+        uploadDuration: timer.getDuration(),
+        processingDuration: timer.getDurationBetween('validation_complete', 'upload_start'),
+        networkDuration: timer.getDurationBetween('upload_start', 'upload_complete'),
+        success: true,
+        timestamp: new Date(),
+        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+        connectionType: typeof navigator !== 'undefined' ? 
+          NetworkPerformanceDetector.getConnectionInfo().effectiveType : undefined,
+      });
+
+      // Update cache with final result
+      await mediaCache.cacheUploadProgress(uploadId, {
+        uploadId,
+        progress: 100,
+        status: 'completed',
+        result: {
+          publicId: result.public_id,
+          url: result.secure_url,
+          size: result.bytes,
+        },
+      });
 
       // Clean up
       this.activeUploads.delete(uploadId);
@@ -380,14 +429,21 @@ export class UploadService {
           throw new Error('Upload cancelled');
         }
 
+        // Use optimized Cloudinary settings
+        const optimizedTransformations = CloudinaryOptimizer.getOptimizedTransformations({
+          quality: uploadOptions.quality as any,
+          width: uploadOptions.maxWidth,
+          height: uploadOptions.maxHeight,
+          crop: 'limit',
+        });
+
         const result = await cloudinary.uploader.upload(fileData, {
           folder: uploadOptions.folder,
           resource_type: 'image',
           public_id: `${uploadOptions.folder}/${Date.now()}_${uploadOptions.filename.replace(/\.[^/.]+$/, "")}`,
-          transformation: [
-            { quality: uploadOptions.quality, fetch_format: 'auto' },
-            { width: uploadOptions.maxWidth, height: uploadOptions.maxHeight, crop: 'limit' },
-          ],
+          transformation: optimizedTransformations,
+          // Enable responsive breakpoints for better performance
+          responsive_breakpoints: CloudinaryOptimizer.getResponsiveBreakpoints(),
         });
 
         return result;

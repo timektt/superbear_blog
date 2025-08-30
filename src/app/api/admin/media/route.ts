@@ -10,6 +10,8 @@ import {
   type UserRole 
 } from '@/lib/media/media-security'
 import { mediaCSRFProtection } from '@/lib/media/csrf-protection'
+import { mediaQueryOptimizer } from '@/lib/media/query-optimizer'
+import { mediaCache } from '@/lib/media/media-cache'
 
 const MediaListQuerySchema = z.object({
   page: z.string().optional().default('1'),
@@ -84,78 +86,41 @@ export async function GET(request: NextRequest) {
 
     const page = parseInt(query.page)
     const limit = Math.min(parseInt(query.limit), 100) // Cap at 100 items per page
-    const skip = (page - 1) * limit
 
-    // Build where clause
-    const where: any = {}
+    // Use optimized query with caching
+    const filters = {
+      format: query.format ? [query.format] : undefined,
+      uploadedAfter: query.dateFrom ? new Date(query.dateFrom) : undefined,
+      uploadedBefore: query.dateTo ? new Date(query.dateTo) : undefined,
+      sizeMin: query.minSize ? parseInt(query.minSize) : undefined,
+      sizeMax: query.maxSize ? parseInt(query.maxSize) : undefined,
+      hasReferences: query.usageStatus === 'used' ? true : 
+                    query.usageStatus === 'orphaned' ? false : undefined,
+    }
 
-    // Search functionality
+    let result
     if (query.search) {
-      where.OR = [
-        { filename: { contains: query.search, mode: 'insensitive' } },
-        { originalFilename: { contains: query.search, mode: 'insensitive' } }
-      ]
-    }
-
-    // Format filter
-    if (query.format) {
-      where.format = { equals: query.format, mode: 'insensitive' }
-    }
-
-    // Date range filter
-    if (query.dateFrom || query.dateTo) {
-      where.uploadedAt = {}
-      if (query.dateFrom) {
-        where.uploadedAt.gte = new Date(query.dateFrom)
-      }
-      if (query.dateTo) {
-        where.uploadedAt.lte = new Date(query.dateTo)
-      }
-    }
-
-    // Size range filter
-    if (query.minSize || query.maxSize) {
-      where.size = {}
-      if (query.minSize) {
-        where.size.gte = parseInt(query.minSize)
-      }
-      if (query.maxSize) {
-        where.size.lte = parseInt(query.maxSize)
-      }
-    }
-
-    // Build orderBy clause
-    const orderBy: any = {}
-    orderBy[query.sortBy] = query.sortOrder
-
-    // Get media files with reference counts
-    const [mediaFiles, totalCount] = await Promise.all([
-      prisma.mediaFile.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy,
-        include: {
-          _count: {
-            select: {
-              references: true
-            }
-          }
-        }
-      }),
-      prisma.mediaFile.count({ where })
-    ])
-
-    // Filter by usage status if specified
-    let filteredMediaFiles = mediaFiles
-    if (query.usageStatus === 'used') {
-      filteredMediaFiles = mediaFiles.filter(file => file._count.references > 0)
-    } else if (query.usageStatus === 'orphaned') {
-      filteredMediaFiles = mediaFiles.filter(file => file._count.references === 0)
+      // Use search with facets
+      result = await mediaQueryOptimizer.searchMedia(query.search, {
+        page,
+        pageSize: limit,
+        sortBy: query.sortBy as any,
+        sortOrder: query.sortOrder as any,
+        filters,
+      })
+    } else {
+      // Use regular list query
+      result = await mediaQueryOptimizer.getMediaList({
+        page,
+        pageSize: limit,
+        sortBy: query.sortBy as any,
+        sortOrder: query.sortOrder as any,
+        filters,
+      })
     }
 
     // Format response for media gallery
-    const formattedFiles = filteredMediaFiles.map(file => ({
+    const formattedFiles = result.items.map(file => ({
       id: file.id,
       publicId: file.publicId,
       url: file.url,
@@ -168,23 +133,23 @@ export async function GET(request: NextRequest) {
       folder: file.folder,
       uploadedAt: file.uploadedAt,
       uploadedBy: file.uploadedBy,
-      referenceCount: file._count.references,
-      isOrphaned: file._count.references === 0,
+      referenceCount: file.references?.length || 0,
+      isOrphaned: !file.references || file.references.length === 0,
       metadata: file.metadata
     }))
 
-    const totalPages = Math.ceil(totalCount / limit)
-    const hasNextPage = page < totalPages
+    const totalPages = Math.ceil(result.totalCount / limit)
+    const hasNextPage = result.hasMore
     const hasPrevPage = page > 1
 
-    return NextResponse.json({
+    const response = {
       success: true,
       data: {
         files: formattedFiles,
         pagination: {
           page,
           limit,
-          totalCount,
+          totalCount: result.totalCount,
           totalPages,
           hasNextPage,
           hasPrevPage
@@ -199,9 +164,17 @@ export async function GET(request: NextRequest) {
           usageStatus: query.usageStatus,
           sortBy: query.sortBy,
           sortOrder: query.sortOrder
-        }
+        },
+        fromCache: result.fromCache
       }
-    })
+    }
+
+    // Add facets for search results
+    if ('facets' in result) {
+      response.data.facets = result.facets
+    }
+
+    return NextResponse.json(response)
 
   } catch (error) {
     console.error('Media listing error:', error)
