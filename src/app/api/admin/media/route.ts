@@ -3,6 +3,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
+import { 
+  mediaSecurityManager, 
+  getMediaOperationFromRequest,
+  requireMediaPermission,
+  type UserRole 
+} from '@/lib/media/media-security'
+import { mediaCSRFProtection } from '@/lib/media/csrf-protection'
 
 const MediaListQuerySchema = z.object({
   page: z.string().optional().default('1'),
@@ -22,12 +29,55 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (!session?.user) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
+        { error: 'Authentication required' },
         { status: 401 }
       )
     }
+
+    const userRole = session.user.role as UserRole
+    const userId = session.user.id
+
+    // Check permissions for media viewing
+    const hasPermission = requireMediaPermission('media:view')(userRole)
+    if (!hasPermission) {
+      return NextResponse.json(
+        { error: 'Insufficient permissions to view media' },
+        { status: 403 }
+      )
+    }
+
+    // Apply rate limiting
+    const operation = getMediaOperationFromRequest(request.nextUrl.pathname, request.method)
+    const rateLimitResult = await mediaSecurityManager.checkRateLimit(request, operation)
+    
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded',
+          retryAfter: rateLimitResult.retryAfter
+        },
+        { 
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.retryAfter?.toString() || '300'
+          }
+        }
+      )
+    }
+
+    // Log the operation for audit
+    await mediaSecurityManager.logMediaOperation(
+      request,
+      {
+        userRole,
+        userId,
+        operation,
+        metadata: { action: 'list_media' }
+      },
+      true
+    )
 
     const { searchParams } = new URL(request.url)
     const query = MediaListQuerySchema.parse(Object.fromEntries(searchParams))

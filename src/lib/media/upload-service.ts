@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
+import { fileValidator, type FileValidationResult, type ValidationOptions } from './file-validator';
 
 // Configure Cloudinary if not already configured
 if (!cloudinary.config().cloud_name) {
@@ -32,6 +33,9 @@ export interface UploadOptions {
   maxHeight?: number;
   allowedFormats?: string[];
   maxFileSize?: number; // in bytes
+  // Enhanced validation options
+  validationOptions?: ValidationOptions;
+  skipValidation?: boolean;
 }
 
 export interface UploadResult {
@@ -48,6 +52,7 @@ export interface UploadResult {
   };
   error?: string;
   uploadId: string;
+  validationResult?: FileValidationResult;
 }
 
 export interface UploadError {
@@ -105,7 +110,9 @@ export class UploadService {
       maxWidth = 1200,
       maxHeight = 1200,
       allowedFormats = ALLOWED_EXTENSIONS,
-      maxFileSize = MAX_FILE_SIZE
+      maxFileSize = MAX_FILE_SIZE,
+      validationOptions = {},
+      skipValidation = false
     } = options;
 
     // Initialize progress tracking
@@ -122,19 +129,51 @@ export class UploadService {
     this.activeUploads.set(uploadId, progress);
     this.notifyProgress(progress, onProgress);
 
+    let validationResult: FileValidationResult | undefined;
+    let fileToUpload = file;
+
     try {
-      // File validation
-      await this.validateFile(file, { allowedFormats, maxFileSize });
+      // Enhanced file validation
+      if (!skipValidation) {
+        const validationOpts: ValidationOptions = {
+          maxSize: maxFileSize,
+          maxWidth,
+          maxHeight,
+          allowedTypes: ALLOWED_MIME_TYPES,
+          stripExif: true,
+          performMalwareScan: true,
+          ...validationOptions
+        };
+
+        validationResult = await fileValidator.validateFile(file, validationOpts);
+        
+        if (!validationResult.isValid) {
+          throw new Error(`File validation failed: ${validationResult.errors.join(', ')}`);
+        }
+
+        // Use processed file if EXIF was stripped
+        if (validationResult.processedFile) {
+          fileToUpload = validationResult.processedFile;
+        }
+
+        // Log warnings if any
+        if (validationResult.warnings.length > 0) {
+          console.warn('File validation warnings:', validationResult.warnings);
+        }
+      } else {
+        // Fallback to basic validation
+        await this.validateFile(file, { allowedFormats, maxFileSize });
+      }
       
       progress.status = 'uploading';
-      progress.progress = 10;
+      progress.progress = 15;
       this.updateProgress(uploadId, progress);
       this.notifyProgress(progress, onProgress);
 
-      // Convert file to base64 for upload
-      const fileData = await this.fileToBase64(file);
+      // Convert file to base64 for upload (use processed file if available)
+      const fileData = await this.fileToBase64(fileToUpload);
       
-      progress.progress = 30;
+      progress.progress = 35;
       this.updateProgress(uploadId, progress);
       this.notifyProgress(progress, onProgress);
 
@@ -151,7 +190,7 @@ export class UploadService {
           quality,
           maxWidth,
           maxHeight,
-          filename: file.name
+          filename: fileToUpload.name
         },
         maxRetries,
         uploadId,
@@ -176,11 +215,12 @@ export class UploadService {
           width: result.width,
           height: result.height,
           format: result.format,
-          size: file.size,
-          filename: file.name,
+          size: fileToUpload.size,
+          filename: fileToUpload.name,
           uploadId
         },
-        uploadId
+        uploadId,
+        validationResult
       };
 
     } catch (error) {
@@ -208,7 +248,8 @@ export class UploadService {
       return {
         success: false,
         error: progress.error,
-        uploadId
+        uploadId,
+        validationResult
       };
     }
   }
