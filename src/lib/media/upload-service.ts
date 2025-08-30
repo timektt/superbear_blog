@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { fileValidator, type FileValidationResult, type ValidationOptions } from './file-validator';
+import { mediaMetricsService } from './media-metrics';
 
 // Configure Cloudinary if not already configured
 if (!cloudinary.config().cloud_name) {
@@ -36,6 +37,7 @@ export interface UploadOptions {
   // Enhanced validation options
   validationOptions?: ValidationOptions;
   skipValidation?: boolean;
+  userId?: string; // For metrics tracking
 }
 
 export interface UploadResult {
@@ -129,6 +131,15 @@ export class UploadService {
     this.activeUploads.set(uploadId, progress);
     this.notifyProgress(progress, onProgress);
 
+    // Record upload start metrics
+    await mediaMetricsService.recordUploadStart(uploadId, {
+      filename: file.name,
+      size: file.size,
+      format: file.type,
+      folder: folder,
+      userId: options.userId
+    });
+
     let validationResult: FileValidationResult | undefined;
     let fileToUpload = file;
 
@@ -203,6 +214,14 @@ export class UploadService {
       this.updateProgress(uploadId, progress);
       this.notifyProgress(progress, onProgress);
 
+      // Record upload success metrics
+      const uploadDuration = progress.endTime.getTime() - progress.startTime.getTime();
+      await mediaMetricsService.recordUploadSuccess(uploadId, {
+        publicId: result.public_id,
+        url: result.secure_url,
+        duration: uploadDuration
+      });
+
       // Clean up
       this.activeUploads.delete(uploadId);
       this.cancelledUploads.delete(uploadId);
@@ -236,6 +255,12 @@ export class UploadService {
         filename: file.name,
         recoverable: this.isRecoverableError(error)
       };
+
+      // Record upload failure metrics
+      await mediaMetricsService.recordUploadFailure(uploadId, {
+        code: uploadError.code,
+        message: uploadError.message
+      });
 
       if (onError) {
         onError(uploadError);
