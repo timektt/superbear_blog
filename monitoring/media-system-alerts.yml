@@ -1,0 +1,278 @@
+# Media Management System Monitoring and Alerting Configuration
+# This file defines monitoring rules and alert thresholds for the media system
+
+# Prometheus monitoring rules
+groups:
+  - name: media_management_system
+    rules:
+      # Upload Performance Metrics
+      - alert: HighUploadFailureRate
+        expr: (rate(media_upload_failures_total[5m]) / rate(media_upload_attempts_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: warning
+          component: upload_service
+        annotations:
+          summary: "High upload failure rate detected"
+          description: "Upload failure rate is {{ $value | humanizePercentage }} over the last 5 minutes"
+          runbook_url: "https://docs.example.com/runbooks/media-upload-failures"
+
+      - alert: SlowUploadPerformance
+        expr: histogram_quantile(0.95, rate(media_upload_duration_seconds_bucket[5m])) > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: upload_service
+        annotations:
+          summary: "Slow upload performance detected"
+          description: "95th percentile upload time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/slow-uploads"
+
+      # Storage and Cleanup Metrics
+      - alert: HighOrphanFilePercentage
+        expr: (media_orphaned_files_count / media_total_files_count) > 0.2
+        for: 10m
+        labels:
+          severity: warning
+          component: cleanup_service
+        annotations:
+          summary: "High percentage of orphaned files"
+          description: "{{ $value | humanizePercentage }} of media files are orphaned"
+          runbook_url: "https://docs.example.com/runbooks/orphaned-files"
+
+      - alert: CleanupOperationFailures
+        expr: increase(media_cleanup_failures_total[1h]) > 3
+        for: 0m
+        labels:
+          severity: critical
+          component: cleanup_service
+        annotations:
+          summary: "Multiple cleanup operation failures"
+          description: "{{ $value }} cleanup operations have failed in the last hour"
+          runbook_url: "https://docs.example.com/runbooks/cleanup-failures"
+
+      - alert: StorageQuotaHigh
+        expr: (media_storage_used_bytes / media_storage_quota_bytes) > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          component: storage
+        annotations:
+          summary: "Storage quota nearly exceeded"
+          description: "Storage usage is at {{ $value | humanizePercentage }} of quota"
+          runbook_url: "https://docs.example.com/runbooks/storage-quota"
+
+      # API Performance Metrics
+      - alert: HighMediaAPILatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{handler=~"/api/admin/media.*"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          component: media_api
+        annotations:
+          summary: "High media API latency"
+          description: "95th percentile API response time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/api-latency"
+
+      - alert: MediaAPIErrorRate
+        expr: (rate(http_requests_total{handler=~"/api/admin/media.*",code=~"5.."}[5m]) / rate(http_requests_total{handler=~"/api/admin/media.*"}[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: media_api
+        annotations:
+          summary: "High media API error rate"
+          description: "Media API error rate is {{ $value | humanizePercentage }}"
+          runbook_url: "https://docs.example.com/runbooks/api-errors"
+
+      # Database Performance
+      - alert: MediaDatabaseConnectionsHigh
+        expr: media_db_connections_active > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "High number of database connections"
+          description: "{{ $value }} active database connections for media operations"
+          runbook_url: "https://docs.example.com/runbooks/db-connections"
+
+      - alert: SlowMediaQueries
+        expr: histogram_quantile(0.95, rate(media_db_query_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Slow media database queries"
+          description: "95th percentile query time is {{ $value }}s"
+          runbook_url: "https://docs.example.com/runbooks/slow-queries"
+
+      # Security Alerts
+      - alert: SuspiciousUploadActivity
+        expr: rate(media_upload_security_violations_total[5m]) > 0.1
+        for: 1m
+        labels:
+          severity: critical
+          component: security
+        annotations:
+          summary: "Suspicious upload activity detected"
+          description: "{{ $value }} security violations per second in uploads"
+          runbook_url: "https://docs.example.com/runbooks/security-violations"
+
+      - alert: RateLimitExceeded
+        expr: rate(media_rate_limit_exceeded_total[5m]) > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: security
+        annotations:
+          summary: "Rate limit frequently exceeded"
+          description: "Rate limit exceeded {{ $value }} times per second"
+          runbook_url: "https://docs.example.com/runbooks/rate-limiting"
+
+# Grafana Dashboard Configuration
+dashboard_config:
+  media_management_overview:
+    title: "Media Management System Overview"
+    panels:
+      - title: "Upload Metrics"
+        type: "graph"
+        targets:
+          - expr: "rate(media_upload_attempts_total[5m])"
+            legend: "Upload Rate"
+          - expr: "rate(media_upload_failures_total[5m])"
+            legend: "Failure Rate"
+          - expr: "histogram_quantile(0.95, rate(media_upload_duration_seconds_bucket[5m]))"
+            legend: "95th Percentile Duration"
+
+      - title: "Storage Usage"
+        type: "singlestat"
+        targets:
+          - expr: "(media_storage_used_bytes / media_storage_quota_bytes) * 100"
+            legend: "Storage Usage %"
+
+      - title: "Orphaned Files"
+        type: "graph"
+        targets:
+          - expr: "media_orphaned_files_count"
+            legend: "Orphaned Files"
+          - expr: "media_total_files_count"
+            legend: "Total Files"
+
+      - title: "API Performance"
+        type: "graph"
+        targets:
+          - expr: "rate(http_requests_total{handler=~\"/api/admin/media.*\"}[5m])"
+            legend: "Request Rate"
+          - expr: "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{handler=~\"/api/admin/media.*\"}[5m]))"
+            legend: "95th Percentile Latency"
+
+      - title: "Cleanup Operations"
+        type: "table"
+        targets:
+          - expr: "media_cleanup_operations_total"
+            legend: "Total Operations"
+          - expr: "media_cleanup_files_deleted_total"
+            legend: "Files Deleted"
+          - expr: "media_cleanup_space_freed_bytes"
+            legend: "Space Freed"
+
+# Log Aggregation Rules
+log_rules:
+  - name: "media_upload_errors"
+    pattern: "ERROR.*upload.*failed"
+    labels:
+      component: "upload_service"
+      severity: "error"
+    
+  - name: "media_cleanup_operations"
+    pattern: "INFO.*cleanup.*completed"
+    labels:
+      component: "cleanup_service"
+      severity: "info"
+    
+  - name: "media_security_violations"
+    pattern: "WARN.*security.*violation"
+    labels:
+      component: "security"
+      severity: "warning"
+
+# Notification Channels
+notification_channels:
+  - name: "media_alerts_slack"
+    type: "slack"
+    settings:
+      webhook_url: "${SLACK_WEBHOOK_URL}"
+      channel: "#media-alerts"
+      title: "Media System Alert"
+      text: "{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}"
+
+  - name: "media_alerts_email"
+    type: "email"
+    settings:
+      addresses: ["admin@example.com", "devops@example.com"]
+      subject: "Media System Alert: {{ .GroupLabels.alertname }}"
+
+  - name: "media_critical_pagerduty"
+    type: "pagerduty"
+    settings:
+      integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
+      severity: "critical"
+
+# Alert Routing Rules
+route:
+  group_by: ['alertname', 'component']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'media_alerts_slack'
+  routes:
+    - match:
+        severity: critical
+      receiver: 'media_critical_pagerduty'
+      continue: true
+    
+    - match:
+        component: security
+      receiver: 'media_alerts_email'
+      continue: true
+
+# Health Check Configuration
+health_checks:
+  - name: "media_upload_endpoint"
+    url: "${NEXTAUTH_URL}/api/upload-image"
+    method: "GET"
+    expected_status: [405, 401]  # Endpoint should reject GET requests
+    interval: "30s"
+    timeout: "10s"
+
+  - name: "media_gallery_endpoint"
+    url: "${NEXTAUTH_URL}/api/admin/media"
+    method: "GET"
+    expected_status: [200, 401]  # May require auth
+    interval: "60s"
+    timeout: "15s"
+
+  - name: "cleanup_endpoint"
+    url: "${NEXTAUTH_URL}/api/admin/media/orphans"
+    method: "GET"
+    expected_status: [200, 401]
+    interval: "300s"  # Check every 5 minutes
+    timeout: "30s"
+
+# Performance Baselines
+performance_baselines:
+  upload_duration_p95: "10s"
+  api_response_time_p95: "1s"
+  database_query_time_p95: "500ms"
+  cleanup_operation_duration: "300s"
+  
+# Capacity Planning Thresholds
+capacity_thresholds:
+  storage_usage_warning: 80  # Percent
+  storage_usage_critical: 90  # Percent
+  orphan_files_warning: 15   # Percent
+  orphan_files_critical: 25  # Percent
+  upload_failure_rate_warning: 3   # Percent
+  upload_failure_rate_critical: 5  # Percent

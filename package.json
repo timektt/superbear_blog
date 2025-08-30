@@ -64,7 +64,16 @@
     "campaigns:process-queue": "node -e \"fetch('http://localhost:3000/api/admin/campaigns/queue/process', {method: 'POST'}).then(r=>r.json()).then(console.log)\"",
     "suppressions:stats": "node -e \"fetch('http://localhost:3000/api/admin/suppressions').then(r=>r.json()).then(console.log)\"",
     "suppressions:export": "node -e \"fetch('http://localhost:3000/api/admin/suppressions?action=export').then(r=>r.json()).then(console.log)\"",
-    "test:layout": "node scripts/test-layout.js"
+    "test:layout": "node scripts/test-layout.js",
+    "media:deploy": "bash scripts/deploy-media-system.sh",
+    "media:deploy:windows": "powershell -ExecutionPolicy Bypass -File scripts/deploy-media-system.ps1",
+    "media:cleanup": "node -e \"fetch('http://localhost:3000/api/cron/media-cleanup', {method: 'POST', headers: {'Authorization': 'Bearer ' + (process.env.CRON_SECRET || 'dev-secret')}}).then(r=>r.json()).then(console.log)\"",
+    "media:orphans": "node -e \"fetch('http://localhost:3000/api/admin/media/orphans').then(r=>r.json()).then(console.log)\"",
+    "media:stats": "node -e \"fetch('http://localhost:3000/api/admin/media/analytics').then(r=>r.json()).then(console.log)\"",
+    "media:health": "node -e \"fetch('http://localhost:3000/api/health/media').then(r=>r.json()).then(console.log)\"",
+    "media:test-upload": "node scripts/test-media-upload.js",
+    "media:extract-references": "node scripts/extract-media-references.js",
+    "media:audit": "node scripts/audit-media-files.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
