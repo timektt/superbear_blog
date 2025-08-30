@@ -1,2 +1,319 @@
-https://stackblitz.com/storage/blobs/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBCRUdMd2dFPSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--c8c14a89627420f2a2ea7c3b1afca7f697bfaf61//.gitignore
+# ===================================
+# 🚫 GITIGNORE สำหรับ SUPERBEAR BLOG CMS
+# ===================================
+
+# ===== DEPENDENCIES & PACKAGES =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package manager lock files (เก็บเฉพาะ package-lock.json)
+yarn.lock
+pnpm-lock.yaml
+.pnpm-lock.yaml
+
+# ===== ENVIRONMENT VARIABLES =====
+# Environment files (ไฟล์ที่มีข้อมูลลับ)
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+.env.*.local
+.env.backup
+.env.local.backup
+
+# Keep example files (เก็บไฟล์ตัวอย่าง)
+!.env.example
+!.env.production.example
+
+# ===== BUILD & COMPILATION =====
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# TypeScript build info
+*.tsbuildinfo
+.tsbuildinfo
+
+# SWC compilation cache
+.swc/
+
+# Webpack bundle analyzer
+analyze/
+bundle-analyzer-report.html
+
+# ===== TESTING =====
+# Test coverage reports
+coverage/
+.nyc_output/
+*.lcov
+
+# Test results and reports
+test-results/
+playwright-report/
+test-report/
+junit.xml
+
+# Jest cache
+.jest-cache/
+
+# ===== DATABASE =====
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+dev.db
+test.db
+
+# Prisma generated files (เก็บ schema.prisma)
+prisma/dev.db*
+prisma/test.db*
+prisma/migrations/migration_lock.toml
+
+# Database dumps and backups
+*.sql
+*.dump
+db-backup/
+database-backup/
+
+# ===== LOGS =====
+# Log files
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Runtime logs
+combined.log
+error.log
+access.log
+
+# ===== CACHE & TEMPORARY FILES =====
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary folders
+tmp/
+temp/
+.tmp/
+.temp/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# ===== IDE & EDITOR =====
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# ===== DEPLOYMENT & PRODUCTION =====
+# Vercel
+.vercel/
+.vercel
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# SSL certificates (เก็บเฉพาะ config)
+ssl/*.pem
+ssl/*.key
+ssl/*.crt
+ssl/*.p12
+ssl/private/
+
+# ===== MEDIA & UPLOADS =====
+# Uploaded files (ถ้ามี local uploads)
+uploads/
+public/uploads/
+storage/
+media/
+
+# Image optimization cache
+.image-cache/
+
+# ===== MONITORING & ANALYTICS =====
+# Sentry
+.sentryclirc
+
+# Performance monitoring
+.lighthouse/
+lighthouse-report.html
+
+# ===== DEVELOPMENT TOOLS =====
+# Storybook
+storybook-static/
+
+# Bundle analysis
+bundle-report.html
+webpack-bundle-analyzer-report.html
+
+# ===== DOCUMENTATION ARTIFACTS =====
+# Generated documentation
+docs/build/
+.docusaurus/
+
+# ===== PROJECT SPECIFIC =====
+# Task completion reports (เอกสารสรุปงาน - ไม่ควร commit)
+*_COMPLETE.md
+*_SUMMARY.md
+*_REPORT.md
+*_DEBUG_REPORT.md
+*_AUDIT_REPORT.md
+*_CHECKLIST.md
+*_FIXES_SUMMARY.md
+*_GUIDE.md
+MEGA_TASK_*.md
+THEME_*.md
+TIPTAP_*.md
+CAMPAIGN_*.md
+ADMIN_*.md
+API_*.md
+SECURITY_*.md
+PERFORMANCE_*.md
+TECHCRUNCH_*.md
+UI_*.md
+PUBLIC_*.md
+DB_*.md
+ARTICLE_*.md
+DEPLOYMENT.md
+PRODUCTION_*.md
+ACCESSIBILITY_*.md
+
+# Kiro AI artifacts (เก็บเฉพาะ specs และ steering)
+.kiro/cache/
+.kiro/temp/
+.kiro/logs/
+.kiro
+
+# Scripts output และ test files
+scripts/output/
+scripts/temp/
+scripts/*.output
+scripts/*.result
+
+# PowerShell execution policy files
+*.ps1.backup
+
+# ===== SECURITY =====
+# Private keys และ certificates
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+
+# Auth tokens และ secrets
+.secrets
+secrets/
+auth-tokens/
+
+# ===== BACKUP FILES =====
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+*.save
+*~
+
+# ===== MISCELLANEOUS =====
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# parcel-bundler cache (https://parceljs.org/)
+.parcel-cache
+
+# Next.js revalidation
+.next-revalidate
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# ===== KEEP THESE FILES =====
+# Important config files to keep
+!.gitignore
+!.gitattributes
+!.npmrc
+!.prettierrc
+!.prettierignore
+!package.json
+!package-lock.json
+!tsconfig.json
+!next.config.ts
+!tailwind.config.ts
+!jest.config.js
+!playwright.config.ts
+!vercel.json
+!README.md
