@@ -154,11 +154,8 @@ export default function CategoryNavigation({
                 }
                 ${isScrolling ? 'pointer-events-none' : ''}
               `}
-              aria-pressed={isActive}
-              style={{
-                animationDelay: `${index * 50}ms`,
-                animationFillMode: 'both'
-              }}
+              aria-pressed={isActive ? 'true' : 'false'}
+              aria-label={`Filter by ${category.name}${showCounts && category.count !== undefined ? ` (${category.count} articles)` : ''}`}
             >
               <span className="relative z-10 whitespace-nowrap">
                 {category.name}

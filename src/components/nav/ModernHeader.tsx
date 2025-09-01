@@ -149,6 +149,7 @@ export default function ModernHeader() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
+                  id="more-menu-button"
                   onClick={toggleMoreDropdown}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -161,8 +162,8 @@ export default function ModernHeader() {
                       ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
-                  aria-expanded={isMoreDropdownOpen}
-                  aria-haspopup="true"
+                  aria-expanded={isMoreDropdownOpen ? 'true' : 'false'}
+                  aria-haspopup="menu"
                   aria-label="More navigation options"
                 >
                   <span>More</span>
@@ -189,6 +190,7 @@ export default function ModernHeader() {
                     className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl z-50 py-3 animate-slide-down"
                     role="menu"
                     aria-orientation="vertical"
+                    aria-labelledby="more-menu-button"
                   >
                     {moreNavigationItems.map((item) => (
                       <Link
@@ -242,7 +244,7 @@ export default function ModernHeader() {
               onClick={toggleMobileMenu}
               className="inline-flex items-center justify-center p-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-300"
               aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen}
+              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (

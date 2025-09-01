@@ -350,6 +350,8 @@ function HomeView({
   }>;
   articlesForFiltering?: any[];
 }) {
+  return (
+    <>
       {/* New Wix-Inspired Hero Section */}
       <WixHeroSection featuredArticles={featuredArticles} />
 

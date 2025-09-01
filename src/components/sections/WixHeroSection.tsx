@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import OptimizedImage, { HeroImage, ThumbnailImage } from '@/components/ui/OptimizedImage';
 
 interface Article {
   id?: string;
@@ -53,10 +53,9 @@ export default function WixHeroSection({ featuredArticles }: WixHeroSectionProps
             >
               {/* Background Image */}
               <div className="absolute inset-0">
-                <Image
+                <HeroImage
                   src={mainFeatured.imageUrl}
                   alt={mainFeatured.title}
-                  fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                   priority
                   sizes="(max-width: 1024px) 100vw, 66vw"
@@ -148,10 +147,9 @@ function SecondaryFeaturedCard({ article }: { article: Article }) {
     >
       {/* Image */}
       <div className="relative aspect-[16/10] overflow-hidden">
-        <Image
+        <ThumbnailImage
           src={article.imageUrl}
           alt={article.title}
-          fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
           sizes="(max-width: 1024px) 100vw, 33vw"
         />

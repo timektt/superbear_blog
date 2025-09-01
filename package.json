@@ -28,6 +28,8 @@
     "test:security": "jest --testPathPattern=src/tests/security --runInBand",
     "test:performance": "jest --testPathPattern=src/tests/performance --runInBand",
     "test:accessibility": "jest --testPathPattern=src/tests/accessibility",
+    "audit:performance": "node scripts/performance-audit.js",
+    "analyze": "cross-env ANALYZE=true next build",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

@@ -15,6 +15,21 @@ const ServiceWorkerRegistration = dynamic(
 
 const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
 
+const PerformanceReporter = dynamic(
+  () => import('@/components/performance/PerformanceMonitor').then(mod => ({ default: mod.PerformanceReporter })),
+  { ssr: false }
+);
+
+const AccessibilityPerformancePanel = dynamic(
+  () => import('@/components/performance/AccessibilityPerformancePanel'),
+  { ssr: false }
+);
+
+const OptimizationInitializer = dynamic(
+  () => import('@/components/performance/OptimizationInitializer'),
+  { ssr: false }
+);
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -127,6 +142,20 @@ export default function RootLayout({
             `,
           }}
         />
+        {process.env.NODE_ENV === 'development' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Initialize accessibility monitoring in development
+                window.addEventListener('load', () => {
+                  import('/src/lib/accessibility/testing-utils').then(({ initAccessibilityMonitoring }) => {
+                    initAccessibilityMonitoring();
+                  }).catch(() => {});
+                });
+              `,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300`}
@@ -146,6 +175,9 @@ export default function RootLayout({
           </SessionProvider>
         </ThemeProvider>
         <ServiceWorkerRegistration />
+        <PerformanceReporter />
+        <OptimizationInitializer />
+        <AccessibilityPerformancePanel />
       </body>
     </html>
   );
