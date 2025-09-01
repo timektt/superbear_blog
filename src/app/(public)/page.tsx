@@ -9,6 +9,7 @@ import StorylinesStrip from '@/components/sections/StorylinesStrip';
 import StartupsBlock from '@/components/sections/StartupsBlock';
 import PodcastsBlock from '@/components/sections/PodcastsBlock';
 import ExploreByCategory from '@/components/sections/ExploreByCategory';
+import CategoryFilteredArticles from '@/components/sections/CategoryFilteredArticles';
 import { NewsletterSubscription } from '@/components/newsletter/NewsletterSubscription';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 import { getPrisma } from '@/lib/prisma';
@@ -61,6 +62,14 @@ export default async function Home() {
       }))
     ];
 
+    // Mock categories for DB-safe mode
+    const mockCategories = [
+      { id: 'ai', name: 'AI', slug: 'ai', count: 3 },
+      { id: 'devtools', name: 'DevTools', slug: 'devtools', count: 2 },
+      { id: 'startups', name: 'Startups', slug: 'startups', count: 2 },
+      { id: 'open-source', name: 'Open Source', slug: 'open-source', count: 1 },
+    ];
+
     return (
       <HomeView
         featuredArticles={mockFeaturedArticles}
@@ -75,13 +84,33 @@ export default async function Home() {
         }}
         headlines={MOCK_TOP_HEADLINES}
         latest={MOCK_LATEST}
+        categories={mockCategories}
+        articlesForFiltering={MOCK_LATEST.map(article => ({
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+          summary: article.snippet || '',
+          image: article.imageUrl,
+          createdAt: new Date(article.date),
+          author: { id: 'mock', name: article.author, avatar: null },
+          category: { 
+            id: article.category.toLowerCase().replace(/\s+/g, '-'), 
+            name: article.category, 
+            slug: article.category.toLowerCase().replace(/\s+/g, '-') 
+          },
+          tags: article.tags?.map(tag => ({ 
+            id: tag, 
+            name: tag, 
+            slug: tag.toLowerCase().replace(/\s+/g, '-') 
+          })) || [],
+        }))}
       />
     );
   }
 
   // Real DB Mode: Fetch data from database
   try {
-    const [featuredResults, headlines, latest] = await Promise.all([
+    const [featuredResults, headlines, latest, categories] = await Promise.all([
       prisma.article.findMany({
         where: { status: 'PUBLISHED' },
         orderBy: { createdAt: 'desc' },
@@ -97,8 +126,25 @@ export default async function Home() {
       prisma.article.findMany({
         where: { status: 'PUBLISHED' },
         orderBy: { createdAt: 'desc' },
-        take: 9,
+        take: 12, // Increased to show more articles for category filtering
         include: { author: true, category: true, tags: true },
+      }),
+      prisma.category.findMany({
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          _count: {
+            select: {
+              articles: {
+                where: {
+                  status: 'PUBLISHED',
+                },
+              },
+            },
+          },
+        },
+        orderBy: { name: 'asc' },
       }),
     ]);
 
@@ -130,6 +176,11 @@ export default async function Home() {
         ];
 
     const featured = featuredResults[0] || MOCK_FEATURED;
+
+    // Filter categories that have published articles
+    const categoriesWithArticles = categories.filter(
+      (category) => category._count.articles > 0
+    );
 
     return (
       <HomeView
@@ -164,6 +215,13 @@ export default async function Home() {
               }))
             : MOCK_LATEST
         }
+        categories={categoriesWithArticles.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          slug: cat.slug,
+          count: cat._count.articles,
+        }))}
+        articlesForFiltering={latest.length > 0 ? latest : []}
       />
     );
   } catch (error) {
@@ -192,6 +250,14 @@ export default async function Home() {
       }))
     ];
 
+    // Mock categories for error fallback
+    const mockCategories = [
+      { id: 'ai', name: 'AI', slug: 'ai', count: 3 },
+      { id: 'devtools', name: 'DevTools', slug: 'devtools', count: 2 },
+      { id: 'startups', name: 'Startups', slug: 'startups', count: 2 },
+      { id: 'open-source', name: 'Open Source', slug: 'open-source', count: 1 },
+    ];
+
     return (
       <HomeView
         featuredArticles={mockFeaturedArticles}
@@ -206,6 +272,26 @@ export default async function Home() {
         }}
         headlines={MOCK_TOP_HEADLINES}
         latest={MOCK_LATEST}
+        categories={mockCategories}
+        articlesForFiltering={MOCK_LATEST.map(article => ({
+          id: article.id,
+          title: article.title,
+          slug: article.slug,
+          summary: article.snippet || '',
+          image: article.imageUrl,
+          createdAt: new Date(article.date),
+          author: { id: 'mock', name: article.author, avatar: null },
+          category: { 
+            id: article.category.toLowerCase().replace(/\s+/g, '-'), 
+            name: article.category, 
+            slug: article.category.toLowerCase().replace(/\s+/g, '-') 
+          },
+          tags: article.tags?.map(tag => ({ 
+            id: tag, 
+            name: tag, 
+            slug: tag.toLowerCase().replace(/\s+/g, '-') 
+          })) || [],
+        }))}
       />
     );
   }
@@ -217,6 +303,8 @@ function HomeView({
   featured,
   headlines,
   latest,
+  categories = [],
+  articlesForFiltering = [],
 }: {
   featuredArticles: Array<{
     id: string;
@@ -254,6 +342,13 @@ function HomeView({
     snippet?: string;
     tags: string[];
   }>;
+  categories?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    count: number;
+  }>;
+  articlesForFiltering?: any[];
 }) {
       {/* New Wix-Inspired Hero Section */}
       <WixHeroSection featuredArticles={featuredArticles} />
@@ -297,6 +392,40 @@ function HomeView({
           </div>
         </div>
       </section>
+
+      {/* Category Filtered Articles Section */}
+      {categories.length > 0 && articlesForFiltering.length > 0 && (
+        <CategoryFilteredArticles
+          articles={articlesForFiltering.map(article => ({
+            id: article.id,
+            title: article.title,
+            slug: article.slug,
+            summary: article.summary,
+            image: article.image || article.imageUrl,
+            publishedAt: article.createdAt,
+            author: {
+              id: article.author?.id || 'unknown',
+              name: article.author?.name || 'SuperBear Reporter',
+              avatar: article.author?.avatar || null,
+            },
+            category: {
+              id: article.category?.id || 'unknown',
+              name: article.category?.name || 'Tech',
+              slug: article.category?.slug || 'tech',
+            },
+            tags: article.tags?.map((tag: any) => ({
+              id: tag.id || tag.name,
+              name: tag.name,
+              slug: tag.slug || tag.name.toLowerCase().replace(/\s+/g, '-'),
+            })) || [],
+          }))}
+          categories={categories}
+          title="Browse by Category"
+          description="Filter articles by topic to find exactly what you're looking for"
+          columns={3}
+          className="border-t border-border"
+        />
+      )}
 
       {/* Storylines Strip */}
       <StorylinesStrip items={mockStorylinesItems} />
