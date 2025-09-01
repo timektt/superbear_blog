@@ -1,6 +1,7 @@
 'use client';
 
 import ArticleCard from './ArticleCard';
+import { Skeleton } from './skeleton';
 
 interface Article {
   id: string;
@@ -29,53 +30,136 @@ interface Article {
 interface ArticleGridProps {
   articles: Article[];
   isLoading?: boolean;
+  variant?: 'default' | 'compact' | 'list' | 'featured';
+  columns?: 1 | 2 | 3 | 4;
+  showAuthor?: boolean;
+  showCategory?: boolean;
+  showReadingTime?: boolean;
+  className?: string;
+}
+
+// Enhanced skeleton component for article cards
+function ArticleCardSkeleton({ variant = 'default' }: { variant?: string }) {
+  if (variant === 'list') {
+    return (
+      <div className="flex gap-6 py-6 border-b border-border last:border-b-0 animate-pulse">
+        <Skeleton className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl flex-shrink-0" />
+        <div className="flex-1 space-y-3">
+          <Skeleton className="h-4 w-20 rounded-full" />
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+          <div className="flex gap-4">
+            <Skeleton className="h-3 w-16" />
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'compact') {
+    return (
+      <div className="flex gap-4 animate-pulse">
+        <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-4 w-16 rounded-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+          <div className="flex gap-3">
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === 'featured') {
+    return (
+      <div className="bg-card rounded-2xl border border-border overflow-hidden animate-pulse">
+        <Skeleton className="aspect-[16/10] w-full" />
+        <div className="p-8 space-y-4">
+          <Skeleton className="h-8 w-3/4" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+          <div className="flex gap-6">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Default skeleton
+  return (
+    <div className="bg-card rounded-2xl border border-border overflow-hidden animate-pulse">
+      <Skeleton className="aspect-[16/9] w-full" />
+      <div className="p-6 space-y-3">
+        <Skeleton className="h-6 w-3/4" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-6 w-20 rounded-full" />
+        </div>
+        <div className="flex gap-4">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ArticleGrid({
   articles,
   isLoading = false,
+  variant = 'default',
+  columns = 3,
+  showAuthor = true,
+  showCategory = true,
+  showReadingTime = true,
+  className = '',
 }: ArticleGridProps) {
+  // Generate grid classes based on columns and variant
+  const getGridClasses = () => {
+    if (variant === 'list') {
+      return 'space-y-0'; // List layout doesn't use grid
+    }
+    
+    const baseClasses = 'grid gap-6 sm:gap-8';
+    const columnClasses = {
+      1: 'grid-cols-1',
+      2: 'grid-cols-1 sm:grid-cols-2',
+      3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
+      4: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+    };
+    
+    return `${baseClasses} ${columnClasses[columns]}`;
+  };
+
   if (isLoading) {
+    const skeletonCount = variant === 'list' ? 8 : columns * 2;
+    
     return (
       <div
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+        className={`${variant === 'list' ? 'space-y-0' : getGridClasses()} ${className}`}
         aria-label="Loading articles"
         role="status"
       >
         <span className="sr-only">Loading articles...</span>
-        {Array.from({ length: 6 }).map((_, index) => (
-          <div
-            key={index}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 animate-pulse overflow-hidden"
-            aria-hidden="true"
-          >
-            <div className="aspect-[4/3] w-full bg-gray-200 dark:bg-gray-700"></div>
-            <div className="p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-24"></div>
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
-              </div>
-              <div className="space-y-3 mb-6">
-                <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-              </div>
-              <div className="space-y-2 mb-6">
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-4/6"></div>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full mr-3"></div>
-                  <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-16"></div>
-                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-lg w-20"></div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {Array.from({ length: skeletonCount }).map((_, index) => (
+          <ArticleCardSkeleton key={index} variant={variant} />
         ))}
       </div>
     );
@@ -83,10 +167,10 @@ export default function ArticleGrid({
 
   if (articles.length === 0) {
     return (
-      <div className="text-center py-16 px-4">
-        <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
+      <div className={`text-center py-16 px-4 ${className}`}>
+        <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6 bg-muted rounded-2xl flex items-center justify-center">
           <svg
-            className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 dark:text-gray-500"
+            className="w-12 h-12 sm:w-16 sm:h-16 text-muted-foreground"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -100,10 +184,10 @@ export default function ArticleGrid({
             />
           </svg>
         </div>
-        <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+        <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4 tracking-tight">
           No articles found
         </h3>
-        <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-lg mx-auto leading-relaxed text-balance">
+        <p className="text-muted-foreground text-base sm:text-lg max-w-lg mx-auto leading-relaxed">
           There are no published articles matching your criteria. Try adjusting
           your search or filters, or check back later for new content!
         </p>
@@ -113,13 +197,19 @@ export default function ArticleGrid({
 
   return (
     <div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+      className={`${getGridClasses()} ${className}`}
       role="list"
       aria-label={`${articles.length} article${articles.length === 1 ? '' : 's'} found`}
     >
       {articles.map((article) => (
         <div key={article.id} role="listitem">
-          <ArticleCard article={article} />
+          <ArticleCard 
+            article={article} 
+            variant={variant}
+            showAuthor={showAuthor}
+            showCategory={showCategory}
+            showReadingTime={showReadingTime}
+          />
         </div>
       ))}
     </div>

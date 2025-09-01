@@ -72,11 +72,11 @@ export default function Pager({
       {currentPage > 1 ? (
         <Link
           href={createPageUrl(currentPage - 1)}
-          className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-lg hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
           aria-label="Go to previous page"
         >
           <svg
-            className="w-4 h-4 mr-1"
+            className="w-4 h-4 mr-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -91,9 +91,9 @@ export default function Pager({
           Previous
         </Link>
       ) : (
-        <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md cursor-not-allowed">
+        <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground/50 bg-muted border border-border rounded-lg cursor-not-allowed">
           <svg
-            className="w-4 h-4 mr-1"
+            className="w-4 h-4 mr-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -116,7 +116,7 @@ export default function Pager({
             return (
               <span
                 key={`dots-${index}`}
-                className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400"
+                className="px-3 py-2 text-sm text-muted-foreground"
               >
                 ...
               </span>
@@ -130,10 +130,10 @@ export default function Pager({
             <Link
               key={pageNum}
               href={createPageUrl(pageNum)}
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200 ${
+              className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 ${
                 isActive
-                  ? 'text-white bg-indigo-600 border border-indigo-600 hover:bg-indigo-700'
-                  : 'text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300'
+                  ? 'text-primary-foreground bg-primary border border-primary hover:bg-primary/90 shadow-sm'
+                  : 'text-muted-foreground bg-background border border-border hover:bg-muted hover:text-foreground'
               }`}
               aria-label={`Go to page ${pageNum}`}
               aria-current={isActive ? 'page' : undefined}
@@ -148,12 +148,12 @@ export default function Pager({
       {currentPage < totalPages ? (
         <Link
           href={createPageUrl(currentPage + 1)}
-          className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 transition-colors duration-200"
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-lg hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
           aria-label="Go to next page"
         >
           Next
           <svg
-            className="w-4 h-4 ml-1"
+            className="w-4 h-4 ml-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -167,10 +167,10 @@ export default function Pager({
           </svg>
         </Link>
       ) : (
-        <span className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-300 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md cursor-not-allowed">
+        <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground/50 bg-muted border border-border rounded-lg cursor-not-allowed">
           Next
           <svg
-            className="w-4 h-4 ml-1"
+            className="w-4 h-4 ml-2"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
