@@ -10,7 +10,7 @@ import StartupsBlock from '@/components/sections/StartupsBlock';
 import PodcastsBlock from '@/components/sections/PodcastsBlock';
 import ExploreByCategory from '@/components/sections/ExploreByCategory';
 import CategoryFilteredArticles from '@/components/sections/CategoryFilteredArticles';
-import { NewsletterSubscription } from '@/components/newsletter/NewsletterSubscription';
+import { NewsletterCTA } from '@/components/sections/NewsletterCTA';
 import { generateMetadata as createMetadata } from '@/lib/metadata-utils';
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
@@ -439,26 +439,13 @@ function HomeView({
       {/* Podcasts Section */}
       <PodcastsBlock title="Podcasts" items={mockPodcastItems} />
 
-      {/* Newsletter Subscription */}
-      <section className="bg-muted/30 py-12">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-card border border-border rounded-2xl p-6 text-center">
-            <h2 className="text-2xl font-bold text-card-foreground mb-3">
-              Stay Updated
-            </h2>
-            <p className="text-muted-foreground mb-6">
-              Get curated tech insights delivered weekly. No spam, unsubscribe
-              anytime.
-            </p>
-            <NewsletterSubscription
-              source="homepage"
-              variant="compact"
-              utmSource="homepage"
-              utmCampaign="main_section"
-            />
-          </div>
-        </div>
-      </section>
+      {/* Newsletter CTA Section */}
+      <NewsletterCTA 
+        variant="gradient"
+        showTestimonials={true}
+        showStats={true}
+        className="bg-muted/20"
+      />
 
       {/* Explore by Category */}
       <ExploreByCategory />
