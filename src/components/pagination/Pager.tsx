@@ -72,7 +72,7 @@ export default function Pager({
       {currentPage > 1 ? (
         <Link
           href={createPageUrl(currentPage - 1)}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-lg hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+          className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
           aria-label="Go to previous page"
         >
           <svg
@@ -91,7 +91,7 @@ export default function Pager({
           Previous
         </Link>
       ) : (
-        <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground/50 bg-muted border border-border rounded-lg cursor-not-allowed">
+        <span className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl cursor-not-allowed">
           <svg
             className="w-4 h-4 mr-2"
             fill="none"
@@ -130,10 +130,10 @@ export default function Pager({
             <Link
               key={pageNum}
               href={createPageUrl(pageNum)}
-              className={`inline-flex items-center px-3 py-2 text-sm font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 ${
+              className={`inline-flex items-center px-4 py-3 text-sm font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 ${
                 isActive
-                  ? 'text-primary-foreground bg-primary border border-primary hover:bg-primary/90 shadow-sm'
-                  : 'text-muted-foreground bg-background border border-border hover:bg-muted hover:text-foreground'
+                  ? 'text-white bg-blue-600 border border-blue-600 hover:bg-blue-700 shadow-sm'
+                  : 'text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
               }`}
               aria-label={`Go to page ${pageNum}`}
               aria-current={isActive ? 'page' : undefined}
@@ -148,7 +148,7 @@ export default function Pager({
       {currentPage < totalPages ? (
         <Link
           href={createPageUrl(currentPage + 1)}
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground bg-background border border-border rounded-lg hover:bg-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200"
+          className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 shadow-sm"
           aria-label="Go to next page"
         >
           Next
@@ -167,7 +167,7 @@ export default function Pager({
           </svg>
         </Link>
       ) : (
-        <span className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground/50 bg-muted border border-border rounded-lg cursor-not-allowed">
+        <span className="inline-flex items-center px-6 py-3 text-sm font-medium text-gray-400 dark:text-gray-600 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl cursor-not-allowed">
           Next
           <svg
             className="w-4 h-4 ml-2"

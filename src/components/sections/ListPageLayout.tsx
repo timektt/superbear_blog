@@ -33,16 +33,20 @@ export default function ListPageLayout({
       )}
 
       {/* Main Content */}
-      <section className="bg-background py-8 transition-colors duration-300">
+      <section className="bg-white dark:bg-gray-900 py-12 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">{title}</h1>
+          <div className="mb-12">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
+              {title}
+            </h1>
             {subtitle && (
-              <p className="text-lg text-muted-foreground">{subtitle}</p>
+              <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed max-w-3xl">
+                {subtitle}
+              </p>
             )}
             {total > 0 && (
-              <p className="text-sm text-muted-foreground mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-4">
                 {total} article{total !== 1 ? 's' : ''} found
               </p>
             )}
@@ -50,10 +54,10 @@ export default function ListPageLayout({
 
           {items.length === 0 ? (
             /* Empty State */
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
+            <div className="text-center py-20">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-2xl flex items-center justify-center">
                 <svg
-                  className="w-8 h-8 text-muted-foreground"
+                  className="w-10 h-10 text-gray-400 dark:text-gray-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -66,10 +70,10 @@ export default function ListPageLayout({
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">
+              <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
                 No articles found
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
                 Try adjusting your search or browse other categories.
               </p>
             </div>
@@ -78,7 +82,7 @@ export default function ListPageLayout({
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Articles List - Left 8 cols */}
               <div className="lg:col-span-8">
-                <div className="bg-card rounded-xl p-6 border border-border">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
                   <LatestList articles={items} />
                 </div>
 
@@ -101,7 +105,7 @@ export default function ListPageLayout({
                   items={mostPopular.map((item) => ({
                     title: item.title,
                     category: item.category,
-                    imageUrl: item.imageUrl,
+                    imageUrl: item.imageUrl || '/placeholder-image.svg',
                     slug: item.slug,
                     timeAgo: item.date,
                   }))}

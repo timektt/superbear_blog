@@ -1,96 +1,45 @@
 'use client';
 
 import Link from 'next/link';
+import { NewsletterSubscription } from '@/components/newsletter/NewsletterSubscription';
 
 export default function SiteFooter() {
   return (
     <footer
       data-testid="footer"
-      className="bg-background border-t border-border transition-colors duration-300"
+      className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 transition-colors duration-300"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* About Section */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand Section */}
+          <div className="space-y-6 lg:col-span-1">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">
                   SB
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-foreground">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                 SuperBear Blog
               </h3>
             </div>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+            <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-sm">
               Filtered, in-depth tech content for developers, AI builders, and
               tech entrepreneurs. Stay ahead with the latest insights in AI,
               DevTools, and startup developments.
             </p>
-          </div>
-
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link
-                  href="/"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
-                >
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/news"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
-                >
-                  Latest
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/ai"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
-                >
-                  Categories
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/podcast"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
-                >
-                  Podcast
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="text-muted-foreground hover:text-primary text-sm transition-colors duration-200"
-                >
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Connect Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Connect</h3>
+            
+            {/* Social Media Icons */}
             <div className="flex space-x-4">
               <a
                 href="https://twitter.com/superbear_blog"
-                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
-                aria-label="Twitter"
+                className="group w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-105 transition-all duration-200"
+                aria-label="Follow us on Twitter"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-muted-foreground"
+                  className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -100,13 +49,13 @@ export default function SiteFooter() {
               </a>
               <a
                 href="https://github.com/superbear-blog"
-                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
-                aria-label="GitHub"
+                className="group w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-700 hover:scale-105 transition-all duration-200"
+                aria-label="View our GitHub"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-muted-foreground"
+                  className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors duration-200"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -120,13 +69,13 @@ export default function SiteFooter() {
               </a>
               <a
                 href="https://linkedin.com/company/superbear-blog"
-                className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center hover:bg-accent transition-colors duration-200"
-                aria-label="LinkedIn"
+                className="group w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-105 transition-all duration-200"
+                aria-label="Connect on LinkedIn"
                 target="_blank"
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="w-5 h-5 text-muted-foreground"
+                  className="w-5 h-5 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                   aria-hidden="true"
@@ -140,13 +89,158 @@ export default function SiteFooter() {
               </a>
             </div>
           </div>
+
+          {/* Navigation Links */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Explore
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/news"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Latest News
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/ai"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  AI & Machine Learning
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/devtools"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Developer Tools
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/startups"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Startups
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/open-source"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Open Source
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Resources */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Resources
+            </h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  href="/podcasts"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Podcasts
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/newsletter"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Newsletter
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/search"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Search
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200 hover:underline"
+                >
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter Subscription */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Stay Updated
+            </h3>
+            <div className="max-w-sm">
+              <NewsletterSubscription 
+                variant="inline" 
+                showBenefits={false}
+              />
+            </div>
+          </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-border">
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm">
-              © 2025 SuperBear Blog. All rights reserved.
-            </p>
+        {/* Bottom Section */}
+        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                © 2025 SuperBear Blog. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-6">
+                <Link
+                  href="/privacy"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200"
+                >
+                  Privacy Policy
+                </Link>
+                <Link
+                  href="/terms"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200"
+                >
+                  Terms of Service
+                </Link>
+                <Link
+                  href="/cookies"
+                  className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition-colors duration-200"
+                >
+                  Cookie Policy
+                </Link>
+              </div>
+            </div>
+            <div className="text-gray-500 dark:text-gray-500 text-sm">
+              Made with ❤️ for developers
+            </div>
           </div>
         </div>
       </div>
