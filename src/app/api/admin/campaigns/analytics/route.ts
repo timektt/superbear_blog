@@ -230,8 +230,9 @@ async function postHandler(request: NextRequest) {
     logger.error('Failed to refresh campaign analytics', error as Error);
     return handleApiError(error);
   }
-}ex
-port const GET = compressedApiRoute(getHandler, {
+}
+
+export const GET = compressedApiRoute(getHandler, {
   threshold: 2048, // Compress analytics responses larger than 2KB
   level: 8, // High compression for analytics data
 });

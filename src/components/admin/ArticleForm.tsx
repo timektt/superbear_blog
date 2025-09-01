@@ -65,7 +65,7 @@ function EnhancedImageUploader({
   className = '',
 }: EnhancedImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -96,18 +96,18 @@ function EnhancedImageUploader({
   };
 
   const handleFileUpload = (file: File) => {
-    setError(null);
+    setImageError(null);
     
     // Validate file type and size
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      setError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      setImageError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
       return;
     }
 
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      setError('File size must be less than 10MB');
+      setImageError('File size must be less than 10MB');
       return;
     }
 
@@ -118,7 +118,7 @@ function EnhancedImageUploader({
     if (onImageRemove) {
       onImageRemove();
     }
-    setError(null);
+    setImageError(null);
   };
 
   const openFileDialog = () => {
@@ -258,9 +258,9 @@ function EnhancedImageUploader({
         </div>
       )}
 
-      {error && (
+      {imageError && (
         <div className="bg-red-50 border border-red-200 rounded-md p-3">
-          <p className="text-sm text-red-600">{error}</p>
+          <p className="text-sm text-red-600">{imageError}</p>
         </div>
       )}
 
@@ -284,7 +284,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
   const { validateImageReferences, updateCoverImageReference } = useMediaTracking();
   const { trackUpload } = useMediaUploadTracking();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [authors, setAuthors] = useState<Author[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -376,7 +376,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     value: string | string[]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    setError(null);
+    setSubmitError(null);
   };
 
   const handleSlugChange = (value: string) => {
@@ -462,7 +462,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     try {
       const validation = await validateImageReferences(formData.content);
       if (!validation.valid) {
-        setError(`Missing images detected: ${validation.missingImages.join(', ')}`);
+        setSubmitError(`Missing images detected: ${validation.missingImages.join(', ')}`);
         return false;
       }
       return true;
@@ -477,7 +477,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     e.preventDefault();
 
     if (!validateForm()) {
-      setError('Please fix all validation errors before submitting');
+      setSubmitError('Please fix all validation errors before submitting');
       return;
     }
 
@@ -488,7 +488,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     }
 
     setLoading(true);
-    setError(null);
+    setSubmitError(null);
     setFormError(null);
 
     try {
@@ -532,7 +532,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
       const errorMessage =
         err instanceof Error ? err.message : 'An unexpected error occurred';
 
-      setError(errorMessage);
+      setSubmitError(errorMessage);
       setFormError(errorMessage);
 
       error(
@@ -568,7 +568,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
             className="p-4 sm:p-6 space-y-6"
             noValidate
           >
-            {(error || formError) && (
+            {(submitError || formError) && (
               <div
                 className="rounded-md bg-red-50 p-4"
                 role="alert"
@@ -594,7 +594,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-red-800">Error</h3>
                     <div className="mt-1 text-sm text-red-700">
-                      {error || formError}
+                      {submitError || formError}
                     </div>
                   </div>
                 </div>

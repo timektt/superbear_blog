@@ -94,8 +94,9 @@ async function handler(request: NextRequest) {
       error: 'Search failed',
     }, { status: 500 });
   }
-}e
-xport const GET = compressedApiRoute(handler, {
+}
+
+export const GET = compressedApiRoute(handler, {
   threshold: 512, // Compress search responses larger than 512 bytes
   level: 7, // Higher compression for search results
 });

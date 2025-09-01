@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import NavBar from '@/components/nav/NavBar';
-import SiteFooter from '@/components/footer/SiteFooter';
 
 interface MainLayoutProps {
   children: React.ReactNode;

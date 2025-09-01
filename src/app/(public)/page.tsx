@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Hero from '@/components/sections/Hero';
+import WixHeroSection from '@/components/sections/WixHeroSection';
 import TopHeadlines from '@/components/sections/TopHeadlines';
 import LatestList from '@/components/sections/LatestList';
 import RightRail from '@/components/sections/RightRail';
@@ -36,8 +37,33 @@ export default async function Home() {
 
   // DB-Safe Mode: Use mock data when database is not configured
   if (!IS_DB_CONFIGURED || !prisma) {
+    const mockFeaturedArticles = [
+      {
+        id: MOCK_FEATURED.id,
+        title: MOCK_FEATURED.title,
+        summary: MOCK_FEATURED.summary,
+        category: MOCK_FEATURED.category.name,
+        author: MOCK_FEATURED.author.name,
+        date: MOCK_FEATURED.date,
+        imageUrl: MOCK_FEATURED.imageUrl,
+        slug: MOCK_FEATURED.slug,
+      },
+      // Add secondary featured articles from MOCK_LATEST
+      ...MOCK_LATEST.slice(0, 2).map(article => ({
+        id: article.id,
+        title: article.title,
+        summary: article.snippet || '',
+        category: article.category,
+        author: article.author,
+        date: article.date,
+        imageUrl: article.imageUrl,
+        slug: article.slug,
+      }))
+    ];
+
     return (
       <HomeView
+        featuredArticles={mockFeaturedArticles}
         featured={{
           title: MOCK_FEATURED.title,
           summary: MOCK_FEATURED.summary,
@@ -59,7 +85,7 @@ export default async function Home() {
       prisma.article.findMany({
         where: { status: 'PUBLISHED' },
         orderBy: { createdAt: 'desc' },
-        take: 1,
+        take: 3, // Get 3 articles for hero section (1 main + 2 secondary)
         include: { author: true, category: true },
       }),
       prisma.article.findMany({
@@ -76,10 +102,38 @@ export default async function Home() {
       }),
     ]);
 
+    // Prepare featured articles for hero section
+    const featuredArticles = featuredResults.length > 0 
+      ? featuredResults.map(article => ({
+          id: article.id,
+          title: article.title,
+          summary: article.summary || '',
+          category: article.category?.name || 'Tech',
+          author: article.author?.name || 'SuperBear Reporter',
+          date: article.createdAt
+            ? new Date(article.createdAt).toLocaleDateString()
+            : new Date().toLocaleDateString(),
+          imageUrl: article.image || article.imageUrl || '/og-default.svg',
+          slug: article.slug,
+        }))
+      : [
+          {
+            id: MOCK_FEATURED.id,
+            title: MOCK_FEATURED.title,
+            summary: MOCK_FEATURED.summary,
+            category: MOCK_FEATURED.category.name,
+            author: MOCK_FEATURED.author.name,
+            date: MOCK_FEATURED.date,
+            imageUrl: MOCK_FEATURED.imageUrl,
+            slug: MOCK_FEATURED.slug,
+          }
+        ];
+
     const featured = featuredResults[0] || MOCK_FEATURED;
 
     return (
       <HomeView
+        featuredArticles={featuredArticles}
         featured={{
           title: featured.title,
           summary: featured.summary || '',
@@ -114,8 +168,33 @@ export default async function Home() {
     );
   } catch (error) {
     console.warn('Database query failed, falling back to mock data:', error);
+    const mockFeaturedArticles = [
+      {
+        id: MOCK_FEATURED.id,
+        title: MOCK_FEATURED.title,
+        summary: MOCK_FEATURED.summary,
+        category: MOCK_FEATURED.category.name,
+        author: MOCK_FEATURED.author.name,
+        date: MOCK_FEATURED.date,
+        imageUrl: MOCK_FEATURED.imageUrl,
+        slug: MOCK_FEATURED.slug,
+      },
+      // Add secondary featured articles from MOCK_LATEST
+      ...MOCK_LATEST.slice(0, 2).map(article => ({
+        id: article.id,
+        title: article.title,
+        summary: article.snippet || '',
+        category: article.category,
+        author: article.author,
+        date: article.date,
+        imageUrl: article.imageUrl,
+        slug: article.slug,
+      }))
+    ];
+
     return (
       <HomeView
+        featuredArticles={mockFeaturedArticles}
         featured={{
           title: MOCK_FEATURED.title,
           summary: MOCK_FEATURED.summary,
@@ -134,10 +213,21 @@ export default async function Home() {
 
 // Home View Component
 function HomeView({
+  featuredArticles,
   featured,
   headlines,
   latest,
 }: {
+  featuredArticles: Array<{
+    id: string;
+    title: string;
+    summary: string;
+    category: string;
+    author: string;
+    date: string;
+    imageUrl: string;
+    slug: string;
+  }>;
   featured: {
     title: string;
     summary: string;
@@ -165,24 +255,8 @@ function HomeView({
     tags: string[];
   }>;
 }) {
-  return (
-    <>
-      {/* Above the Fold - Hero Band */}
-      <section className="bg-background border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Featured Article - Left 8 cols */}
-            <div className="lg:col-span-8">
-              <Hero featuredArticle={featured} />
-            </div>
-
-            {/* Top Headlines - Right 4 cols */}
-            <div className="lg:col-span-4">
-              <TopHeadlines headlines={headlines} />
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* New Wix-Inspired Hero Section */}
+      <WixHeroSection featuredArticles={featuredArticles} />
 
       {/* Latest News Section */}
       <section className="bg-background py-8">

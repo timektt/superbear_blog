@@ -1581,6 +1581,7 @@ Headers: {
    ```
 
 4. **Bundle Analysis**
+
    ```bash
    npm run build:analyze
    # Opens bundle analyzer in browser
