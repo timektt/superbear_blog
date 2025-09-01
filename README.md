@@ -1,4 +1,4 @@
-# 🐻 SuperBear Blog - Enterprise CMS Platform
+# 🐻 SuperBear Blog 
 
 <div align="center">
   <img src="public/og-default.svg" alt="SuperBear Blog" width="200" height="200">
