@@ -44,16 +44,16 @@ export function createLazyComponent<T extends React.ComponentType<any>>(
   const LazyComponent = React.lazy(importFn);
   
   return function WrappedLazyComponent(props: React.ComponentProps<T>) {
-    return (
-      <React.Suspense 
-        fallback={
-          fallback ? 
-            React.createElement(fallback) : 
-            <div className="animate-pulse bg-muted rounded h-32" />
-        }
-      >
-        <LazyComponent {...props} />
-      </React.Suspense>
+    const FallbackComponent = fallback || (() => 
+      React.createElement('div', { 
+        className: 'animate-pulse bg-muted rounded h-32' 
+      })
+    );
+    
+    return React.createElement(
+      React.Suspense,
+      { fallback: React.createElement(FallbackComponent) },
+      React.createElement(LazyComponent, props)
     );
   };
 }
@@ -73,7 +73,6 @@ export const routeComponents = {
   
   // Heavy UI components
   RichTextEditor: () => import('@/components/editor/Editor'),
-  ChartComponents: () => import('@/components/ui/charts'),
 };
 
 /**
@@ -116,7 +115,7 @@ export function monitorBundleSize(): void {
       entries.forEach((entry) => {
         if (entry.name.includes('.js') || entry.name.includes('.css')) {
           console.log(`Bundle loaded: ${entry.name}`, {
-            size: entry.transferSize,
+            size: (entry as any).transferSize || 0,
             duration: entry.duration,
             type: entry.name.includes('.js') ? 'javascript' : 'css',
           });

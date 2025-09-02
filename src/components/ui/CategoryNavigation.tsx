@@ -117,13 +117,7 @@ export default function CategoryNavigation({
       {/* Categories container with enhanced styling */}
       <div
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto scrollbar-hide pb-3 scroll-smooth
-                   px-8 sm:px-12 md:px-0"
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch'
-        }}
+        className="flex gap-3 overflow-x-auto scrollbar-hide pb-3 scroll-smooth px-8 sm:px-12 md:px-0"
       >
         {allCategories.map((category, index) => {
           const isActive = activeCategory === category.slug;
@@ -154,7 +148,8 @@ export default function CategoryNavigation({
                 }
                 ${isScrolling ? 'pointer-events-none' : ''}
               `}
-              aria-pressed={isActive ? 'true' : 'false'}
+              aria-pressed={isActive}
+              aria-current={isActive ? 'page' : undefined}
               aria-label={`Filter by ${category.name}${showCounts && category.count !== undefined ? ` (${category.count} articles)` : ''}`}
             >
               <span className="relative z-10 whitespace-nowrap">

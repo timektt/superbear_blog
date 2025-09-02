@@ -155,6 +155,15 @@ export default function ModernHeader() {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
                       toggleMoreDropdown();
+                    } else if (e.key === 'Escape' && isMoreDropdownOpen) {
+                      closeMoreDropdown();
+                    } else if (e.key === 'ArrowDown' && isMoreDropdownOpen) {
+                      e.preventDefault();
+                      // Focus first menu item
+                      const firstMenuItem = document.querySelector(
+                        '[role="menu"] [role="menuitem"]'
+                      ) as HTMLElement;
+                      firstMenuItem?.focus();
                     }
                   }}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
@@ -162,7 +171,7 @@ export default function ModernHeader() {
                       ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
-                  aria-expanded={isMoreDropdownOpen ? 'true' : 'false'}
+                  aria-expanded={isMoreDropdownOpen}
                   aria-haspopup="menu"
                   aria-label="More navigation options"
                 >
@@ -197,6 +206,28 @@ export default function ModernHeader() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreDropdown}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') {
+                            closeMoreDropdown();
+                            document
+                              .getElementById('more-menu-button')
+                              ?.focus();
+                          } else if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            const nextItem =
+                              e.currentTarget.parentElement?.nextElementSibling?.querySelector(
+                                'a'
+                              ) as HTMLElement;
+                            nextItem?.focus();
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            const prevItem =
+                              e.currentTarget.parentElement?.previousElementSibling?.querySelector(
+                                'a'
+                              ) as HTMLElement;
+                            prevItem?.focus();
+                          }
+                        }}
                         className={`block px-6 py-4 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl mx-2 ${
                           isActivePage(item.href)
                             ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
@@ -225,11 +256,14 @@ export default function ModernHeader() {
               <div className="relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
-                  type="text"
+                  type="search"
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-12 pr-6 py-3 w-64 lg:w-80 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-300 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                  aria-label="Search articles"
+                  role="searchbox"
+                  aria-describedby="search-help"
                 />
               </div>
             </form>
@@ -244,7 +278,7 @@ export default function ModernHeader() {
               onClick={toggleMobileMenu}
               className="inline-flex items-center justify-center p-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-300"
               aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
+              aria-expanded={isMobileMenuOpen}
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (

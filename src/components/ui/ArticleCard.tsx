@@ -327,22 +327,36 @@ export default function ArticleCard({
   return (
     <article
       className={`group bg-card rounded-2xl shadow-sm border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${className}`}
+      role="article"
+      aria-labelledby={`article-title-${slug}`}
+      aria-describedby={snippet ? `article-summary-${slug}` : undefined}
     >
-      <Link href={href} className="block">
+      <Link 
+        href={href} 
+        className="block focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-2xl"
+        aria-label={`Read article: ${title}`}
+      >
         {/* Article Image */}
         <div className="relative aspect-[16/9] overflow-hidden bg-muted">
           <Image
             src={imageUrl}
-            alt={title}
+            alt={`Featured image for ${title}`}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-500"
             sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            loading="lazy"
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
           />
 
           {/* Category Badge */}
           {showCategory && (
             <div className="absolute top-4 left-4">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${getCategoryColor(category)}`}>
+              <span 
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${getCategoryColor(category)}`}
+                role="badge"
+                aria-label={`Category: ${category}`}
+              >
                 {category}
               </span>
             </div>
@@ -352,13 +366,19 @@ export default function ArticleCard({
         {/* Article Content */}
         <div className="p-6">
           {/* Title */}
-          <h3 className="text-lg font-bold text-card-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-tight">
+          <h3 
+            id={`article-title-${slug}`}
+            className="text-lg font-bold text-card-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-tight"
+          >
             {title}
           </h3>
 
           {/* Snippet */}
           {snippet && (
-            <p className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed">
+            <p 
+              id={`article-summary-${slug}`}
+              className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed"
+            >
               {snippet}
             </p>
           )}

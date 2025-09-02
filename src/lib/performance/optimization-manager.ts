@@ -5,7 +5,7 @@
 
 import { initWebVitals, webVitalsMonitor, type WebVitalMetric } from './core-web-vitals';
 import { initPerformanceMonitoring, type PerformanceMonitor } from './bundle-optimization';
-import { initAccessibilityMonitoring, type AccessibilityMonitor } from '../accessibility/testing-utils';
+import { runAccessibilityAudit } from '../accessibility/testing-utils';
 import { preloadCriticalRoutes, addResourceHints } from './bundle-optimization';
 
 export interface OptimizationConfig {
@@ -31,7 +31,7 @@ export interface OptimizationReport {
 export class OptimizationManager {
   private config: OptimizationConfig;
   private performanceMonitor?: PerformanceMonitor;
-  private accessibilityMonitor?: AccessibilityMonitor;
+  private accessibilityResults: any[] = [];
   private isInitialized = false;
 
   constructor(config: Partial<OptimizationConfig> = {}) {
@@ -67,7 +67,8 @@ export class OptimizationManager {
 
       // Initialize accessibility monitoring (dev only)
       if (this.config.enableAccessibilityMonitoring) {
-        this.accessibilityMonitor = initAccessibilityMonitoring();
+        const audit = runAccessibilityAudit();
+        this.accessibilityResults = audit.results;
         console.log('✅ Accessibility monitoring initialized');
       }
 
@@ -135,7 +136,7 @@ export class OptimizationManager {
     }
 
     // Check accessibility issues
-    const accessibilityIssues = this.accessibilityMonitor?.getIssues().length || 0;
+    const accessibilityIssues = this.accessibilityResults.filter(r => r.severity === 'error').length;
     if (accessibilityIssues > 0) {
       recommendations.push(`Fix ${accessibilityIssues} accessibility issues for better WCAG compliance`);
     }
@@ -225,7 +226,7 @@ export class OptimizationManager {
       initialized: this.isInitialized,
       webVitalsActive: this.config.enableWebVitals,
       performanceMonitoringActive: !!this.performanceMonitor,
-      accessibilityMonitoringActive: !!this.accessibilityMonitor,
+      accessibilityMonitoringActive: this.config.enableAccessibilityMonitoring,
     };
   }
 
@@ -234,7 +235,7 @@ export class OptimizationManager {
    */
   cleanup(): void {
     this.performanceMonitor?.disconnect();
-    this.accessibilityMonitor?.disconnect();
+    this.accessibilityResults = [];
     webVitalsMonitor.disconnect();
     this.isInitialized = false;
   }
@@ -291,7 +292,7 @@ export const devTools = {
    * Test accessibility compliance
    */
   async testAccessibility(): Promise<void> {
-    const issues = optimizationManager.accessibilityMonitor?.getIssues() || [];
+    const issues = optimizationManager.accessibilityResults || [];
     
     console.group('♿ Accessibility Status');
     
@@ -299,8 +300,8 @@ export const devTools = {
       console.log('✅ No accessibility issues detected');
     } else {
       console.log(`❌ ${issues.length} accessibility issues found:`);
-      issues.forEach(issue => {
-        console.log(`  • ${issue.description} (${issue.impact} impact)`);
+      issues.forEach((issue: any) => {
+        console.log(`  • ${issue.message} (${issue.severity} severity)`);
       });
     }
     

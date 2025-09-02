@@ -9,7 +9,14 @@ export interface AriaProps {
   'aria-describedby'?: string;
   'aria-expanded'?: boolean;
   'aria-hidden'?: boolean;
-  'aria-current'?: 'page' | 'step' | 'location' | 'date' | 'time' | 'true' | 'false';
+  'aria-current'?:
+    | 'page'
+    | 'step'
+    | 'location'
+    | 'date'
+    | 'time'
+    | 'true'
+    | 'false';
   'aria-pressed'?: boolean;
   'aria-selected'?: boolean;
   'aria-checked'?: boolean | 'mixed';
@@ -277,7 +284,8 @@ export function getArticleCardAria(
   };
 
   if (summary) {
-    aria['aria-describedby'] = `${title.toLowerCase().replace(/\s+/g, '-')}-summary`;
+    aria['aria-describedby'] =
+      `${title.toLowerCase().replace(/\s+/g, '-')}-summary`;
   }
 
   if (isRead) {
@@ -333,12 +341,23 @@ export function validateAriaProps(props: AriaProps): string[] {
 
   // Check for conflicting aria-label and aria-labelledby
   if (props['aria-label'] && props['aria-labelledby']) {
-    warnings.push('Both aria-label and aria-labelledby are present. aria-labelledby takes precedence.');
+    warnings.push(
+      'Both aria-label and aria-labelledby are present. aria-labelledby takes precedence.'
+    );
   }
 
   // Check for proper boolean values
-  const booleanAttrs = ['aria-expanded', 'aria-hidden', 'aria-pressed', 'aria-selected', 'aria-disabled', 'aria-required', 'aria-atomic', 'aria-busy'];
-  booleanAttrs.forEach(attr => {
+  const booleanAttrs = [
+    'aria-expanded',
+    'aria-hidden',
+    'aria-pressed',
+    'aria-selected',
+    'aria-disabled',
+    'aria-required',
+    'aria-atomic',
+    'aria-busy',
+  ];
+  booleanAttrs.forEach((attr) => {
     const value = props[attr as keyof AriaProps];
     if (value !== undefined && typeof value !== 'boolean') {
       warnings.push(`${attr} should be a boolean value, got ${typeof value}`);
@@ -346,7 +365,12 @@ export function validateAriaProps(props: AriaProps): string[] {
   });
 
   // Check for valid aria-current values
-  if (props['aria-current'] && !['page', 'step', 'location', 'date', 'time', 'true', 'false'].includes(props['aria-current'])) {
+  if (
+    props['aria-current'] &&
+    !['page', 'step', 'location', 'date', 'time', 'true', 'false'].includes(
+      props['aria-current']
+    )
+  ) {
     warnings.push(`Invalid aria-current value: ${props['aria-current']}`);
   }
 
@@ -449,9 +473,11 @@ export const focusManagement = {
     const currentIndex = focusableElements.indexOf(currentElement);
     if (currentIndex === -1) return null;
 
-    const nextIndex = direction === 'next' 
-      ? (currentIndex + 1) % focusableElements.length
-      : (currentIndex - 1 + focusableElements.length) % focusableElements.length;
+    const nextIndex =
+      direction === 'next'
+        ? (currentIndex + 1) % focusableElements.length
+        : (currentIndex - 1 + focusableElements.length) %
+          focusableElements.length;
 
     return focusableElements[nextIndex];
   },
