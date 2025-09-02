@@ -105,7 +105,7 @@ export default function ModernHeader() {
   return (
     <header
       data-testid="modern-header"
-      className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm transition-all duration-300"
+      className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 shadow-sm transition-all duration-300 animate-fade-in-down"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
@@ -171,7 +171,7 @@ export default function ModernHeader() {
                       ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
                       : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
                   }`}
-                  aria-expanded={isMoreDropdownOpen}
+                  aria-expanded={isMoreDropdownOpen ? 'true' : 'false'}
                   aria-haspopup="menu"
                   aria-label="More navigation options"
                 >
@@ -196,53 +196,54 @@ export default function ModernHeader() {
                 {/* Dropdown Menu */}
                 {isMoreDropdownOpen && (
                   <div
-                    className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl z-50 py-3 animate-slide-down"
+                    className="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl z-50 py-3 animate-scale-in"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="more-menu-button"
                   >
                     {moreNavigationItems.map((item) => (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={closeMoreDropdown}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Escape') {
-                            closeMoreDropdown();
-                            document
-                              .getElementById('more-menu-button')
-                              ?.focus();
-                          } else if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            const nextItem =
-                              e.currentTarget.parentElement?.nextElementSibling?.querySelector(
-                                'a'
-                              ) as HTMLElement;
-                            nextItem?.focus();
-                          } else if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            const prevItem =
-                              e.currentTarget.parentElement?.previousElementSibling?.querySelector(
-                                'a'
-                              ) as HTMLElement;
-                            prevItem?.focus();
+                      <div key={item.href} role="none">
+                        <Link
+                          href={item.href}
+                          onClick={closeMoreDropdown}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Escape') {
+                              closeMoreDropdown();
+                              document
+                                .getElementById('more-menu-button')
+                                ?.focus();
+                            } else if (e.key === 'ArrowDown') {
+                              e.preventDefault();
+                              const nextItem =
+                                e.currentTarget.parentElement?.nextElementSibling?.querySelector(
+                                  'a'
+                                ) as HTMLElement;
+                              nextItem?.focus();
+                            } else if (e.key === 'ArrowUp') {
+                              e.preventDefault();
+                              const prevItem =
+                                e.currentTarget.parentElement?.previousElementSibling?.querySelector(
+                                  'a'
+                                ) as HTMLElement;
+                              prevItem?.focus();
+                            }
+                          }}
+                          className={`block px-6 py-4 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl mx-2 ${
+                            isActivePage(item.href)
+                              ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
+                              : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                          }`}
+                          role="menuitem"
+                          aria-current={
+                            isActivePage(item.href) ? 'page' : undefined
                           }
-                        }}
-                        className={`block px-6 py-4 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl mx-2 ${
-                          isActivePage(item.href)
-                            ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                            : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-50 dark:hover:bg-gray-800/50'
-                        }`}
-                        role="menuitem"
-                        aria-current={
-                          isActivePage(item.href) ? 'page' : undefined
-                        }
-                      >
-                        <div className="font-semibold">{item.label}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                          {item.description}
-                        </div>
-                      </Link>
+                        >
+                          <div className="font-semibold">{item.label}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {item.description}
+                          </div>
+                        </Link>
+                      </div>
                     ))}
                   </div>
                 )}
@@ -278,7 +279,7 @@ export default function ModernHeader() {
               onClick={toggleMobileMenu}
               className="inline-flex items-center justify-center p-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-300"
               aria-controls="mobile-menu"
-              aria-expanded={isMobileMenuOpen}
+              aria-expanded={isMobileMenuOpen ? 'true' : 'false'}
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? (
@@ -294,7 +295,7 @@ export default function ModernHeader() {
         <div
           className={`md:hidden transition-all duration-500 ease-in-out ${
             isMobileMenuOpen
-              ? 'max-h-screen opacity-100 pb-6'
+              ? 'max-h-screen opacity-100 pb-6 animate-slide-in-right'
               : 'max-h-0 opacity-0 overflow-hidden'
           }`}
           id="mobile-menu"

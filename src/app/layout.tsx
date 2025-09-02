@@ -30,6 +30,11 @@ const OptimizationInitializer = dynamic(
   { ssr: false }
 );
 
+const CrossBrowserTestSuite = dynamic(
+  () => import('@/components/testing/CrossBrowserTestSuite'),
+  { ssr: false }
+);
+
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
@@ -156,6 +161,22 @@ export default function RootLayout({
             }}
           />
         )}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Initialize cross-browser support and animations
+              window.addEventListener('DOMContentLoaded', () => {
+                import('/src/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
+                  initializeCrossBrowserSupport();
+                }).catch(() => {});
+                
+                import('/src/lib/animations').then(({ initializeAnimations }) => {
+                  initializeAnimations();
+                }).catch(() => {});
+              });
+            `,
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300`}
@@ -178,6 +199,7 @@ export default function RootLayout({
         <PerformanceReporter />
         <OptimizationInitializer />
         <AccessibilityPerformancePanel />
+        <CrossBrowserTestSuite />
       </body>
     </html>
   );

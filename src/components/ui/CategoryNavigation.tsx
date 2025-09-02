@@ -93,7 +93,7 @@ export default function CategoryNavigation({
   ];
 
   return (
-    <div className={`relative group ${className}`}>
+    <div className={`relative group animate-fade-in-up ${className}`}>
       {/* Left scroll button with enhanced styling */}
       {canScrollLeft && (
         <button
@@ -148,7 +148,7 @@ export default function CategoryNavigation({
                 }
                 ${isScrolling ? 'pointer-events-none' : ''}
               `}
-              aria-pressed={isActive}
+              aria-pressed={isActive ? 'true' : 'false'}
               aria-current={isActive ? 'page' : undefined}
               aria-label={`Filter by ${category.name}${showCounts && category.count !== undefined ? ` (${category.count} articles)` : ''}`}
             >

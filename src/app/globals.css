@@ -558,3 +558,345 @@ input:invalid:focus {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
+
+/* Cross-browser compatibility enhancements */
+
+/* Safari-specific fixes */
+@supports (-webkit-appearance: none) {
+  /* Fix Safari backdrop-filter performance */
+  .backdrop-blur-sm,
+  .backdrop-blur-md {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    /* Improve performance on Safari */
+    transform: translateZ(0);
+    will-change: backdrop-filter;
+  }
+
+  /* Safari sticky positioning fix */
+  .sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+
+  /* Safari flexbox gap fallback */
+  .safari-gap-fix > * + * {
+    margin-left: 0.75rem;
+  }
+}
+
+/* Firefox-specific fixes */
+@-moz-document url-prefix() {
+  /* Firefox scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+
+  /* Firefox focus outline improvements */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+}
+
+/* Edge/IE compatibility */
+@supports (-ms-ime-align: auto) {
+  /* Edge-specific fixes */
+  .grid {
+    display: -ms-grid;
+    display: grid;
+  }
+
+  /* Edge backdrop-filter fallback */
+  .backdrop-blur-sm::before,
+  .backdrop-blur-md::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: -1;
+  }
+
+  .dark .backdrop-blur-sm::before,
+  .dark .backdrop-blur-md::before {
+    background: rgba(17, 24, 39, 0.8);
+  }
+}
+
+/* Enhanced animations with cross-browser support */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -20px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(20px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Animation classes */
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Staggered animation delays */
+.animate-delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animate-delay-300 {
+  animation-delay: 0.3s;
+}
+
+/* Enhanced hover effects with hardware acceleration */
+.hover-lift {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  will-change: transform, box-shadow;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease-out;
+  will-change: transform;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02) translateZ(0);
+}
+
+/* Smooth gradient animations */
+.gradient-shift {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Enhanced focus states for better accessibility */
+.focus-ring {
+  transition: box-shadow 0.15s ease-in-out;
+}
+
+.focus-ring:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6, 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+  .border-gray-200 {
+    border-color: #000;
+  }
+  
+  .text-gray-600 {
+    color: #000;
+  }
+  
+  .bg-gray-50 {
+    background-color: #fff;
+  }
+  
+  .dark .border-gray-700 {
+    border-color: #fff;
+  }
+  
+  .dark .text-gray-400 {
+    color: #fff;
+  }
+  
+  .dark .bg-gray-800 {
+    background-color: #000;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-break-before {
+    page-break-before: always;
+  }
+  
+  .print-break-after {
+    page-break-after: always;
+  }
+  
+  /* Ensure good contrast in print */
+  * {
+    color: #000 !important;
+    background: #fff !important;
+  }
+  
+  a {
+    text-decoration: underline;
+  }
+  
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+  }
+}
+
+/* Enhanced mobile touch interactions */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device optimizations */
+  .hover-lift:active {
+    transform: translateY(-1px) translateZ(0);
+  }
+  
+  .hover-scale:active {
+    transform: scale(0.98) translateZ(0);
+  }
+  
+  /* Larger touch targets */
+  button,
+  [role="button"],
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .hover\:bg-gray-50:hover {
+    background-color: initial;
+  }
+  
+  .hover\:text-blue-600:hover {
+    color: initial;
+  }
+}
+
+/* Improved loading states */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.dark .skeleton {
+  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Enhanced typography with better cross-browser support */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Fallback for browsers that don't support text-wrap */
+@supports not (text-wrap: balance) {
+  .text-balance {
+    /* Use hyphens as fallback */
+    hyphens: auto;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+  }
+}
+
+/* Better font rendering */
+.font-smooth {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Container query fallbacks */
+@supports not (container-type: inline-size) {
+  /* Fallback responsive behavior for older browsers */
+  .container-responsive {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  @media (min-width: 640px) {
+    .container-responsive {
+      padding: 0 1.5rem;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding: 0 2rem;
+    }
+  }
+}

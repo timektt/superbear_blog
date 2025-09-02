@@ -48,16 +48,16 @@ export default function WixHeroSection({
 
   return (
     <section
-      className="bg-white dark:bg-gray-900 py-8 lg:py-12"
+      className="bg-white dark:bg-gray-900 py-8 lg:py-12 animate-fade-in-up"
       aria-label="Featured articles"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
           {/* Main Featured Article - Large Hero */}
-          <article className="lg:col-span-8" role="article">
+          <article className="lg:col-span-8 animate-fade-in-up" role="article">
             <Link
               href={`/news/${mainFeatured.slug}`}
-              className="group block relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 aspect-[16/9] hover:shadow-2xl transition-all duration-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 focus-visible:outline-none"
+              className="group block relative overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800 aspect-[16/9] hover-lift transition-all duration-500 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 focus-visible:outline-none"
               aria-label={`Read featured article: ${mainFeatured.title}`}
             >
               {/* Background Image */}
@@ -79,7 +79,6 @@ export default function WixHeroSection({
                 <div className="mb-4">
                   <span
                     className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white/20 backdrop-blur-sm text-white border border-white/30 uppercase tracking-wide"
-                    role="badge"
                     aria-label={`Category: ${mainFeatured.category}`}
                   >
                     {mainFeatured.category}
@@ -140,7 +139,7 @@ export default function WixHeroSection({
 
           {/* Secondary Featured Articles */}
           <aside
-            className="lg:col-span-4 space-y-6"
+            className="lg:col-span-4 space-y-6 animate-fade-in-up animate-delay-200"
             aria-label="Secondary featured articles"
           >
             {secondaryFeatured.length > 0 ? (
@@ -174,7 +173,7 @@ function SecondaryFeaturedCard({ article }: { article: Article }) {
     <article role="article">
       <Link
         href={`/news/${article.slug}`}
-        className="group block bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover:shadow-lg border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+        className="group block bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-sm hover-lift border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none"
         aria-label={`Read secondary featured article: ${article.title}`}
       >
         {/* Image */}
@@ -189,7 +188,6 @@ function SecondaryFeaturedCard({ article }: { article: Article }) {
           <div className="absolute top-3 left-3">
             <span
               className="inline-flex items-center px-2 py-1 rounded-md text-xs font-semibold bg-white/90 text-gray-900 uppercase tracking-wide"
-              role="badge"
               aria-label={`Category: ${article.category}`}
             >
               {article.category}
