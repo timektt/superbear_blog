@@ -8,7 +8,7 @@ export const IS_SAFE_MODE =
   !process.env.DATABASE_URL;
 
 export const IS_EDGE_RUNTIME = 
-  typeof EdgeRuntime !== 'undefined' ||
+  (typeof globalThis !== 'undefined' && 'EdgeRuntime' in globalThis) ||
   process.env.NEXT_RUNTIME === 'edge';
 
 /**
@@ -27,7 +27,9 @@ export async function safeImport<T>(modulePath: string): Promise<T | null> {
   }
   
   try {
-    return await import(modulePath);
+    // Use static import path to avoid webpack warnings
+    const module = await import(/* webpackIgnore: true */ modulePath);
+    return module as T;
   } catch (error) {
     console.warn(`Failed to import ${modulePath}:`, error);
     return null;

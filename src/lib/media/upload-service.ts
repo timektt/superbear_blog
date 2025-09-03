@@ -1,14 +1,29 @@
-import { v2 as cloudinary } from 'cloudinary';
 import { fileValidator, type FileValidationResult, type ValidationOptions } from './file-validator';
 import { mediaMetricsService } from './media-metrics';
 
-// Configure Cloudinary if not already configured
-if (!cloudinary.config().cloud_name) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
+// Dynamic import for Cloudinary (server-side only)
+let cloudinary: any = null;
+
+async function getCloudinary() {
+  if (typeof window !== 'undefined') {
+    throw new Error('Cloudinary can only be used on the server side');
+  }
+  
+  if (!cloudinary) {
+    const { v2 } = await import('cloudinary');
+    cloudinary = v2;
+    
+    // Configure Cloudinary if not already configured
+    if (!cloudinary.config().cloud_name) {
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
+    }
+  }
+  
+  return cloudinary;
 }
 
 // Types and Interfaces
@@ -405,7 +420,8 @@ export class UploadService {
           throw new Error('Upload cancelled');
         }
 
-        const result = await cloudinary.uploader.upload(fileData, {
+        const cloudinaryInstance = await getCloudinary();
+        const result = await cloudinaryInstance.uploader.upload(fileData, {
           folder: uploadOptions.folder,
           resource_type: 'image',
           public_id: `${uploadOptions.folder}/${Date.now()}_${uploadOptions.filename.replace(/\.[^/.]+$/, "")}`,

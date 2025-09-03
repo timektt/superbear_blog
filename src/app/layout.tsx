@@ -16,23 +16,19 @@ const ServiceWorkerRegistration = dynamic(
 const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
 
 const PerformanceReporter = dynamic(
-  () => import('@/components/performance/PerformanceMonitor').then(mod => ({ default: mod.PerformanceReporter })),
-  { ssr: false }
+  () => import('@/components/performance/PerformanceMonitor').then(mod => ({ default: mod.PerformanceReporter }))
 );
 
 const AccessibilityPerformancePanel = dynamic(
-  () => import('@/components/performance/AccessibilityPerformancePanel'),
-  { ssr: false }
+  () => import('@/components/performance/AccessibilityPerformancePanel')
 );
 
 const OptimizationInitializer = dynamic(
-  () => import('@/components/performance/OptimizationInitializer'),
-  { ssr: false }
+  () => import('@/components/performance/OptimizationInitializer')
 );
 
 const CrossBrowserTestSuite = dynamic(
-  () => import('@/components/testing/CrossBrowserTestSuite'),
-  { ssr: false }
+  () => import('@/components/testing/CrossBrowserTestSuite')
 );
 
 const inter = Inter({
@@ -153,7 +149,7 @@ export default function RootLayout({
               __html: `
                 // Initialize accessibility monitoring in development
                 window.addEventListener('load', () => {
-                  import('/src/lib/accessibility/testing-utils').then(({ initAccessibilityMonitoring }) => {
+                  import('@/lib/accessibility/testing-utils').then(({ initAccessibilityMonitoring }) => {
                     initAccessibilityMonitoring();
                   }).catch(() => {});
                 });
@@ -166,11 +162,11 @@ export default function RootLayout({
             __html: `
               // Initialize cross-browser support and animations
               window.addEventListener('DOMContentLoaded', () => {
-                import('/src/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
+                import('@/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
                   initializeCrossBrowserSupport();
                 }).catch(() => {});
                 
-                import('/src/lib/animations').then(({ initializeAnimations }) => {
+                import('@/lib/animations').then(({ initializeAnimations }) => {
                   initializeAnimations();
                 }).catch(() => {});
               });

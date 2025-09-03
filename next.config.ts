@@ -216,6 +216,69 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Webpack configuration for all environments
+  webpack: (config, { dev, isServer }) => {
+    // Fix for Node.js modules in client-side code
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        util: false,
+        url: false,
+        querystring: false,
+      };
+
+      // Exclude server-only packages from client bundle
+      config.externals = config.externals || [];
+      config.externals.push({
+        'cloudinary': 'cloudinary',
+        '@prisma/client': '@prisma/client',
+      });
+    }
+
+    // Development optimizations
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20,
+          },
+          // Common chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+        },
+      };
+    }
+
+    return config;
+  },
+
   // Production optimizations
   ...(isProduction && {
     output: 'standalone',
@@ -233,49 +296,6 @@ const nextConfig: NextConfig = {
       '@tiptap/react': {
         transform: '@tiptap/react/dist/packages/react/src/{{member}}',
       },
-    },
-
-    // Webpack optimizations
-    webpack: (config, { dev, isServer }) => {
-      // Production optimizations
-      if (!dev && !isServer) {
-        config.optimization.splitChunks = {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-          },
-        };
-      }
-
-      return config;
-    },
-  }),
-
-  // Development optimizations
-  ...(isDevelopment && {
-    webpack: (config) => {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
-      return config;
     },
   }),
 
@@ -297,7 +317,9 @@ const finalConfig = isProduction
       project: process.env.SENTRY_PROJECT,
       widenClientFileUpload: true,
       tunnelRoute: '/monitoring',
-      hideSourceMaps: true,
+      sourcemaps: {
+        disable: true,
+      },
       disableLogger: true,
       automaticVercelMonitors: true,
     })
