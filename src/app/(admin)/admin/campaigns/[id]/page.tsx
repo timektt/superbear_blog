@@ -4,16 +4,17 @@ import { prisma } from '@/lib/prisma';
 import CampaignDetails from '@/components/admin/CampaignDetails';
 
 interface CampaignPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: CampaignPageProps): Promise<Metadata> {
+  const resolvedParams = await params;
   const campaign = await prisma.newsletterCampaign.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     select: { title: true },
   });
 
@@ -30,8 +31,9 @@ export async function generateMetadata({
 }
 
 export default async function CampaignPage({ params }: CampaignPageProps) {
+  const resolvedParams = await params;
   const campaign = await prisma.newsletterCampaign.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     include: {
       template: {
         select: {

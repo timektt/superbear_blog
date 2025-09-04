@@ -31,7 +31,7 @@ import { getStoredBookmarks, setStoredBookmarks } from '@/lib/bookmarks/store';
 import { sanitizeHtml } from '@/lib/comments/store';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 function ReadingProgress() {
@@ -525,15 +525,27 @@ function RelatedArticles({ currentArticleId }: { currentArticleId: string }) {
 export default function ArticlePage({ params }: Props) {
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [slug, setSlug] = useState<string>('');
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
 
   useEffect(() => {
+    // Await params and set slug
+    const loadParams = async () => {
+      const resolvedParams = await params;
+      setSlug(resolvedParams.slug);
+    };
+    loadParams();
+  }, [params]);
+
+  useEffect(() => {
+    if (!slug) return;
+    
     // Mock article for now since we don't have the proper fetcher
     const mockArticle = {
-      id: params.slug,
+      id: slug,
       title: 'Building Modern Web Applications with Next.js and TypeScript',
       summary: 'A comprehensive guide to creating scalable, type-safe web applications using Next.js 15 and TypeScript. Learn best practices, performance optimization, and modern development patterns.',
-      slug: params.slug,
+      slug: slug,
       content: `
         <p>Modern web development has evolved significantly over the past few years, with frameworks like Next.js leading the charge in creating powerful, scalable applications. In this comprehensive guide, we'll explore how to build robust web applications using Next.js 15 and TypeScript.</p>
         
@@ -592,7 +604,7 @@ interface Article {
       setArticle(mockArticle);
       setLoading(false);
     }, 500);
-  }, [params.slug]);
+  }, [slug]);
 
   if (loading) {
     return (

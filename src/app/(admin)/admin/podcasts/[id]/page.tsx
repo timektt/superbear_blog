@@ -11,9 +11,9 @@ export const metadata = {
 };
 
 interface EditPodcastPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function fetchPodcast(id: string) {
@@ -40,6 +40,7 @@ async function fetchPodcast(id: string) {
 }
 
 async function EditPodcastPage({ params }: EditPodcastPageProps) {
+  const resolvedParams = await params;
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -51,7 +52,7 @@ async function EditPodcastPage({ params }: EditPodcastPageProps) {
     redirect('/');
   }
 
-  const podcast = await fetchPodcast(params.id);
+  const podcast = await fetchPodcast(resolvedParams.id);
 
   return (
     <div className="container mx-auto py-6">

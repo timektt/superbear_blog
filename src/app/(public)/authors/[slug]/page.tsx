@@ -4,16 +4,17 @@ import { getSafePrismaClient } from '@/lib/db-safe/client';
 import { generatePersonJsonLd } from '@/lib/seo/jsonld';
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params;
   const prisma = getSafePrismaClient();
   if (!prisma) return { title: 'Author Not Found' };
 
   try {
     const author = await prisma.user.findUnique({
-      where: { id: params.slug }, // Using ID as slug for now
+      where: { id: resolvedParams.slug }, // Using ID as slug for now
     });
 
     if (!author) return { title: 'Author Not Found' };
@@ -28,12 +29,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function AuthorPage({ params }: Props) {
+  const resolvedParams = await params;
   const prisma = getSafePrismaClient();
   if (!prisma) notFound();
 
   try {
     const author = await prisma.user.findUnique({
-      where: { id: params.slug },
+      where: { id: resolvedParams.slug },
     });
 
     if (!author) notFound();

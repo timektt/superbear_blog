@@ -4,16 +4,17 @@ import EmailTemplateEditor from '@/components/admin/EmailTemplateEditor';
 import { prisma } from '@/lib/prisma';
 
 interface EmailTemplatePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: EmailTemplatePageProps): Promise<Metadata> {
+  const resolvedParams = await params;
   const template = await prisma.emailTemplate.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     select: { name: true },
   });
 
@@ -32,9 +33,10 @@ export async function generateMetadata({
 export default async function EmailTemplateEditPage({
   params,
 }: EmailTemplatePageProps) {
+  const resolvedParams = await params;
   // Verify template exists
   const template = await prisma.emailTemplate.findUnique({
-    where: { id: params.id },
+    where: { id: resolvedParams.id },
     select: { id: true },
   });
 
@@ -42,5 +44,5 @@ export default async function EmailTemplateEditPage({
     notFound();
   }
 
-  return <EmailTemplateEditor templateId={params.id} />;
+  return <EmailTemplateEditor templateId={resolvedParams.id} />;
 }

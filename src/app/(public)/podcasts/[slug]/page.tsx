@@ -11,9 +11,9 @@ import { formatDuration } from '@/lib/utils/time';
 import { Calendar, User, Clock, ArrowLeft, Share2 } from 'lucide-react';
 
 interface PodcastPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function getPodcast(slug: string) {
@@ -54,7 +54,8 @@ async function getRelatedPodcasts(categoryId?: string, currentId?: string) {
 export async function generateMetadata({
   params,
 }: PodcastPageProps): Promise<Metadata> {
-  const podcast = await getPodcast(params.slug);
+  const resolvedParams = await params;
+  const podcast = await getPodcast(resolvedParams.slug);
 
   if (!podcast) {
     return {
@@ -90,9 +91,10 @@ export async function generateStaticParams() {
 }
 
 export default async function PodcastPage({ params }: PodcastPageProps) {
+  const resolvedParams = await params;
   const [podcast, relatedPodcasts] = await Promise.all([
-    getPodcast(params.slug),
-    getPodcast(params.slug).then((p) =>
+    getPodcast(resolvedParams.slug),
+    getPodcast(resolvedParams.slug).then((p) =>
       p ? getRelatedPodcasts(p.category?.id, p.id) : []
     ),
   ]);
