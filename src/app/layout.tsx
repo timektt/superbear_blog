@@ -15,8 +15,10 @@ const ServiceWorkerRegistration = dynamic(
 
 const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
 
-const PerformanceReporter = dynamic(
-  () => import('@/components/performance/PerformanceMonitor').then(mod => ({ default: mod.PerformanceReporter }))
+const PerformanceReporter = dynamic(() =>
+  import('@/components/performance/PerformanceMonitor').then((mod) => ({
+    default: mod.PerformanceReporter,
+  }))
 );
 
 const AccessibilityPerformancePanel = dynamic(
@@ -36,6 +38,10 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
 });
+
+const showDevOverlays =
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_ENABLE_DEV_OVERLAYS === '1';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
@@ -157,22 +163,24 @@ export default function RootLayout({
             }}
           />
         )}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Initialize cross-browser support and animations
-              window.addEventListener('DOMContentLoaded', () => {
-                import('@/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
-                  initializeCrossBrowserSupport();
-                }).catch(() => {});
-                
-                import('@/lib/animations').then(({ initializeAnimations }) => {
-                  initializeAnimations();
-                }).catch(() => {});
-              });
-            `,
-          }}
-        />
+        {showDevOverlays && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Initialize cross-browser support and animations
+                window.addEventListener('DOMContentLoaded', () => {
+                  import('@/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
+                    initializeCrossBrowserSupport?.();
+                  }).catch(() => {});
+                  
+                  import('@/lib/animations').then(({ initializeAnimations }) => {
+                    initializeAnimations?.();
+                  }).catch(() => {});
+                });
+              `,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300`}
@@ -191,11 +199,15 @@ export default function RootLayout({
             </ToastProvider>
           </SessionProvider>
         </ThemeProvider>
-        <ServiceWorkerRegistration />
-        <PerformanceReporter />
-        <OptimizationInitializer />
-        <AccessibilityPerformancePanel />
-        <CrossBrowserTestSuite />
+        {process.env.NODE_ENV === 'production' && <ServiceWorkerRegistration />}
+        {showDevOverlays && (
+          <>
+            <PerformanceReporter />
+            <OptimizationInitializer />
+            <AccessibilityPerformancePanel />
+            <CrossBrowserTestSuite />
+          </>
+        )}
       </body>
     </html>
   );

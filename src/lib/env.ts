@@ -65,11 +65,7 @@ export function isDatabaseConfigured(): boolean {
     }
 
     // For network databases, check if hostname exists
-    if (url.hostname && url.hostname !== '') {
-      return true;
-    }
-
-    return false;
+    return !!(url.hostname && url.hostname !== '');
   } catch {
     // Invalid URL format
     return false;

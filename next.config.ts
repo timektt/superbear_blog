@@ -1,5 +1,12 @@
 import type { NextConfig } from 'next';
-import { withSentryConfig } from '@sentry/nextjs';
+
+// Safe Sentry import with error handling
+let withSentryConfig: any = null;
+try {
+  withSentryConfig = require('@sentry/nextjs').withSentryConfig;
+} catch (error) {
+  console.info('Sentry not available, continuing without monitoring');
+}
 
 // Bundle analyzer - only enabled for build:analyze command
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -281,7 +288,6 @@ const nextConfig: NextConfig = {
 
   // Production optimizations
   ...(isProduction && {
-    output: 'standalone',
     compiler: {
       removeConsole: {
         exclude: ['error', 'warn'],
@@ -292,9 +298,6 @@ const nextConfig: NextConfig = {
     modularizeImports: {
       'lucide-react': {
         transform: 'lucide-react/dist/esm/icons/{{member}}',
-      },
-      '@tiptap/react': {
-        transform: '@tiptap/react/dist/packages/react/src/{{member}}',
       },
     },
   }),
@@ -309,20 +312,35 @@ const nextConfig: NextConfig = {
 // Apply bundle analyzer
 const configWithAnalyzer = withBundleAnalyzer(nextConfig);
 
-// Apply Sentry configuration in production
-const finalConfig = isProduction
-  ? withSentryConfig(configWithAnalyzer, {
-      silent: true,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      widenClientFileUpload: true,
-      tunnelRoute: '/monitoring',
-      sourcemaps: {
-        disable: true,
-      },
-      disableLogger: true,
-      automaticVercelMonitors: true,
-    })
-  : configWithAnalyzer;
+// Apply Sentry configuration only if available and properly configured
+const finalConfig = (() => {
+  // Check if Sentry is available and configured
+  const hasSentryConfig = withSentryConfig && 
+    process.env.SENTRY_DSN && 
+    process.env.SENTRY_ORG && 
+    process.env.SENTRY_PROJECT;
+
+  if (isProduction && hasSentryConfig) {
+    try {
+      return withSentryConfig(configWithAnalyzer, {
+        silent: true,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        widenClientFileUpload: true,
+        tunnelRoute: '/monitoring',
+        sourcemaps: {
+          disable: true,
+        },
+        disableLogger: true,
+        automaticVercelMonitors: true,
+      });
+    } catch (error) {
+      console.warn('Failed to configure Sentry, continuing without monitoring:', error.message);
+      return configWithAnalyzer;
+    }
+  }
+
+  return configWithAnalyzer;
+})();
 
 export default finalConfig;
