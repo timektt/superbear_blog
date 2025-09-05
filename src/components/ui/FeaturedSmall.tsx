@@ -23,7 +23,7 @@ export default function FeaturedSmall({ article }: FeaturedSmallProps) {
       className="group block w-full"
       aria-label={`Read article: ${article.title}`}
     >
-      <article className="relative w-full min-h-[180px] rounded-lg overflow-hidden bg-gray-900">
+      <article className="relative w-full aspect-video min-h-[180px] rounded-lg overflow-hidden bg-gray-900">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
@@ -39,8 +39,8 @@ export default function FeaturedSmall({ article }: FeaturedSmallProps) {
           />
         </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        {/* 70% Black Gradient Overlay from Bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
         {/* Content */}
         <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
@@ -54,7 +54,7 @@ export default function FeaturedSmall({ article }: FeaturedSmallProps) {
             </span>
           </div>
 
-          {/* Title */}
+          {/* Title with proper line-clamp */}
           <h4 className="text-lg font-bold leading-tight line-clamp-2 group-hover:text-red-300 transition-colors mb-2">
             {article.title}
           </h4>

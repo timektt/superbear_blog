@@ -24,7 +24,7 @@ export default function FeaturedLarge({ article }: FeaturedLargeProps) {
       className="group block w-full"
       aria-label={`Read article: ${article.title}`}
     >
-      <article className="relative w-full min-h-[320px] md:min-h-[360px] rounded-lg overflow-hidden bg-gray-900">
+      <article className="relative w-full aspect-video min-h-[320px] md:min-h-[360px] rounded-lg overflow-hidden bg-gray-900">
         {/* Background Image */}
         <div className="absolute inset-0">
           <Image
@@ -41,8 +41,8 @@ export default function FeaturedLarge({ article }: FeaturedLargeProps) {
           />
         </div>
 
-        {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        {/* 70% Black Gradient Overlay from Bottom */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
 
         {/* Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
@@ -64,8 +64,8 @@ export default function FeaturedLarge({ article }: FeaturedLargeProps) {
             )}
           </div>
 
-          {/* Title */}
-          <h3 className="text-2xl md:text-3xl font-bold leading-tight mb-3 line-clamp-3 group-hover:text-red-300 transition-colors">
+          {/* Title with proper line-clamp */}
+          <h3 className="text-2xl md:text-3xl font-bold leading-tight mb-3 line-clamp-2 group-hover:text-red-300 transition-colors">
             {article.title}
           </h3>
 
