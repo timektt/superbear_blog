@@ -34,10 +34,8 @@ export function ThemeProvider({
   // Prevent hydration mismatch and FOIT (Flash of Incorrect Theme)
   if (!mounted) {
     return (
-      <div className="theme-loading">
-        <div className="min-h-screen bg-background text-foreground">
-          {children}
-        </div>
+      <div className="min-h-screen bg-background text-foreground">
+        {children}
       </div>
     );
   }

@@ -15,24 +15,22 @@ const ServiceWorkerRegistration = dynamic(
 
 const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
 
-const PerformanceReporter = dynamic(
-  () => import('@/components/performance/PerformanceMonitor').then(mod => ({ default: mod.PerformanceReporter })),
-  { ssr: false }
+const PerformanceReporter = dynamic(() =>
+  import('@/components/performance/PerformanceMonitor').then((mod) => ({
+    default: mod.PerformanceReporter,
+  }))
 );
 
 const AccessibilityPerformancePanel = dynamic(
-  () => import('@/components/performance/AccessibilityPerformancePanel'),
-  { ssr: false }
+  () => import('@/components/performance/AccessibilityPerformancePanel')
 );
 
 const OptimizationInitializer = dynamic(
-  () => import('@/components/performance/OptimizationInitializer'),
-  { ssr: false }
+  () => import('@/components/performance/OptimizationInitializer')
 );
 
 const CrossBrowserTestSuite = dynamic(
-  () => import('@/components/testing/CrossBrowserTestSuite'),
-  { ssr: false }
+  () => import('@/components/testing/CrossBrowserTestSuite')
 );
 
 const inter = Inter({
@@ -40,6 +38,10 @@ const inter = Inter({
   variable: '--font-inter',
   display: 'swap',
 });
+
+const showDevOverlays =
+  process.env.NODE_ENV === 'development' &&
+  process.env.NEXT_PUBLIC_ENABLE_DEV_OVERLAYS === '1';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
@@ -153,7 +155,7 @@ export default function RootLayout({
               __html: `
                 // Initialize accessibility monitoring in development
                 window.addEventListener('load', () => {
-                  import('/src/lib/accessibility/testing-utils').then(({ initAccessibilityMonitoring }) => {
+                  import('@/lib/accessibility/testing-utils').then(({ initAccessibilityMonitoring }) => {
                     initAccessibilityMonitoring();
                   }).catch(() => {});
                 });
@@ -161,22 +163,24 @@ export default function RootLayout({
             }}
           />
         )}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Initialize cross-browser support and animations
-              window.addEventListener('DOMContentLoaded', () => {
-                import('/src/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
-                  initializeCrossBrowserSupport();
-                }).catch(() => {});
-                
-                import('/src/lib/animations').then(({ initializeAnimations }) => {
-                  initializeAnimations();
-                }).catch(() => {});
-              });
-            `,
-          }}
-        />
+        {showDevOverlays && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                // Initialize cross-browser support and animations
+                window.addEventListener('DOMContentLoaded', () => {
+                  import('@/lib/cross-browser-testing').then(({ initializeCrossBrowserSupport }) => {
+                    initializeCrossBrowserSupport?.();
+                  }).catch(() => {});
+                  
+                  import('@/lib/animations').then(({ initializeAnimations }) => {
+                    initializeAnimations?.();
+                  }).catch(() => {});
+                });
+              `,
+            }}
+          />
+        )}
       </head>
       <body
         className={`${inter.variable} font-sans antialiased min-h-screen bg-background text-foreground transition-colors duration-300`}
@@ -195,11 +199,15 @@ export default function RootLayout({
             </ToastProvider>
           </SessionProvider>
         </ThemeProvider>
-        <ServiceWorkerRegistration />
-        <PerformanceReporter />
-        <OptimizationInitializer />
-        <AccessibilityPerformancePanel />
-        <CrossBrowserTestSuite />
+        {process.env.NODE_ENV === 'production' && <ServiceWorkerRegistration />}
+        {showDevOverlays && (
+          <>
+            <PerformanceReporter />
+            <OptimizationInitializer />
+            <AccessibilityPerformancePanel />
+            <CrossBrowserTestSuite />
+          </>
+        )}
       </body>
     </html>
   );

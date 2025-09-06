@@ -11,9 +11,9 @@ export const metadata = {
 };
 
 interface EditNewsletterIssuePageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 async function fetchNewsletterIssue(id: string) {
@@ -42,6 +42,7 @@ async function fetchNewsletterIssue(id: string) {
 async function EditNewsletterIssuePage({
   params,
 }: EditNewsletterIssuePageProps) {
+  const resolvedParams = await params;
   const session = await getServerSession(authOptions);
 
   if (!session?.user) {
@@ -53,7 +54,7 @@ async function EditNewsletterIssuePage({
     redirect('/');
   }
 
-  const issue = await fetchNewsletterIssue(params.id);
+  const issue = await fetchNewsletterIssue(resolvedParams.id);
 
   return (
     <div className="container mx-auto py-6">

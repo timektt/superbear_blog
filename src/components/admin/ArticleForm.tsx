@@ -15,7 +15,18 @@ import {
   validateSlug,
 } from '@/lib/validations/article';
 import { createEmptyDocument } from '@/lib/editor-utils';
-import { uploadService, type UploadProgress } from '@/lib/media/upload-service';
+// Remove direct import of uploadService - use API instead
+export interface UploadProgress {
+  uploadId: string;
+  filename: string;
+  progress: number;
+  status: 'pending' | 'uploading' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  bytesUploaded: number;
+  totalBytes: number;
+  error?: string;
+  startTime: Date;
+  endTime?: Date;
+}
 import { mediaTracker } from '@/lib/media/media-tracker';
 import { useMediaTracking, useMediaUploadTracking } from '@/lib/hooks/useMediaTracking';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
@@ -406,34 +417,39 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     setUploadProgress(null);
 
     try {
-      const result = await uploadService.uploadImage(file, {
-        folder: 'superbear_blog/covers',
-        onProgress: (progress) => {
-          setUploadProgress(progress);
-        },
-        onError: (error) => {
-          console.error('Upload error:', error);
-          error('Upload failed', error.message);
-        },
+      // Use API endpoint for upload instead of direct service
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
+      }
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed');
+      }
+
+      // Update form data with new image URL
+      setFormData((prev) => ({ ...prev, image: result.data.url }));
+      setImagePublicId(result.data.publicId);
+
+      // Track the upload in media tracker
+      await trackUpload(result.data, {
+        contentType: 'article',
+        contentId: initialData?.id,
+        referenceContext: 'cover_image',
+        uploadedBy: 'current_user', // TODO: Get actual user ID from auth
       });
 
-      if (result.success && result.data) {
-        // Update form data with new image URL
-        setFormData((prev) => ({ ...prev, image: result.data!.url }));
-        setImagePublicId(result.data.publicId);
-
-        // Track the upload in media tracker
-        await trackUpload(result.data, {
-          contentType: 'article',
-          contentId: initialData?.id,
-          referenceContext: 'cover_image',
-          uploadedBy: 'current_user', // TODO: Get actual user ID from auth
-        });
-
-        success('Image uploaded successfully', 'Cover image has been uploaded and is ready to use.');
-      } else {
-        error('Upload failed', result.error || 'Failed to upload image');
-      }
+      success('Image uploaded successfully', 'Cover image has been uploaded and is ready to use.');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
       error('Upload failed', errorMessage);

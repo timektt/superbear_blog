@@ -8,9 +8,9 @@ import { formatDate } from '@/lib/utils/date';
 import { Calendar, User, ArrowLeft, Share2, Mail } from 'lucide-react';
 
 interface NewsletterIssuePageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 async function getNewsletterIssue(slug: string) {
@@ -47,7 +47,8 @@ async function getRecentIssues(currentId?: string) {
 export async function generateMetadata({
   params,
 }: NewsletterIssuePageProps): Promise<Metadata> {
-  const issue = await getNewsletterIssue(params.slug);
+  const resolvedParams = await params;
+  const issue = await getNewsletterIssue(resolvedParams.slug);
 
   if (!issue) {
     return {
@@ -107,9 +108,10 @@ function renderContent(content: any) {
 export default async function NewsletterIssuePage({
   params,
 }: NewsletterIssuePageProps) {
+  const resolvedParams = await params;
   const [issue, recentIssues] = await Promise.all([
-    getNewsletterIssue(params.slug),
-    getNewsletterIssue(params.slug).then((i) =>
+    getNewsletterIssue(resolvedParams.slug),
+    getNewsletterIssue(resolvedParams.slug).then((i) =>
       i ? getRecentIssues(i.id) : []
     ),
   ]);

@@ -1,5 +1,12 @@
 import type { NextConfig } from 'next';
-import { withSentryConfig } from '@sentry/nextjs';
+
+// Safe Sentry import with error handling
+let withSentryConfig: any = null;
+try {
+  withSentryConfig = require('@sentry/nextjs').withSentryConfig;
+} catch (error) {
+  console.info('Sentry not available, continuing without monitoring');
+}
 
 // Bundle analyzer - only enabled for build:analyze command
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -216,9 +223,71 @@ const nextConfig: NextConfig = {
     ];
   },
 
+  // Webpack configuration for all environments
+  webpack: (config, { dev, isServer }) => {
+    // Fix for Node.js modules in client-side code
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        util: false,
+        url: false,
+        querystring: false,
+      };
+
+      // Exclude server-only packages from client bundle
+      config.externals = config.externals || [];
+      config.externals.push({
+        'cloudinary': 'cloudinary',
+        '@prisma/client': '@prisma/client',
+      });
+    }
+
+    // Development optimizations
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+
+    // Production optimizations
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: false,
+          vendors: false,
+          // Vendor chunk
+          vendor: {
+            name: 'vendor',
+            chunks: 'all',
+            test: /node_modules/,
+            priority: 20,
+          },
+          // Common chunk
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: 10,
+            reuseExistingChunk: true,
+            enforce: true,
+          },
+        },
+      };
+    }
+
+    return config;
+  },
+
   // Production optimizations
   ...(isProduction && {
-    output: 'standalone',
     compiler: {
       removeConsole: {
         exclude: ['error', 'warn'],
@@ -230,52 +299,6 @@ const nextConfig: NextConfig = {
       'lucide-react': {
         transform: 'lucide-react/dist/esm/icons/{{member}}',
       },
-      '@tiptap/react': {
-        transform: '@tiptap/react/dist/packages/react/src/{{member}}',
-      },
-    },
-
-    // Webpack optimizations
-    webpack: (config, { dev, isServer }) => {
-      // Production optimizations
-      if (!dev && !isServer) {
-        config.optimization.splitChunks = {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true,
-            },
-          },
-        };
-      }
-
-      return config;
-    },
-  }),
-
-  // Development optimizations
-  ...(isDevelopment && {
-    webpack: (config) => {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
-      return config;
     },
   }),
 
@@ -289,18 +312,35 @@ const nextConfig: NextConfig = {
 // Apply bundle analyzer
 const configWithAnalyzer = withBundleAnalyzer(nextConfig);
 
-// Apply Sentry configuration in production
-const finalConfig = isProduction
-  ? withSentryConfig(configWithAnalyzer, {
-      silent: true,
-      org: process.env.SENTRY_ORG,
-      project: process.env.SENTRY_PROJECT,
-      widenClientFileUpload: true,
-      tunnelRoute: '/monitoring',
-      hideSourceMaps: true,
-      disableLogger: true,
-      automaticVercelMonitors: true,
-    })
-  : configWithAnalyzer;
+// Apply Sentry configuration only if available and properly configured
+const finalConfig = (() => {
+  // Check if Sentry is available and configured
+  const hasSentryConfig = withSentryConfig && 
+    process.env.SENTRY_DSN && 
+    process.env.SENTRY_ORG && 
+    process.env.SENTRY_PROJECT;
+
+  if (isProduction && hasSentryConfig) {
+    try {
+      return withSentryConfig(configWithAnalyzer, {
+        silent: true,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        widenClientFileUpload: true,
+        tunnelRoute: '/monitoring',
+        sourcemaps: {
+          disable: true,
+        },
+        disableLogger: true,
+        automaticVercelMonitors: true,
+      });
+    } catch (error) {
+      console.warn('Failed to configure Sentry, continuing without monitoring:', error.message);
+      return configWithAnalyzer;
+    }
+  }
+
+  return configWithAnalyzer;
+})();
 
 export default finalConfig;

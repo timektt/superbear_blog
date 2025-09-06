@@ -193,8 +193,9 @@ export default function CrossBrowserTestSuite() {
     }
   };
 
-  if (process.env.NODE_ENV !== 'development') {
-    return null; // Only show in development
+  // Only show when explicitly enabled via environment variable
+  if (process.env.NODE_ENV !== 'development' || process.env.QA_OVERLAY !== 'on') {
+    return null;
   }
 
   return (

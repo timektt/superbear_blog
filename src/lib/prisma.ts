@@ -1,8 +1,6 @@
 import { IS_DB_CONFIGURED } from './env';
 
-export type PrismaClientType =
-  | typeof import('@prisma/client').PrismaClient
-  | null;
+export type PrismaClientType = any | null;
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientType;
