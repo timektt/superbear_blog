@@ -1,0 +1,255 @@
+/**
+ * Responsive Grid System and Container Utilities
+ * Complements the magazine layout's responsive design requirements
+ */
+
+/* Container utilities with consistent max-widths */
+.container-sm { @apply max-w-3xl mx-auto; }
+.container-md { @apply max-w-5xl mx-auto; }
+.container-lg { @apply max-w-6xl mx-auto; }
+.container-xl { @apply max-w-7xl mx-auto; }
+.container-full { @apply max-w-full mx-auto; }
+
+/* Responsive padding utilities */
+.padding-none { @apply p-0; }
+.padding-sm { @apply px-4; }
+.padding-md { @apply px-4 sm:px-6 lg:px-8; }
+.padding-lg { @apply px-6 sm:px-8 lg:px-12; }
+
+/* Section spacing utilities */
+.section-sm { @apply py-6 md:py-8; }
+.section-md { @apply py-8 md:py-12; }
+.section-lg { @apply py-12 md:py-16; }
+.section-xl { @apply py-16 md:py-24; }
+
+/* Touch target utilities for accessibility */
+.touch-target { 
+  @apply min-h-[44px] min-w-[44px] flex items-center justify-center touch-manipulation;
+}
+
+.touch-target-sm { 
+  @apply min-h-[40px] min-w-[40px] flex items-center justify-center touch-manipulation;
+}
+
+.touch-target-lg { 
+  @apply min-h-[48px] min-w-[48px] flex items-center justify-center touch-manipulation;
+}
+
+/* Responsive grid utilities */
+.grid-responsive-2 { @apply grid grid-cols-1 sm:grid-cols-2; }
+.grid-responsive-3 { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3; }
+.grid-responsive-4 { @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4; }
+.grid-responsive-6 { @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6; }
+
+/* Gap utilities */
+.gap-responsive-sm { @apply gap-2 md:gap-3; }
+.gap-responsive-md { @apply gap-4 md:gap-6; }
+.gap-responsive-lg { @apply gap-6 md:gap-8; }
+.gap-responsive-xl { @apply gap-8 md:gap-12; }
+
+/* Flex utilities for responsive layouts */
+.flex-responsive-col { @apply flex flex-col md:flex-row; }
+.flex-responsive-row { @apply flex flex-row md:flex-col; }
+
+/* Hero Mosaic specific utilities */
+.hero-mosaic-mobile { @apply flex flex-col gap-6 md:hidden; }
+.hero-mosaic-tablet { @apply hidden md:flex lg:hidden md:gap-6 md:items-start; }
+.hero-mosaic-desktop { @apply hidden lg:flex lg:gap-8 lg:items-start; }
+
+/* Newsletter panel responsive widths */
+.newsletter-tablet { @apply w-5/12 flex-shrink-0; }
+.newsletter-desktop { @apply w-2/5 flex-shrink-0; }
+
+/* Featured articles responsive widths */
+.featured-tablet { @apply w-7/12 flex-shrink-0; }
+.featured-desktop { @apply w-3/5 flex-shrink-0; }
+
+/* Horizontal scroll utilities */
+.scroll-horizontal {
+  @apply overflow-x-auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-start { scroll-snap-align: start; }
+.scroll-snap-center { scroll-snap-align: center; }
+.scroll-snap-end { scroll-snap-align: end; }
+
+/* Hide scrollbars while maintaining functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Focus and hover utilities */
+.focus-ring {
+  @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none;
+}
+
+.hover-lift {
+  @apply hover:-translate-y-1 transition-transform duration-200;
+}
+
+.hover-scale {
+  @apply hover:scale-105 transition-transform duration-300;
+}
+
+.hover-fade {
+  @apply hover:opacity-80 transition-opacity duration-200;
+}
+
+/* Typography responsive utilities */
+.text-hero-title { @apply text-4xl md:text-6xl; }
+.text-hero-subtitle { @apply text-xl md:text-2xl; }
+.text-section-title { @apply text-2xl md:text-3xl; }
+.text-section-subtitle { @apply text-lg md:text-xl; }
+.text-card-title { @apply text-lg md:text-xl; }
+.text-card-subtitle { @apply text-base md:text-lg; }
+.text-card-meta { @apply text-sm md:text-base; }
+
+/* Image aspect ratio utilities */
+.aspect-hero { @apply aspect-[16/9]; }
+.aspect-card { @apply aspect-[4/3]; }
+.aspect-wide { @apply aspect-[21/9]; }
+
+/* Animation utilities */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from { 
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Loading state utilities */
+.skeleton {
+  @apply animate-pulse bg-muted rounded;
+}
+
+.skeleton-text {
+  @apply skeleton h-4 w-full;
+}
+
+.skeleton-title {
+  @apply skeleton h-6 w-3/4;
+}
+
+.skeleton-image {
+  @apply skeleton aspect-[16/9] w-full;
+}
+
+/* Responsive visibility utilities */
+.mobile-only { @apply block md:hidden; }
+.tablet-only { @apply hidden md:block lg:hidden; }
+.desktop-only { @apply hidden lg:block; }
+.tablet-up { @apply hidden md:block; }
+.desktop-up { @apply hidden lg:block; }
+
+/* Print utilities */
+@media print {
+  .print-hidden { display: none !important; }
+  .print-visible { display: block !important; }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .focus-ring {
+    @apply ring-4 ring-black dark:ring-white;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .hover-lift,
+  .hover-scale,
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in-left,
+  .animate-slide-in-right {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Dark mode specific utilities */
+@media (prefers-color-scheme: dark) {
+  .dark-mode-shadow {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  .mobile-optimized {
+    @apply text-base leading-relaxed;
+  }
+  
+  .mobile-touch-friendly {
+    @apply min-h-[48px] min-w-[48px];
+  }
+}
+
+/* Tablet-specific optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-optimized {
+    @apply text-lg leading-relaxed;
+  }
+}
+
+/* Desktop-specific optimizations */
+@media (min-width: 1025px) {
+  .desktop-optimized {
+    @apply text-xl leading-relaxed;
+  }
+}

@@ -2,6 +2,8 @@ import React from 'react';
 import { FeaturedArticle } from '@/types/content';
 import NewsletterPanel from './NewsletterPanel';
 import FeaturedArticles from './FeaturedArticles';
+import Container, { Section, Flex } from '@/components/ui/Container';
+import { grid } from '@/lib/responsive';
 
 interface HeroMosaicProps {
   featuredArticles: FeaturedArticle[];
@@ -13,14 +15,20 @@ export default function HeroMosaic({
   className = '' 
 }: HeroMosaicProps) {
   return (
-    <section 
-      className={`w-full py-8 md:py-12 ${className}`}
+    <Section 
+      className={className}
+      padding="md"
       data-testid="hero-mosaic"
       aria-label="Featured content and newsletter signup"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <Container size="xl" padding="md">
         {/* Mobile: Stacked Layout */}
-        <div className="flex flex-col gap-6 md:hidden">
+        <Flex
+          direction={{ default: 'col', md: 'row' }}
+          gap="lg"
+          align="start"
+          className="md:hidden"
+        >
           {/* Newsletter Panel - Full width on mobile */}
           <div className="w-full">
             <NewsletterPanel className="touch-manipulation" />
@@ -30,10 +38,15 @@ export default function HeroMosaic({
           <div className="w-full">
             <FeaturedArticles articles={featuredArticles} />
           </div>
-        </div>
+        </Flex>
 
         {/* Tablet: Adjusted Layout (5/7 split as per design) */}
-        <div className="hidden md:flex lg:hidden md:gap-6 md:items-start">
+        <Flex
+          direction={{ default: 'row' }}
+          gap="md"
+          align="start"
+          className="hidden md:flex lg:hidden"
+        >
           {/* Newsletter Panel - 5/12 width on tablet */}
           <div className="w-5/12 flex-shrink-0">
             <NewsletterPanel className="touch-manipulation" />
@@ -43,10 +56,15 @@ export default function HeroMosaic({
           <div className="w-7/12 flex-shrink-0">
             <FeaturedArticles articles={featuredArticles} />
           </div>
-        </div>
+        </Flex>
 
         {/* Desktop: Side-by-side Layout (40/60 split) */}
-        <div className="hidden lg:flex lg:gap-8 lg:items-start">
+        <Flex
+          direction={{ default: 'row' }}
+          gap="lg"
+          align="start"
+          className="hidden lg:flex"
+        >
           {/* Newsletter Panel - 40% width on desktop */}
           <div className="w-2/5 flex-shrink-0">
             <NewsletterPanel className="touch-manipulation" />
@@ -56,8 +74,8 @@ export default function HeroMosaic({
           <div className="w-3/5 flex-shrink-0">
             <FeaturedArticles articles={featuredArticles} />
           </div>
-        </div>
-      </div>
-    </section>
+        </Flex>
+      </Container>
+    </Section>
   );
 }
