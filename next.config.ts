@@ -24,7 +24,7 @@ const nextConfig: NextConfig = {
       '@tiptap/react',
       '@tiptap/starter-kit',
     ],
-    optimizeCss: isProduction,
+    optimizeCss: false, // Temporarily disable CSS optimization
   },
 
   // External packages for server components
@@ -256,51 +256,33 @@ const nextConfig: NextConfig = {
       };
     }
 
-    // Production optimizations
+    // Production optimizations - temporarily disabled
     if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          default: false,
-          vendors: false,
-          // Vendor chunk
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 20,
-          },
-          // Common chunk
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 10,
-            reuseExistingChunk: true,
-            enforce: true,
-          },
-        },
+      // Disable minification to fix webpack error
+      config.optimization = {
+        ...config.optimization,
+        minimize: false,
       };
     }
 
     return config;
   },
 
-  // Production optimizations
-  ...(isProduction && {
-    compiler: {
-      removeConsole: {
-        exclude: ['error', 'warn'],
-      },
-    },
+  // Production optimizations - temporarily disabled due to webpack issues
+  // ...(isProduction && {
+  //   compiler: {
+  //     removeConsole: {
+  //       exclude: ['error', 'warn'],
+  //     },
+  //   },
 
-    // Optimize bundle
-    modularizeImports: {
-      'lucide-react': {
-        transform: 'lucide-react/dist/esm/icons/{{member}}',
-      },
-    },
-  }),
+  //   // Optimize bundle
+  //   modularizeImports: {
+  //     'lucide-react': {
+  //       transform: 'lucide-react/dist/esm/icons/{{member}}',
+  //     },
+  //   },
+  // }),
 
   // Environment-specific configurations
   env: {

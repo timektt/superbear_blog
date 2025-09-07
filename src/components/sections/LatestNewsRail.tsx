@@ -5,7 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Clock, User, Calendar } from 'lucide-react';
 import type { Article } from '@/types/content';
-import Container, { Section, Flex, TouchTarget } from '@/components/ui/Container';
+import Container, {
+  Section,
+  Flex,
+  TouchTarget,
+} from '@/components/ui/Container';
 import { typography, animations, scrollBehavior } from '@/lib/responsive';
 
 interface LatestNewsRailProps {
@@ -17,12 +21,15 @@ interface LatestNewsRailProps {
 // Category color mapping for consistent styling
 const getCategoryColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'AI': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-    'Startups': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    'DevTools': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    'Open Source': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-    'News': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-    'Tech': 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+    AI: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    Startups:
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    DevTools:
+      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    'Open Source':
+      'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    News: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    Tech: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
   };
   return colors[category] || colors['Tech'];
 };
@@ -50,16 +57,17 @@ interface ArticleRailCardProps {
 
 function ArticleRailCard({ article }: ArticleRailCardProps) {
   const href = `/news/${article.slug}`;
-  const imageUrl = article.coverUrl || article.imageUrl || '/placeholder-image.svg';
+  const imageUrl =
+    article.coverUrl || article.imageUrl || '/placeholder-image.svg';
   const excerpt = article.excerpt || article.summary || '';
   const publishDate = article.publishedAt || article.createdAt;
   const readingTime = excerpt ? estimateReadingTime(excerpt) : null;
 
   return (
     <article className="flex-shrink-0 w-80 group">
-      <Link 
+      <Link
         href={href}
-        className="block focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-xl"
+        className="block focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none rounded-xl"
         aria-label={`Read article: ${article.title}`}
       >
         <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
@@ -73,10 +81,12 @@ function ArticleRailCard({ article }: ArticleRailCardProps) {
               sizes="320px"
               loading="lazy"
             />
-            
+
             {/* Category Badge */}
             <div className="absolute top-3 left-3">
-              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${getCategoryColor(article.category.name)}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${getCategoryColor(article.category.name)}`}
+              >
                 {article.category.name}
               </span>
             </div>
@@ -151,10 +161,10 @@ function LatestNewsRailSkeleton() {
   );
 }
 
-export default function LatestNewsRail({ 
-  articles, 
-  showNavButtons = true, 
-  className = '' 
+export default function LatestNewsRail({
+  articles,
+  showNavButtons = true,
+  className = '',
 }: LatestNewsRailProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -179,10 +189,10 @@ export default function LatestNewsRail({
     const cardWidth = 320; // w-80 = 320px
     const gap = 24; // gap-6 = 24px
     const scrollAmount = cardWidth + gap;
-    
+
     container.scrollBy({
       left: -scrollAmount,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
@@ -194,10 +204,10 @@ export default function LatestNewsRail({
     const cardWidth = 320; // w-80 = 320px
     const gap = 24; // gap-6 = 24px
     const scrollAmount = cardWidth + gap;
-    
+
     container.scrollBy({
       left: scrollAmount,
-      behavior: 'smooth'
+      behavior: 'smooth',
     });
   };
 
@@ -223,7 +233,7 @@ export default function LatestNewsRail({
 
     // Add scroll event listener
     container.addEventListener('scroll', checkScrollPosition);
-    
+
     // Add resize event listener to recheck on window resize
     window.addEventListener('resize', checkScrollPosition);
 
@@ -235,10 +245,18 @@ export default function LatestNewsRail({
 
   if (isLoading) {
     return (
-      <Section className={className} padding="md" data-testid="latest-news-rail">
+      <Section
+        className={className}
+        padding="md"
+        data-testid="latest-news-rail"
+      >
         <Container size="xl" padding="md">
           <Flex justify="between" align="center" className="mb-8">
-            <h2 className={`${typography.section.title} font-bold text-foreground`}>Latest News</h2>
+            <h2
+              className={`${typography.section.title} font-bold text-foreground`}
+            >
+              Latest News
+            </h2>
           </Flex>
           <LatestNewsRailSkeleton />
         </Container>
@@ -248,10 +266,18 @@ export default function LatestNewsRail({
 
   if (!articles || articles.length === 0) {
     return (
-      <Section className={className} padding="md" data-testid="latest-news-rail">
+      <Section
+        className={className}
+        padding="md"
+        data-testid="latest-news-rail"
+      >
         <Container size="xl" padding="md">
           <Flex justify="between" align="center" className="mb-8">
-            <h2 className={`${typography.section.title} font-bold text-foreground`}>Latest News</h2>
+            <h2
+              className={`${typography.section.title} font-bold text-foreground`}
+            >
+              Latest News
+            </h2>
           </Flex>
           <div className="text-center py-16 px-4">
             <div className="w-24 h-24 mx-auto mb-6 bg-muted rounded-2xl flex items-center justify-center">
@@ -274,7 +300,8 @@ export default function LatestNewsRail({
               No latest articles found
             </h3>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              There are no published articles available. Check back later for new content!
+              There are no published articles available. Check back later for
+              new content!
             </p>
           </div>
         </Container>
@@ -283,7 +310,7 @@ export default function LatestNewsRail({
   }
 
   return (
-    <Section 
+    <Section
       className={className}
       padding="md"
       data-testid="latest-news-rail"
@@ -293,8 +320,12 @@ export default function LatestNewsRail({
       <Container size="xl" padding="md">
         {/* Section Header */}
         <Flex justify="between" align="center" className="mb-8">
-          <h2 className={`${typography.section.title} font-bold text-foreground`}>Latest News</h2>
-          
+          <h2
+            className={`${typography.section.title} font-bold text-foreground`}
+          >
+            Latest News
+          </h2>
+
           {/* Navigation Buttons */}
           {showNavButtons && articles.length > 3 && (
             <Flex gap="sm">
@@ -337,10 +368,7 @@ export default function LatestNewsRail({
         >
           <Flex gap="lg" className="min-w-max">
             {articles.slice(0, 12).map((article) => (
-              <div
-                key={article.id}
-                style={{ scrollSnapAlign: 'start' }}
-              >
+              <div key={article.id} style={{ scrollSnapAlign: 'start' }}>
                 <ArticleRailCard article={article} />
               </div>
             ))}

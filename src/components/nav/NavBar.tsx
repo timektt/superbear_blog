@@ -131,7 +131,7 @@ export default function NavBar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
                       ? 'text-primary bg-primary/10'
                       : 'text-foreground hover:text-primary hover:bg-muted/50'
@@ -153,7 +153,7 @@ export default function NavBar() {
                       toggleMoreDropdown();
                     }
                   }}
-                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     moreNavigationItems.some((item) => isActivePage(item.href))
                       ? 'text-primary bg-primary/10'
                       : 'text-foreground hover:text-primary hover:bg-muted/50'
@@ -192,7 +192,7 @@ export default function NavBar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMoreDropdown}
-                        className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                        className={`block px-4 py-3 text-sm transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                           isActivePage(item.href)
                             ? 'text-primary bg-primary/10'
                             : 'text-popover-foreground hover:text-primary hover:bg-muted/50'
@@ -284,7 +284,7 @@ export default function NavBar() {
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 ${
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
                       ? 'text-primary bg-primary/10'
                       : 'text-foreground hover:text-primary hover:bg-muted/50'

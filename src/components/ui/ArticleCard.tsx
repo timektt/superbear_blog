@@ -50,12 +50,15 @@ interface ArticleCardProps {
 // Category color mapping for consistent color coding
 const getCategoryColor = (category: string): string => {
   const colors: Record<string, string> = {
-    'AI': 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
-    'Startups': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-    'DevTools': 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-    'Open Source': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
-    'News': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-    'Tech': 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
+    AI: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+    Startups:
+      'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+    DevTools:
+      'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+    'Open Source':
+      'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+    News: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+    Tech: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300',
   };
   return colors[category] || colors['Tech'];
 };
@@ -101,11 +104,10 @@ export default function ArticleCard({
   const snippet = article?.summary || propSnippet || '';
   const tags = article?.tags?.map((tag) => tag.name) || propTags || [];
   const href = `/news/${slug || 'article'}`;
-  
+
   // Calculate reading time
-  const readingTime = showReadingTime && snippet 
-    ? estimateReadingTime(snippet) 
-    : null;
+  const readingTime =
+    showReadingTime && snippet ? estimateReadingTime(snippet) : null;
 
   if (variant === 'compact') {
     return (
@@ -126,7 +128,9 @@ export default function ArticleCard({
 
             <div className="flex-1 min-w-0">
               {showCategory && (
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium mb-2 ${getCategoryColor(category)}`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium mb-2 ${getCategoryColor(category)}`}
+                >
                   {category}
                 </span>
               )}
@@ -169,7 +173,7 @@ export default function ArticleCard({
       >
         <Link
           href={href}
-          className="flex-shrink-0 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl"
+          className="flex-shrink-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-xl"
         >
           <div className="relative w-24 h-24 sm:w-32 sm:h-32 overflow-hidden rounded-xl bg-muted">
             <Image
@@ -185,7 +189,9 @@ export default function ArticleCard({
         <div className="flex-1 min-w-0">
           {showCategory && (
             <div className="flex items-center gap-2 mb-3">
-              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(category)}`}
+              >
                 {category}
               </span>
             </div>
@@ -193,7 +199,7 @@ export default function ArticleCard({
 
           <Link
             href={href}
-            className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md"
+            className="focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-md"
           >
             <h3 className="text-lg sm:text-xl font-bold text-foreground group-hover:text-primary transition-colors duration-200 line-clamp-2 mb-3 leading-tight">
               {title}
@@ -263,7 +269,9 @@ export default function ArticleCard({
             {/* Category Badge */}
             {showCategory && (
               <div className="absolute top-6 left-6">
-                <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm ${getCategoryColor(category)}`}>
+                <span
+                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm ${getCategoryColor(category)}`}
+                >
                   {category}
                 </span>
               </div>
@@ -331,9 +339,9 @@ export default function ArticleCard({
       aria-labelledby={`article-title-${slug}`}
       aria-describedby={snippet ? `article-summary-${slug}` : undefined}
     >
-      <Link 
-        href={href} 
-        className="block focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none rounded-2xl"
+      <Link
+        href={href}
+        className="block focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none rounded-2xl"
         aria-label={`Read article: ${title}`}
       >
         {/* Article Image */}
@@ -352,7 +360,7 @@ export default function ArticleCard({
           {/* Category Badge */}
           {showCategory && (
             <div className="absolute top-4 left-4">
-              <span 
+              <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm ${getCategoryColor(category)}`}
                 role="badge"
                 aria-label={`Category: ${category}`}
@@ -366,7 +374,7 @@ export default function ArticleCard({
         {/* Article Content */}
         <div className="p-6">
           {/* Title */}
-          <h3 
+          <h3
             id={`article-title-${slug}`}
             className="text-lg font-bold text-card-foreground mb-3 line-clamp-2 group-hover:text-primary transition-colors duration-200 leading-tight"
           >
@@ -375,7 +383,7 @@ export default function ArticleCard({
 
           {/* Snippet */}
           {snippet && (
-            <p 
+            <p
               id={`article-summary-${slug}`}
               className="text-muted-foreground text-sm mb-4 line-clamp-2 leading-relaxed"
             >
