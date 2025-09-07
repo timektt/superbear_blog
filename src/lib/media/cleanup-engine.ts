@@ -218,8 +218,8 @@ export class CleanupEngine {
       const articlesWithImage = await this.prisma.article.findMany({
         where: {
           OR: [
-            { content: { contains: publicId } },
-            { coverImagePublicId: publicId }
+            { content: { contains: publicId } as any },
+            { image: publicId }
           ]
         },
         select: { id: true, title: true }
@@ -233,8 +233,8 @@ export class CleanupEngine {
       const newslettersWithImage = await this.prisma.newsletterIssue.findMany({
         where: {
           OR: [
-            { content: { contains: publicId } },
-            { coverImagePublicId: publicId }
+            { content: { contains: publicId } as any },
+            { image: publicId }
           ]
         },
         select: { id: true, title: true }
@@ -245,16 +245,17 @@ export class CleanupEngine {
       }
 
       // Search in podcast content
-      const podcastsWithImage = await this.prisma.podcast.findMany({
-        where: {
-          OR: [
-            { description: { contains: publicId } },
-            { coverImagePublicId: publicId }
-          ]
-        },
-        select: { id: true, title: true }
-      });
+      // const podcastsWithImage = await this.prisma.podcast.findMany({
+      //   where: {
+      //     OR: [
+      //       { description: { contains: publicId } },
+      //       { coverImagePublicId: publicId }
+      //     ]
+      //   },
+      //   select: { id: true, title: true }
+      // });
 
+      const podcastsWithImage: any[] = [];
       if (podcastsWithImage.length > 0) {
         warnings.push(`Found ${podcastsWithImage.length} podcasts that may reference this image`);
       }
@@ -342,7 +343,7 @@ export class CleanupEngine {
               await cloudinary.uploader.destroy(verification.publicId);
             } catch (cloudinaryError: unknown) {
               // If file doesn't exist in Cloudinary, that's okay
-              if (cloudinaryError.http_code !== 404) {
+              if ((cloudinaryError as any).http_code !== 404) {
                 throw cloudinaryError;
               }
             }

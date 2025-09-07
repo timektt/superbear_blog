@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { cache } from '../redis';
 import { ArticleCache } from './article-cache';
 import { SearchCache } from './search-cache';

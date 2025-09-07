@@ -103,7 +103,7 @@ export function generateMetaTags(seo: SEOData): Metadata {
     openGraph: {
       title,
       description,
-      type,
+      type: type === 'blog' ? 'article' : (type as 'article' | 'website' | 'profile'),
       url,
       siteName,
       locale,

@@ -40,7 +40,7 @@ export function handleApiError(
     appError = error;
   } else if (error instanceof ZodError) {
     appError = new ValidationError('Invalid input data', {
-      zodErrors: error.errors,
+      zodErrors: (error as any).errors,
     });
   } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
     appError = handlePrismaError(error);
@@ -149,7 +149,7 @@ export async function safeDbOperation<T>(
   try {
     return await operation();
   } catch (error) {
-    logger.warn('Database operation failed, using fallback', error as Error);
+    logger.warn('Database operation failed, using fallback', error as any);
 
     if (fallback !== undefined) {
       return fallback;

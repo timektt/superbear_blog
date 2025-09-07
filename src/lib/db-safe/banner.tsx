@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { IS_DB_CONFIGURED, IS_DEVELOPMENT } from '@/lib/env';
 
 export interface SafeModeBannerProps {

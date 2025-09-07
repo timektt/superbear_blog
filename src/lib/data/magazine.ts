@@ -80,7 +80,7 @@ export async function getTickerArticles(): Promise<TickerArticle[]> {
     return validatedArticles;
 
   } catch (error) {
-    logger.error('Failed to fetch ticker articles:', error);
+    logger.error('Failed to fetch ticker articles:', error as any);
     
     // Try to return stale cache data
     const staleCache = await cache.get<TickerArticle[]>(cacheKey);
@@ -133,7 +133,7 @@ export async function getFeaturedArticles(): Promise<FeaturedArticle[]> {
     return featuredArticles;
 
   } catch (error) {
-    logger.error('Failed to fetch featured articles:', error);
+    logger.error('Failed to fetch featured articles:', error as any);
     
     // Try to return stale cache data
     const staleCache = await cache.get<FeaturedArticle[]>(cacheKey);
@@ -149,7 +149,7 @@ export async function getFeaturedArticles(): Promise<FeaturedArticle[]> {
       logger.warn('Using latest articles as featured fallback');
       return fallbackFeatured;
     } catch (fallbackError) {
-      logger.error('Fallback featured articles also failed:', fallbackError);
+      logger.error('Fallback featured articles also failed:', fallbackError as any);
       return FALLBACK_DATA.featured;
     }
   }
@@ -193,7 +193,7 @@ export async function getLatestArticles(take: number = 12): Promise<Article[]> {
     return transformedArticles;
 
   } catch (error) {
-    logger.error('Failed to fetch latest articles:', error);
+    logger.error('Failed to fetch latest articles:', error as any);
     
     // Try to return stale cache data
     const staleCache = await cache.get<Article[]>(cacheKey);
@@ -246,7 +246,7 @@ export async function getCategoriesWithCount(): Promise<CategoryWithCount[]> {
     return validatedCategories;
 
   } catch (error) {
-    logger.error('Failed to fetch categories:', error);
+    logger.error('Failed to fetch categories:', error as any);
     
     // Try to return stale cache data
     const staleCache = await cache.get<CategoryWithCount[]>(cacheKey);
@@ -282,7 +282,7 @@ export async function getAllMagazineData(latestCount: number = 12) {
       errors: [],
     };
   } catch (error) {
-    logger.error('Failed to fetch all magazine data:', error);
+    logger.error('Failed to fetch all magazine data:', error as any);
     
     // Try to fetch each individually to get partial data
     const results = await Promise.allSettled([
@@ -419,7 +419,7 @@ export async function invalidateMagazineCache(): Promise<void> {
     ]);
     logger.info('Magazine cache invalidated successfully');
   } catch (error) {
-    logger.error('Failed to invalidate magazine cache:', error);
+    logger.error('Failed to invalidate magazine cache:', error as any);
   }
 }
 
@@ -434,7 +434,7 @@ export async function invalidateArticleCache(articleId?: string): Promise<void> 
     
     logger.info('Article cache invalidated successfully');
   } catch (error) {
-    logger.error('Failed to invalidate article cache:', error);
+    logger.error('Failed to invalidate article cache:', error as any);
   }
 }
 
@@ -447,7 +447,7 @@ export async function warmMagazineCache(): Promise<void> {
     
     logger.info('Magazine cache warmed successfully');
   } catch (error) {
-    logger.error('Failed to warm magazine cache:', error);
+    logger.error('Failed to warm magazine cache:', error as unknown);
   }
 }
 

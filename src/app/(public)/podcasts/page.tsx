@@ -32,7 +32,7 @@ interface SearchParams {
 }
 
 interface PodcastsPageProps {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }
 
 async function getPodcasts(params: SearchParams) {
@@ -230,14 +230,15 @@ function Pagination({
 export default async function PodcastsPage({
   searchParams,
 }: PodcastsPageProps) {
+  const resolvedSearchParams = await searchParams;
   const [podcastsData, categories] = await Promise.all([
-    getPodcasts(searchParams),
+    getPodcasts(resolvedSearchParams),
     getCategories(),
   ]);
 
-  const currentPage = parseInt(searchParams.page || '1');
+  const currentPage = parseInt(resolvedSearchParams.page || '1');
   const baseUrl = `/podcasts?${new URLSearchParams(
-    Object.entries(searchParams).filter(([key]) => key !== 'page')
+    Object.entries(resolvedSearchParams).filter(([key]) => key !== 'page')
   )}`;
 
   return (

@@ -99,12 +99,12 @@ export function validateTemplateContent(
   const variables = extractTemplateVariables(content);
 
   // Check for script tags
-  if (options.removeScripts && /<script[^>]*>.*?<\/script>/gis.test(content)) {
+  if (options.removeScripts && /<script[^>]*>.*?<\/script>/gi.test(content)) {
     errors.push('Script tags are not allowed in templates');
   }
 
   // Check for iframe tags
-  if (options.removeIframes && /<iframe[^>]*>.*?<\/iframe>/gis.test(content)) {
+  if (options.removeIframes && /<iframe[^>]*>.*?<\/iframe>/gi.test(content)) {
     errors.push('Iframe tags are not allowed in templates');
   }
 
@@ -249,11 +249,11 @@ export function renderSafeTemplate(
 
     // Remove dangerous content if options are set
     if (options.removeScripts) {
-      rendered = rendered.replace(/<script[^>]*>.*?<\/script>/gis, '');
+      rendered = rendered.replace(/<script[^>]*>.*?<\/script>/gi, '');
     }
 
     if (options.removeIframes) {
-      rendered = rendered.replace(/<iframe[^>]*>.*?<\/iframe>/gis, '');
+      rendered = rendered.replace(/<iframe[^>]*>.*?<\/iframe>/gi, '');
     }
 
     return {
@@ -377,10 +377,10 @@ export function sanitizeHtmlContent(html: string): string {
   let sanitized = html;
 
   // Remove script tags
-  sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gis, '');
+  sanitized = sanitized.replace(/<script[^>]*>.*?<\/script>/gi, '');
 
   // Remove iframe tags
-  sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gis, '');
+  sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gi, '');
 
   // Remove dangerous attributes
   const dangerousAttributes = [

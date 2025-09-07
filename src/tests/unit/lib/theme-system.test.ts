@@ -6,7 +6,7 @@ import React from 'react';
 // Mock next-themes
 jest.mock('next-themes', () => ({
   useTheme: jest.fn(),
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ThemeProvider: ({ children }: { children: React.ReactNode }) => React.createElement('div', {}, children),
 }));
 
 // Mock localStorage

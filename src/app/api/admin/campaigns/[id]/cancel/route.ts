@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 // POST /api/admin/campaigns/[id]/cancel - Cancel campaign
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -17,6 +17,7 @@ export async function POST(
       return NextResponse.json({ error: authResult.error }, { status: 401 });
     }
 
+    const { id } = await params;
     const { reason } = await request.json();
     const campaignId = params.id;
 

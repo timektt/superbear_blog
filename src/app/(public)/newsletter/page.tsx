@@ -29,7 +29,7 @@ interface SearchParams {
 }
 
 interface NewsletterPageProps {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }
 
 async function getNewsletterIssues(params: SearchParams) {
@@ -148,8 +148,9 @@ function Pagination({
 export default async function NewsletterPage({
   searchParams,
 }: NewsletterPageProps) {
-  const newsletterData = await getNewsletterIssues(searchParams);
-  const currentPage = parseInt(searchParams.page || '1');
+  const resolvedSearchParams = await searchParams;
+  const newsletterData = await getNewsletterIssues(resolvedSearchParams);
+  const currentPage = parseInt(resolvedSearchParams.page || '1');
 
   return (
     <div className="container mx-auto px-4 py-8">

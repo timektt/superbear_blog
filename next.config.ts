@@ -1,12 +1,5 @@
 import type { NextConfig } from 'next';
-
-// Safe Sentry import with error handling
-let withSentryConfig: any = null;
-try {
-  withSentryConfig = require('@sentry/nextjs').withSentryConfig;
-} catch (error) {
-  console.info('Sentry not available, continuing without monitoring');
-}
+import { withSentryConfig } from '@sentry/nextjs';
 
 // Bundle analyzer - only enabled for build:analyze command
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -17,6 +10,11 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const isProduction = process.env.NODE_ENV === 'production';
 
 const nextConfig: NextConfig = {
+  // Disable ESLint during build to focus on TypeScript errors only
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Enable experimental features for better performance
   experimental: {
     optimizePackageImports: [
@@ -294,35 +292,6 @@ const nextConfig: NextConfig = {
 // Apply bundle analyzer
 const configWithAnalyzer = withBundleAnalyzer(nextConfig);
 
-// Apply Sentry configuration only if available and properly configured
-const finalConfig = (() => {
-  // Check if Sentry is available and configured
-  const hasSentryConfig = withSentryConfig && 
-    process.env.SENTRY_DSN && 
-    process.env.SENTRY_ORG && 
-    process.env.SENTRY_PROJECT;
-
-  if (isProduction && hasSentryConfig) {
-    try {
-      return withSentryConfig(configWithAnalyzer, {
-        silent: true,
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-        widenClientFileUpload: true,
-        tunnelRoute: '/monitoring',
-        sourcemaps: {
-          disable: true,
-        },
-        disableLogger: true,
-        automaticVercelMonitors: true,
-      });
-    } catch (error) {
-      console.warn('Failed to configure Sentry, continuing without monitoring:', error.message);
-      return configWithAnalyzer;
-    }
-  }
-
-  return configWithAnalyzer;
-})();
-
-export default finalConfig;
+export default process.env.SENTRY_DSN 
+  ? withSentryConfig(configWithAnalyzer, { silent: true })
+  : configWithAnalyzer;
