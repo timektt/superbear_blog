@@ -71,9 +71,11 @@ export default function NewsletterPanel({ className = '' }: NewsletterPanelProps
   };
 
   return (
-    <div 
+    <section 
       className={`bg-red-600 p-6 md:p-8 rounded-lg text-white ${className}`}
       data-testid="newsletter-panel"
+      aria-label="Newsletter subscription"
+      role="region"
     >
       {/* Header */}
       <div className="mb-6">
@@ -107,7 +109,7 @@ export default function NewsletterPanel({ className = '' }: NewsletterPanelProps
                 : 'border-transparent bg-white hover:bg-gray-50'
             }`}
             aria-describedby={errors.email ? 'email-error' : undefined}
-            aria-invalid={!!errors.email}
+            aria-invalid={errors.email ? 'true' : 'false'}
             disabled={isSubmitting}
           />
           {errors.email && (
@@ -134,7 +136,7 @@ export default function NewsletterPanel({ className = '' }: NewsletterPanelProps
                   : 'border-white'
               }`}
               aria-describedby={errors.consent ? 'consent-error' : undefined}
-              aria-invalid={!!errors.consent}
+              aria-invalid={errors.consent ? 'true' : 'false'}
               disabled={isSubmitting}
             />
             <span className="text-sm text-red-100 leading-relaxed">
@@ -196,6 +198,6 @@ export default function NewsletterPanel({ className = '' }: NewsletterPanelProps
           Join 10,000+ developers, AI builders, and tech entrepreneurs who trust SuperBear Blog for curated tech insights.
         </p>
       </div>
-    </div>
+    </section>
   );
 }

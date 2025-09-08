@@ -10,6 +10,37 @@ interface HighlightTickerProps {
   scrollSpeed?: number;
 }
 
+// Loading skeleton for highlight ticker
+function HighlightTickerSkeleton() {
+  return (
+    <section 
+      className="bg-red-50 border-y border-red-100"
+      data-testid="highlight-ticker"
+      aria-label="Breaking news ticker loading"
+    >
+      <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-20 h-6 bg-red-200 rounded-full animate-pulse"></div>
+          </div>
+          <div className="flex-1 overflow-hidden">
+            <div className="flex gap-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <div key={index} className="flex-shrink-0">
+                  <div className="h-5 w-48 bg-red-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            <div className="w-4 h-4 bg-red-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function HighlightTicker({ 
   articles, 
   autoScroll = true, 
@@ -18,6 +49,7 @@ export default function HighlightTicker({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [loading, setLoading] = useState(true);
   const animationRef = useRef<number | undefined>(undefined);
 
   // Fallback content when no ticker articles are available
@@ -26,6 +58,16 @@ export default function HighlightTicker({
   ];
 
   const displayArticles = articles.length > 0 ? articles : fallbackArticles;
+
+  // Simulate loading time
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <HighlightTickerSkeleton />;
+  }
 
   // Auto-scroll functionality
   useEffect(() => {
@@ -112,6 +154,7 @@ export default function HighlightTicker({
       className="bg-red-50 border-y border-red-100"
       data-testid="highlight-ticker"
       aria-label="Breaking news ticker"
+      role="region"
     >
       <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FeaturedArticle } from '@/types/content';
@@ -9,7 +9,40 @@ interface FeaturedSmallProps {
   article: FeaturedArticle;
 }
 
+// Loading skeleton for small featured article
+function FeaturedSmallSkeleton() {
+  return (
+    <div className="relative w-full aspect-video min-h-[180px] rounded-lg overflow-hidden bg-gray-200 animate-pulse">
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-12 bg-gray-300 rounded-full"></div>
+            <div className="h-3 w-16 bg-gray-300 rounded"></div>
+          </div>
+          <div className="space-y-1">
+            <div className="h-5 w-full bg-gray-300 rounded"></div>
+            <div className="h-5 w-3/4 bg-gray-300 rounded"></div>
+          </div>
+          <div className="h-3 w-20 bg-gray-300 rounded"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturedSmall({ article }: FeaturedSmallProps) {
+  const [loading, setLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    // Simulate component loading
+    const timer = setTimeout(() => setLoading(false), 700);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <FeaturedSmallSkeleton />;
+  }
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', {
       month: 'short',
@@ -28,15 +61,24 @@ export default function FeaturedSmall({ article }: FeaturedSmallProps) {
       <article className="relative w-full aspect-video min-h-[180px] rounded-lg overflow-hidden bg-gray-900">
         {/* Background Image */}
         <div className="absolute inset-0">
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
           <Image
             src={imageUrl}
             alt={article.title}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 30vw, 25vw"
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            width={400}
+            height={225}
+            priority={article.featureRank < 3}
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className={`object-cover w-full h-full transition-all duration-300 group-hover:scale-105 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            onLoad={() => setImageLoaded(true)}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder-image.svg';
+              setImageLoaded(true);
             }}
           />
         </div>

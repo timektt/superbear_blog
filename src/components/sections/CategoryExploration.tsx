@@ -23,13 +23,15 @@ export default function CategoryExploration({ categories }: CategoryExplorationP
         data-testid="category-exploration"
       >
         <Container size="xl" padding="md">
-          <h2 className={`${typography.section.title} font-bold text-gray-900 dark:text-white mb-8`}>
-            Explore by Category
-          </h2>
-          <div className="text-center py-8">
-            <p className="text-gray-600 dark:text-gray-400">
-              No categories available at the moment.
-            </p>
+          <div role="region" aria-label="Explore articles by category">
+            <h2 className={`${typography.section.title} font-bold text-gray-900 dark:text-white mb-8`}>
+              Explore by Category
+            </h2>
+            <div className="text-center py-8">
+              <p className="text-gray-600 dark:text-gray-400">
+                No categories available at the moment.
+              </p>
+            </div>
           </div>
         </Container>
       </Section>
@@ -43,9 +45,10 @@ export default function CategoryExploration({ categories }: CategoryExplorationP
       data-testid="category-exploration"
     >
       <Container size="xl" padding="md">
-        <h2 className={`${typography.section.title} font-bold text-gray-900 dark:text-white mb-8`}>
-          Explore by Category
-        </h2>
+        <div role="region" aria-label="Explore articles by category">
+          <h2 className={`${typography.section.title} font-bold text-gray-900 dark:text-white mb-8`}>
+            Explore by Category
+          </h2>
         
         {/* Responsive grid: 2 cols mobile, 3 tablet, 4 desktop */}
         <Grid
@@ -57,6 +60,7 @@ export default function CategoryExploration({ categories }: CategoryExplorationP
             <CategoryCard key={category.id} category={category} />
           ))}
         </Grid>
+        </div>
       </Container>
     </Section>
   );

@@ -64,7 +64,7 @@ function ArticleRailCard({ article }: ArticleRailCardProps) {
   const readingTime = excerpt ? estimateReadingTime(excerpt) : null;
 
   return (
-    <article className="flex-shrink-0 w-80 group">
+    <div className="flex-shrink-0 w-80 group">
       <Link
         href={href}
         className="block focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none rounded-xl"
@@ -126,7 +126,7 @@ function ArticleRailCard({ article }: ArticleRailCardProps) {
           </div>
         </div>
       </Link>
-    </article>
+    </div>
   );
 }
 
@@ -314,8 +314,6 @@ export default function LatestNewsRail({
       className={className}
       padding="md"
       data-testid="latest-news-rail"
-      role="region"
-      aria-label="Latest news articles"
     >
       <Container size="xl" padding="md">
         {/* Section Header */}
@@ -354,26 +352,34 @@ export default function LatestNewsRail({
         </Flex>
 
         {/* Scrollable Articles Container */}
-        <div
-          ref={scrollContainerRef}
-          className={`${scrollBehavior.horizontal.container} pb-4`}
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-          }}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          role="group"
-          aria-label="Horizontally scrollable latest articles"
-        >
-          <Flex gap="lg" className="min-w-max">
-            {articles.slice(0, 12).map((article) => (
-              <div key={article.id} style={{ scrollSnapAlign: 'start' }}>
-                <ArticleRailCard article={article} />
-              </div>
-            ))}
-          </Flex>
-        </div>
+        <section aria-label="Latest News" role="region">
+          <h2 id="latest-news-heading" className="sr-only">Latest News</h2>
+          <div 
+            role="group" 
+            aria-labelledby="latest-news-heading"
+            ref={scrollContainerRef}
+            className={`${scrollBehavior.horizontal.container} pb-4`}
+            style={{
+              scrollSnapType: 'x mandatory',
+              WebkitOverflowScrolling: 'touch',
+            }}
+            onKeyDown={handleKeyDown}
+            tabIndex={0}
+          >
+            <Flex gap="lg" className="min-w-max">
+              {articles.slice(0, 12).map((article) => (
+                <div key={article.id} style={{ scrollSnapAlign: 'start' }}>
+                  <article 
+                    aria-label={article.title}
+                    className="flex-shrink-0"
+                  >
+                    <ArticleRailCard article={article} />
+                  </article>
+                </div>
+              ))}
+            </Flex>
+          </div>
+        </section>
 
         {/* Touch/Swipe Hint for Mobile */}
         <div className="mt-4 text-center sm:hidden">
