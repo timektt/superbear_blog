@@ -34,6 +34,8 @@
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:production": "playwright test src/tests/e2e --grep @production",
+    "test:visual": "playwright test src/tests/e2e/visual-regression.spec.ts",
+    "test:visual:update": "playwright test src/tests/e2e/visual-regression.spec.ts --update-snapshots",
     "test:smoke": "playwright test src/tests/smoke",
     "test:all": "tsx src/tests/test-runner.ts",
     "test:ci": "tsx src/tests/test-runner.ts --skip-optional --fail-fast --parallel",
