@@ -105,36 +105,30 @@ export default function NavBar() {
   return (
     <header
       data-testid="navbar"
-      className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border shadow-sm transition-all duration-200"
+      className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link
-              href="/"
-              className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-purple-700 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 rounded-md px-1"
-              aria-label="SuperBear Blog - Home"
-            >
-              SuperBear
+          <div className="flex items-center space-x-8">
+            <Link href="/" className="text-xl font-bold text-red-600 hover:text-red-700 transition-colors">
+              SuperBear Blog
             </Link>
-          </div>
-
-          {/* Desktop Navigation - Centered */}
-          <nav
-            className="hidden lg:block flex-1"
-            role="navigation"
-            aria-label="Main navigation"
-          >
-            <div className="flex items-center justify-center space-x-1">
+            
+            {/* Desktop Navigation */}
+            <nav
+              className="hidden lg:block"
+              role="navigation"
+              aria-label="Main navigation"
+            >
+              <div className="flex items-center space-x-1">
               {mainNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-muted/50'
+                      ? 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >
@@ -153,10 +147,10 @@ export default function NavBar() {
                       toggleMoreDropdown();
                     }
                   }}
-                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                  className={`flex items-center space-x-1 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     moreNavigationItems.some((item) => isActivePage(item.href))
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-muted/50'
+                      ? 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400'
                   }`}
                   aria-expanded={isMoreDropdownOpen}
                   aria-haspopup="true"
@@ -211,8 +205,9 @@ export default function NavBar() {
                   </div>
                 )}
               </div>
-            </div>
-          </nav>
+              </div>
+            </nav>
+          </div>
 
           {/* Search and Theme Toggle - Right Side */}
           <div className="hidden md:flex items-center space-x-3">
@@ -284,10 +279,10 @@ export default function NavBar() {
                   key={item.href}
                   href={item.href}
                   onClick={closeMobileMenu}
-                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                  className={`block px-4 py-3 rounded-lg text-base font-medium transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                     isActivePage(item.href)
-                      ? 'text-primary bg-primary/10'
-                      : 'text-foreground hover:text-primary hover:bg-muted/50'
+                      ? 'text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400'
                   }`}
                   aria-current={isActivePage(item.href) ? 'page' : undefined}
                 >
