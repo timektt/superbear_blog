@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DateRangePicker } from '@/components/ui/date-range-picker';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
 import {
   BarChart3,
   TrendingUp,
@@ -219,7 +219,7 @@ export default function CampaignAnalyticsPage() {
           <p className="text-gray-500 dark:text-gray-400 mb-4">
             No campaign data available for the selected time period.
           </p>
-          <Button onClick={fetchAnalytics}>
+          <Button onClick={() => fetchAnalytics()}>
             <RefreshCw className="w-4 h-4 mr-2" />
             Retry
           </Button>
@@ -258,7 +258,7 @@ export default function CampaignAnalyticsPage() {
             </SelectContent>
           </Select>
 
-          <DateRangePicker value={dateRange} onChange={setDateRange} />
+          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
 
           <select
             value={timeRange}
@@ -397,7 +397,7 @@ export default function CampaignAnalyticsPage() {
               Recent Campaigns
             </h3>
             <div className="space-y-4">
-              {data.recentCampaigns.map((campaign) => (
+              {data.recentCampaigns.map((campaign: CampaignPerformance) => (
                 <div
                   key={campaign.campaignId}
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -428,7 +428,7 @@ export default function CampaignAnalyticsPage() {
               Top Performers
             </h3>
             <div className="space-y-4">
-              {data.topPerformers.map((campaign, index) => (
+              {data.topPerformers.map((campaign: CampaignPerformance, index: number) => (
                 <div
                   key={campaign.campaignId}
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"
@@ -471,7 +471,7 @@ export default function CampaignAnalyticsPage() {
                 Emails Sent
               </p>
               <p className="text-2xl font-bold text-blue-600">
-                {formatNumber(data.trends.sent.reduce((a, b) => a + b, 0))}
+                {formatNumber(data.trends.sent.reduce((a: number, b: number) => a + b, 0))}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Total in period
@@ -482,7 +482,7 @@ export default function CampaignAnalyticsPage() {
                 Emails Opened
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {formatNumber(data.trends.opened.reduce((a, b) => a + b, 0))}
+                {formatNumber(data.trends.opened.reduce((a: number, b: number) => a + b, 0))}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Total in period
@@ -493,7 +493,7 @@ export default function CampaignAnalyticsPage() {
                 Links Clicked
               </p>
               <p className="text-2xl font-bold text-purple-600">
-                {formatNumber(data.trends.clicked.reduce((a, b) => a + b, 0))}
+                {formatNumber(data.trends.clicked.reduce((a: number, b: number) => a + b, 0))}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Total in period

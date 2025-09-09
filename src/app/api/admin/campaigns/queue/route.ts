@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.info('Manual queue processing triggered by admin', {
-      userId: session.user.email,
+      userId: session.user.email || undefined,
     });
 
     await processEmailQueue();

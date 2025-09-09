@@ -47,7 +47,7 @@ export class MediaCSRFProtection {
         nonce: this.generateNonce()
       }
 
-      const token = await new SignJWT(tokenData)
+      const token = await new SignJWT(tokenData as any)
         .setProtectedHeader({ alg: CSRF_CONFIG.algorithm })
         .setIssuedAt()
         .setExpirationTime(`${CSRF_CONFIG.tokenExpiry}s`)
@@ -55,7 +55,7 @@ export class MediaCSRFProtection {
 
       return token
     } catch (error) {
-      logger.error('Failed to generate CSRF token:', error)
+      logger.error('Failed to generate CSRF token:', error as any)
       throw new Error('CSRF token generation failed')
     }
   }
@@ -105,7 +105,7 @@ export class MediaCSRFProtection {
       }
 
     } catch (error) {
-      logger.warn('CSRF token validation failed:', error)
+      logger.warn('CSRF token validation failed:', error as any)
       return {
         valid: false,
         reason: error instanceof Error ? error.message : 'Token validation failed'
@@ -247,7 +247,7 @@ export async function createCSRFProtectedResponse(
     // Also include token in response headers for client-side access
     response.headers.set('X-CSRF-Token', token)
   } catch (error) {
-    logger.error('Failed to set CSRF token in response:', error)
+    logger.error('Failed to set CSRF token in response:', error as any)
   }
 
   return response

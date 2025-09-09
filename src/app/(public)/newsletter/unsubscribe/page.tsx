@@ -2,14 +2,14 @@ import { Suspense } from 'react';
 import Link from 'next/link';
 
 interface UnsubscribePageProps {
-  searchParams: {
+  searchParams: Promise<{
     status?: string;
     email?: string;
     error?: string;
-  };
+  }>;
 }
 
-function UnsubscribeContent({ searchParams }: UnsubscribePageProps) {
+function UnsubscribeContent({ searchParams }: { searchParams: { status?: string; email?: string; error?: string; } }) {
   const { status, email, error } = searchParams;
 
   if (error) {
@@ -213,9 +213,11 @@ function UnsubscribeContent({ searchParams }: UnsubscribePageProps) {
   );
 }
 
-export default function NewsletterUnsubscribePage({
+export default async function NewsletterUnsubscribePage({
   searchParams,
 }: UnsubscribePageProps) {
+  const resolvedSearchParams = await searchParams;
+  
   return (
     <Suspense
       fallback={
@@ -224,7 +226,7 @@ export default function NewsletterUnsubscribePage({
         </div>
       }
     >
-      <UnsubscribeContent searchParams={searchParams} />
+      <UnsubscribeContent searchParams={resolvedSearchParams} />
     </Suspense>
   );
 }

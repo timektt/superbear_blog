@@ -186,7 +186,7 @@ async function getRecentAnalyticsActivity() {
       })) || [];
 
     return {
-      recentViews: recentViews.map((view) => ({
+      recentViews: recentViews.map((view: any) => ({
         id: view.id,
         articleTitle: view.article.title,
         articleSlug: view.article.slug,
@@ -194,7 +194,7 @@ async function getRecentAnalyticsActivity() {
         device: view.device,
         country: view.country,
       })),
-      recentInteractions: recentInteractions.map((interaction) => ({
+      recentInteractions: recentInteractions.map((interaction: any) => ({
         id: interaction.id,
         articleTitle: interaction.article.title,
         articleSlug: interaction.article.slug,

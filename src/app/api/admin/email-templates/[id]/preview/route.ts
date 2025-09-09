@@ -43,7 +43,7 @@ export async function POST(
           summary: 'This is a sample article summary for preview purposes.',
           slug: 'sample-article',
         },
-        latest: sampleArticles.slice(0, 4).map((article) => ({
+        latest: sampleArticles.slice(0, 4).map((article: any) => ({
           title: article.title,
           summary: article.summary,
           slug: article.slug,

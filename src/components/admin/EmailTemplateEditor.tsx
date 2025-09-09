@@ -44,7 +44,7 @@ export default function EmailTemplateEditor({
   const [previewSize, setPreviewSize] = useState<number>(0);
 
   const router = useRouter();
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   // Load template data if editing
   useEffect(() => {

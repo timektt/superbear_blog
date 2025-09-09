@@ -81,10 +81,10 @@ async function getHandler(request: NextRequest) {
         data = await getCategoryPerformance(startDate, endDate);
         break;
       case 'engagement':
-        data = await getEngagementMetrics(articleId, startDate, endDate);
+        data = await getEngagementMetrics(articleId || undefined, startDate, endDate);
         break;
       case 'views':
-        data = await getViewMetrics(articleId, startDate, endDate);
+        data = await getViewMetrics(articleId || undefined, startDate, endDate);
         break;
       case 'summary':
         data = await getAnalyticsSummary(startDate!, endDate!);
@@ -197,10 +197,10 @@ async function postHandler(request: NextRequest) {
         data = await getCategoryPerformance(startDate, endDate);
         break;
       case 'engagement':
-        data = await getEngagementMetrics(articleId, startDate, endDate);
+        data = await getEngagementMetrics(articleId || undefined, startDate, endDate);
         break;
       case 'views':
-        data = await getViewMetrics(articleId, startDate, endDate);
+        data = await getViewMetrics(articleId || undefined, startDate, endDate);
         break;
       case 'summary':
         data = await getAnalyticsSummary(startDate!, endDate!);

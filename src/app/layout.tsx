@@ -13,7 +13,7 @@ const ServiceWorkerRegistration = dynamic(
   () => import('@/components/app/ServiceWorkerRegistration.client')
 );
 
-const SkipLink = dynamic(() => import('@/components/app/SkipLink.client'));
+import SkipLink from '@/components/app/SkipLink.client';
 
 const PerformanceReporter = dynamic(() =>
   import('@/components/performance/PerformanceMonitor').then((mod) => ({

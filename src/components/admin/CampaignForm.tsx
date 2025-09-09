@@ -25,7 +25,7 @@ interface CampaignFormData {
 
 export default function CampaignForm() {
   const router = useRouter();
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const [formData, setFormData] = useState<CampaignFormData>({
     title: '',

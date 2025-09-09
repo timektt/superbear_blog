@@ -4,6 +4,8 @@ import { logger } from './logger';
 // Redis client singleton
 let redis: Redis | null = null;
 
+export { redis };
+
 // Cache configuration
 export const CACHE_CONFIG = {
   // Article caching
@@ -59,7 +61,6 @@ export function initRedis(): Redis | null {
 
   try {
     redis = new Redis(redisUrl, {
-      retryDelayOnFailover: 100,
       maxRetriesPerRequest: 3,
       lazyConnect: true,
       keepAlive: 30000,
@@ -81,7 +82,7 @@ export function initRedis(): Redis | null {
 
     return redis;
   } catch (error) {
-    logger.error('Failed to initialize Redis:', error);
+    logger.error('Failed to initialize Redis:', error as any);
     return null;
   }
 }
@@ -116,7 +117,7 @@ export class CacheManager {
         await this.redis.setex(key, ttl, serializedValue);
         return;
       } catch (error) {
-        logger.error('Redis set error:', error);
+        logger.error('Redis set error:', error as any);
       }
     }
 
@@ -136,7 +137,7 @@ export class CacheManager {
         const value = await this.redis.get(key);
         return value ? JSON.parse(value) : null;
       } catch (error) {
-        logger.error('Redis get error:', error);
+        logger.error('Redis get error:', error as any);
       }
     }
 
@@ -162,7 +163,7 @@ export class CacheManager {
         await this.redis.del(key);
         return;
       } catch (error) {
-        logger.error('Redis del error:', error);
+        logger.error('Redis del error:', error as any);
       }
     }
 
@@ -182,7 +183,7 @@ export class CacheManager {
         }
         return;
       } catch (error) {
-        logger.error('Redis delPattern error:', error);
+        logger.error('Redis delPattern error:', error as any);
       }
     }
 
@@ -203,7 +204,7 @@ export class CacheManager {
         const result = await this.redis.exists(key);
         return result === 1;
       } catch (error) {
-        logger.error('Redis exists error:', error);
+        logger.error('Redis exists error:', error as any);
       }
     }
 
@@ -232,7 +233,7 @@ export class CacheManager {
         }
         return result;
       } catch (error) {
-        logger.error('Redis incr error:', error);
+        logger.error('Redis incr error:', error as any);
       }
     }
 
@@ -264,7 +265,7 @@ export class CacheManager {
         await this.redis.expire(key, ttl);
         return;
       } catch (error) {
-        logger.error('Redis expire error:', error);
+        logger.error('Redis expire error:', error as any);
       }
     }
 
@@ -309,7 +310,7 @@ export class CacheManager {
         const info = await this.redis.info('memory');
         stats.redisInfo = info;
       } catch (error) {
-        logger.error('Redis info error:', error);
+        logger.error('Redis info error:', error as any);
       }
     }
 

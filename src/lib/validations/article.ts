@@ -228,7 +228,7 @@ export const createPodcastSchema = z.object({
     .string()
     .min(1, 'Audio URL is required')
     .url('Valid audio URL required'),
-  coverImage: z.string().optional().url('Invalid cover image URL'),
+  coverImage: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, 'Invalid cover image URL'),
   duration: z.number().positive('Duration must be positive').optional(),
   episodeNumber: z
     .number()
@@ -272,7 +272,7 @@ export const updatePodcastSchema = z.object({
       'Summary must be less than 500 characters'
     ),
   audioUrl: z.string().url('Valid audio URL required').optional(),
-  coverImage: z.string().optional().url('Invalid cover image URL'),
+  coverImage: z.string().optional().refine((val) => !val || z.string().url().safeParse(val).success, 'Invalid cover image URL'),
   duration: z.number().positive('Duration must be positive').optional(),
   episodeNumber: z
     .number()

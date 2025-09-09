@@ -1,4 +1,7 @@
+'use client';
+
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import Container, { Section, TouchTarget } from '@/components/ui/Container';
 import { typography, animations } from '@/lib/responsive';
 
@@ -15,12 +18,30 @@ export default function TopHeader({
   ctaText,
   ctaHref
 }: TopHeaderProps) {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading
+    setTimeout(() => setLoading(false), 1000);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="animate-pulse bg-gradient-to-r from-red-600 to-red-700 h-32">
+        <div className="container mx-auto px-4 py-8">
+          <div className="h-8 bg-red-500 rounded w-1/3 mb-4"></div>
+          <div className="h-4 bg-red-500 rounded w-1/2"></div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Section 
       className="bg-gradient-to-r from-red-600 to-red-800 text-white"
       padding="xl"
       data-testid="top-header"
-      as="section"
+      as="header"
     >
       <Container size="xl" padding="md">
         <div className="text-center">

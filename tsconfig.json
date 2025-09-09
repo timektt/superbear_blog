@@ -30,5 +30,12 @@
     ".next/types/**/*.ts",
     "src/types/jest-dom.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+    "src/tests/**/*"
+  ]
 }

@@ -29,7 +29,7 @@ export async function GET() {
   });
 
   const rssItems = articles
-    .map((article) => {
+    .map((article: any) => {
       const pubDate = article.publishedAt
         ? new Date(article.publishedAt).toUTCString()
         : new Date(article.updatedAt).toUTCString();

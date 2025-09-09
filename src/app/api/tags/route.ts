@@ -31,7 +31,7 @@ export async function GET() {
     });
 
     // Only return tags that have published articles
-    const tagsWithArticles = tags.filter((tag) => tag._count.articles > 0);
+    const tagsWithArticles = tags.filter((tag: any) => tag._count.articles > 0);
 
     return NextResponse.json(tagsWithArticles);
   } catch (error) {

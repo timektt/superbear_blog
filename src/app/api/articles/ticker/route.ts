@@ -44,7 +44,7 @@ async function handler() {
       },
     });
   } catch (error) {
-    logger.error('Error fetching ticker articles:', error);
+    logger.error('Error fetching ticker articles:', error as Error);
     
     // Return fallback data on error
     return NextResponse.json([

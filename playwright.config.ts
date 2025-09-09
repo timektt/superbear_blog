@@ -22,6 +22,20 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
+    /* Visual testing settings */
+    screenshot: 'only-on-failure',
+  },
+
+  /* Visual testing configuration */
+  expect: {
+    /* Threshold for visual comparisons */
+    toHaveScreenshot: {
+      threshold: 0.2,
+    },
+    toMatchSnapshot: {
+      threshold: 0.2,
+    },
   },
 
   /* Configure projects for major browsers */

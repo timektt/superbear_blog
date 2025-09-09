@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const sessionHash =
       sessionId ||
       createHash('sha256')
-        .update(`${userAgent || ''}-${request.ip || ''}-${Date.now()}`)
+        .update(`${userAgent || ''}-${request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'}-${Date.now()}`)
         .digest('hex');
 
     // Create browser fingerprint hash if provided

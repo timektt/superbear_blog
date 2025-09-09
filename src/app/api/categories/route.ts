@@ -30,7 +30,7 @@ export async function GET() {
 
     // Only return categories that have published content
     const categoriesWithContent = categories.filter(
-      (category) => category._count.articles > 0 || category._count.podcasts > 0
+      (category: any) => category._count.articles > 0 || category._count.podcasts > 0
     );
 
     return NextResponse.json({ categories: categoriesWithContent });

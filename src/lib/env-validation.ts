@@ -223,8 +223,8 @@ export function validateEnvironment(): {
     const result = envSchema.safeParse(process.env);
 
     if (!result.success) {
-      const errors = result.error.errors.map(
-        (err) => `${err.path.join('.')}: ${err.message}`
+      const errors = (result.error as any).errors.map(
+        (err: unknown) => `${err.path.join('.')}: ${err.message}`
       );
 
       return {

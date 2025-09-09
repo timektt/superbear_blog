@@ -15,7 +15,7 @@ import {
   XIcon,
   FolderIcon
 } from 'lucide-react'
-import { DateRange } from 'react-day-picker'
+import { DateRange } from '@/components/ui/date-range-picker'
 
 interface MediaFile {
   id: string

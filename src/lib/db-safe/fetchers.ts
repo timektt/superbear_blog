@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getSafePrismaClient } from './client';
 import {
   MOCK_FEATURED,

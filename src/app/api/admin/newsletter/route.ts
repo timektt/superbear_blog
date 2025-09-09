@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Failed to fetch newsletter subscribers', error);
+    logger.error('Failed to fetch newsletter subscribers', error as Error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch subscribers' },
       { status: 500 }
@@ -161,7 +161,7 @@ export async function PATCH(request: NextRequest) {
       data: { count: updateResult.count },
     });
   } catch (error) {
-    logger.error('Failed to perform bulk operation on subscribers', error);
+    logger.error('Failed to perform bulk operation on subscribers', error as Error);
     return NextResponse.json(
       { success: false, message: 'Failed to perform bulk operation' },
       { status: 500 }

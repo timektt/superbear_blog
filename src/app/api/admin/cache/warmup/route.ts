@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       message,
     });
   } catch (error) {
-    logger.error('Failed to warm up cache:', error);
+    logger.error('Failed to warm up cache:', error as Error);
 
     return NextResponse.json(
       { error: 'Failed to warm up cache' },

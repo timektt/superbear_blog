@@ -166,7 +166,7 @@ export const animations = {
     fade: 'hover:opacity-80 transition-opacity duration-200',
   },
   focus: {
-    ring: 'focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+    ring: 'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2',
     outline: 'focus-visible:outline-none',
   },
 } as const;

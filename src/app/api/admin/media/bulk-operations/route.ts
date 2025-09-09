@@ -7,7 +7,7 @@ import { z } from 'zod'
 const BulkOperationSchema = z.object({
   operation: z.enum(['move', 'tag', 'update-metadata']),
   mediaIds: z.array(z.string()).min(1).max(100),
-  data: z.record(z.any()) // Flexible data object for different operations
+  data: z.record(z.string(), z.any()) // Flexible data object for different operations
 })
 
 const MoveOperationSchema = z.object({
@@ -20,7 +20,7 @@ const TagOperationSchema = z.object({
 })
 
 const MetadataOperationSchema = z.object({
-  metadata: z.record(z.any()),
+  metadata: z.record(z.string(), z.any()),
   action: z.enum(['merge', 'replace']).default('merge')
 })
 
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle media IDs that weren't found
-    const foundIds = mediaFiles.map(f => f.id)
+    const foundIds = mediaFiles.map((f: any) => f.id)
     const notFoundIds = mediaIds.filter(id => !foundIds.includes(id))
     
     for (const id of notFoundIds) {
@@ -191,7 +191,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       )

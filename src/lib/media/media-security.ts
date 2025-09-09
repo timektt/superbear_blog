@@ -3,6 +3,9 @@ import { rateLimit } from '../rate-limit'
 import { hasPermission, type UserRole, type Permission } from '../rbac'
 import { logger } from '../logger'
 
+// Re-export UserRole for convenience
+export type { UserRole } from '../rbac'
+
 // Media-specific permissions
 export type MediaPermission = 
   | 'media:upload'
@@ -157,7 +160,7 @@ export class MediaSecurityManager {
         retryAfter: result.success ? undefined : Math.ceil((result.reset - Date.now()) / 1000)
       }
     } catch (error) {
-      logger.error('Media rate limit check failed:', error)
+      logger.error('Media rate limit check failed:', error as any)
       // Fail closed - deny access on error
       return {
         allowed: false,
@@ -212,7 +215,7 @@ export class MediaSecurityManager {
       return { allowed: true }
       
     } catch (error) {
-      logger.error('Media access check failed:', error)
+      logger.error('Media access check failed:', error as any)
       return {
         allowed: false,
         reason: 'Access check failed'
@@ -258,13 +261,13 @@ export class MediaSecurityManager {
       }
       
       // Log to application logger
-      logger.info('Media operation audit', auditLog)
+      logger.info('Media operation audit', auditLog as any)
       
       // In production, you might want to store this in a dedicated audit log table
       // await this.storeAuditLog(auditLog)
       
     } catch (logError) {
-      logger.error('Failed to log media operation:', logError)
+      logger.error('Failed to log media operation:', logError as any)
     }
   }
 
@@ -284,7 +287,7 @@ export class MediaSecurityManager {
       const csrfToken = request.headers.get('x-csrf-token')
       
       if (!csrfToken) {
-        logger.warn('Missing CSRF token for media operation:', operation)
+        logger.warn('Missing CSRF token for media operation:', operation as any)
         return false
       }
       
@@ -293,7 +296,7 @@ export class MediaSecurityManager {
       return this.isValidCSRFToken(csrfToken)
       
     } catch (error) {
-      logger.error('CSRF validation failed:', error)
+      logger.error('CSRF validation failed:', error as unknown)
       return false
     }
   }

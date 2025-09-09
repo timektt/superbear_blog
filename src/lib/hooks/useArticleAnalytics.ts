@@ -12,7 +12,7 @@ export function useArticleAnalyticsTracking({
   articleId,
   enabled = true,
 }: UseArticleAnalyticsProps) {
-  const analyticsRef = useRef<ReturnType<typeof useArticleAnalytics> | null>(
+  const analyticsRef = useRef<any | null>(
     null
   );
 

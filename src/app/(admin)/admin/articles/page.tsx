@@ -44,7 +44,7 @@ interface ArticlesResponse {
 }
 
 export default function ArticlesPage() {
-  const { toasts, removeToast, showSuccess, showError } = useToast();
+  const { toasts, removeToast, success, error: showError } = useToast();
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,7 +114,7 @@ export default function ArticlesPage() {
         throw new Error('Failed to delete article');
       }
 
-      showSuccess(
+      success(
         'Article deleted successfully!',
         'The article has been permanently removed.'
       );

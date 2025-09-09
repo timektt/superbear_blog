@@ -318,8 +318,8 @@ export async function getSearchSuggestions(
       status: 'PUBLISHED',
       publishedAt: { lte: new Date() },
       OR: [
-        { title: { contains: query, mode: 'insensitive' } },
-        { summary: { contains: query, mode: 'insensitive' } },
+        { title: { contains: query } },
+        { summary: { contains: query } },
       ],
     },
     select: { title: true, slug: true },
@@ -339,7 +339,7 @@ export async function getSearchSuggestions(
   // Tag suggestions
   const tags = await prisma.tag.findMany({
     where: {
-      name: { contains: query, mode: 'insensitive' },
+      name: { contains: query },
     },
     select: { name: true, slug: true },
     take: 3,
@@ -357,7 +357,7 @@ export async function getSearchSuggestions(
   // Category suggestions
   const categories = await prisma.category.findMany({
     where: {
-      name: { contains: query, mode: 'insensitive' },
+      name: { contains: query },
     },
     select: { name: true, slug: true },
     take: 2,

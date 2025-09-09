@@ -1,6 +1,15 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { IS_DB_CONFIGURED } from '@/lib/env';
+import { getAllMagazineData } from '@/lib/data/magazine';
+import { getLayoutMode, isDevOverlaysEnabled, logFeatureFlags } from '@/lib/feature-flags';
+import { logValidationResults } from '@/lib/utils/feature-flag-validator';
+import TopHeader from '@/components/sections/TopHeader';
+import HighlightTicker from '@/components/sections/HighlightTicker';
+import HeroMosaic from '@/components/sections/HeroMosaic';
+import LatestNewsRail from '@/components/sections/LatestNewsRail';
+import CategoryExploration from '@/components/sections/CategoryExploration';
+import LayoutDebugIndicator from '@/components/debug/LayoutDebugIndicator';
 
 export const metadata: Metadata = {
   title: 'SuperBear Blog - Tech News for Developers',
@@ -8,7 +17,8 @@ export const metadata: Metadata = {
     'Filtered, in-depth tech content for developers, AI builders, and tech entrepreneurs. Discover AI & LLM news, developer tools, and startup insights.',
 };
 
-export default function Home() {
+// Classic homepage layout component
+function ClassicHomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Simple Hero Section */}
@@ -122,8 +132,104 @@ export default function Home() {
           DB-safe mode: using mock data
         </div>
       )}
+
+      {/* Layout Debug Indicator */}
+      <LayoutDebugIndicator />
     </div>
   );
+}
+
+// Magazine homepage layout component
+async function MagazineHomePage() {
+  // Fetch all magazine data in parallel
+  const magazineData = await getAllMagazineData(12);
+  
+  const {
+    tickerArticles,
+    featuredArticles,
+    latestArticles,
+    categories,
+    success,
+    errors
+  } = magazineData;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Top Header with Brand Hero */}
+      <TopHeader
+        title="SuperBear Blog"
+        tagline="Tech News for Developers, AI Builders, and Tech Entrepreneurs"
+        ctaText="Explore Articles"
+        ctaHref="/news"
+      />
+
+      {/* Highlight Ticker */}
+      <HighlightTicker
+        articles={tickerArticles}
+        autoScroll={true}
+        scrollSpeed={50}
+      />
+
+      {/* Hero Mosaic: Newsletter Panel + Featured Articles */}
+      <HeroMosaic
+        featuredArticles={featuredArticles}
+        className="py-8"
+      />
+
+      {/* Latest News Rail */}
+      <LatestNewsRail
+        articles={latestArticles}
+        showNavButtons={true}
+        className="py-8 bg-muted/30"
+      />
+
+      {/* Category Exploration */}
+      <CategoryExploration
+        categories={categories}
+      />
+
+      {/* DB Safe Mode Banner */}
+      {!IS_DB_CONFIGURED && (
+        <div className="fixed bottom-4 left-4 bg-amber-500/10 border border-amber-400/30 text-amber-700 dark:text-amber-300 px-4 py-2 rounded-lg text-sm backdrop-blur-sm">
+          DB-safe mode: using mock data
+        </div>
+      )}
+
+      {/* Debug Info (only when dev overlays are enabled) */}
+      {isDevOverlaysEnabled() && !success && errors.length > 0 && (
+        <div className="fixed bottom-4 right-4 bg-red-500/10 border border-red-400/30 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm backdrop-blur-sm max-w-sm">
+          <div className="font-semibold mb-1">Magazine Data Errors:</div>
+          <ul className="text-xs space-y-1">
+            {errors.slice(0, 3).map((error, index) => (
+              <li key={index}>• {error}</li>
+            ))}
+            {errors.length > 3 && <li>• ... and {errors.length - 3} more</li>}
+          </ul>
+        </div>
+      )}
+
+      {/* Layout Debug Indicator */}
+      <LayoutDebugIndicator />
+    </div>
+  );
+}
+
+// Main homepage component with feature flag logic
+export default function Home() {
+  // Log feature flags and validate configuration in development
+  logFeatureFlags();
+  logValidationResults();
+  
+  // Get the current layout mode using feature flag system
+  const layoutMode = getLayoutMode();
+  
+  // Switch between magazine and classic layouts
+  if (layoutMode === 'magazine') {
+    return <MagazineHomePage />;
+  }
+  
+  // Default to classic layout
+  return <ClassicHomePage />;
 }
 
 

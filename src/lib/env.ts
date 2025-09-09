@@ -61,7 +61,7 @@ export function isDatabaseConfigured(): boolean {
     // Special handling for file: URLs (SQLite)
     if (url.protocol === 'file:') {
       // For file URLs, just check if path exists
-      return url.pathname && url.pathname !== '/';
+      return Boolean(url.pathname && url.pathname !== '/');
     }
 
     // For network databases, check if hostname exists

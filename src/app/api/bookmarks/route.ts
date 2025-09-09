@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
           authorEmailHash: emailHash,
           authorName: 'Anonymous',
           body: 'bookmark:saved',
-          status: 'APPROVED',
+          status: 'approved',
         },
       });
       return NextResponse.json({ action: 'added', bookmarked: true });

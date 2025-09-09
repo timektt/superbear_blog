@@ -58,8 +58,8 @@ export function initSentry() {
 
     // Additional configuration
     integrations: [
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.Prisma({ client: undefined }), // Will be set later
+      // new Sentry.Integrations.Http({ tracing: true }),
+      // new Sentry.Integrations.Prisma({ client: undefined }), // Will be set later
     ],
 
     // Release tracking
@@ -69,10 +69,10 @@ export function initSentry() {
     debug: process.env.NODE_ENV === 'development',
 
     // Capture unhandled rejections
-    captureUnhandledRejections: true,
+    // captureUnhandledRejections: true,
 
     // Capture uncaught exceptions
-    captureUncaughtException: true,
+    // captureUncaughtException: true,
   });
 }
 
@@ -119,7 +119,8 @@ export function addBreadcrumb(
 }
 
 export function startTransaction(name: string, op: string) {
-  return Sentry.startTransaction({ name, op });
+  // return Sentry.startTransaction({ name, op });
+  return null;
 }
 
 export { Sentry };

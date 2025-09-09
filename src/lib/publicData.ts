@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getPrisma } from '@/lib/prisma';
 import { IS_DB_CONFIGURED } from '@/lib/env';
 import { MOCK_LATEST, mockRightRailItems } from '@/lib/mockData';

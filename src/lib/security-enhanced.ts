@@ -340,8 +340,8 @@ export function validateEnvironment(): { valid: boolean; errors?: string[] } {
     if (error instanceof z.ZodError) {
       return {
         valid: false,
-        errors: error.errors.map(
-          (err) => `${err.path.join('.')}: ${err.message}`
+        errors: (error as any).errors.map(
+          (err: unknown) => `${err.path.join('.')}: ${err.message}`
         ),
       };
     }

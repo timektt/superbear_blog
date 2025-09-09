@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     const userRole = session.user.role as UserRole;
     const userId = session.user.id;
-    const sessionId = session.user.sessionId || 'no-session';
+    const sessionId = (session.user as any).sessionId || 'no-session';
 
     // Check permissions for media upload
     const hasPermission = requireMediaPermission('media:upload')(userRole);

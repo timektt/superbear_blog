@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Newsletter unsubscription error', error);
+    logger.error('Newsletter unsubscription error', error as Error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       )
     );
   } catch (error) {
-    logger.error('Newsletter unsubscribe link error', error);
+    logger.error('Newsletter unsubscribe link error', error as Error);
 
     return NextResponse.redirect(
       new URL('/newsletter/unsubscribe?error=server_error', request.url)

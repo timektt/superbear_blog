@@ -5,7 +5,7 @@ import { headers } from 'next/headers';
 export async function POST(request: NextRequest) {
   try {
     // Verify cron secret for security
-    const headersList = headers();
+    const headersList = await headers();
     const cronSecret = headersList.get('x-cron-secret');
     
     if (cronSecret !== process.env.CRON_SECRET) {
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     // Verify cron secret for security
-    const headersList = headers();
+    const headersList = await headers();
     const cronSecret = headersList.get('x-cron-secret');
     
     if (cronSecret !== process.env.CRON_SECRET) {

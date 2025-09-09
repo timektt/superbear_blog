@@ -48,7 +48,7 @@ async function handler() {
     });
 
     // Add simulated featureRank to articles (1 for first, 2+ for others)
-    const articlesWithRank = featuredArticles.map((article, index) => ({
+    const articlesWithRank = featuredArticles.map((article: any, index: number) => ({
       ...article,
       featureRank: index + 1,
       isFeatured: true,
@@ -64,7 +64,7 @@ async function handler() {
       },
     });
   } catch (error) {
-    logger.error('Error fetching featured articles:', error);
+    logger.error('Error fetching featured articles:', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch featured articles' },
       { status: 500 }

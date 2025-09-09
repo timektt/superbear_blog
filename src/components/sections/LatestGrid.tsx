@@ -20,7 +20,11 @@ interface LatestGridProps {
 
 export default function LatestGrid({ articles }: LatestGridProps) {
   return (
-    <section className="bg-white dark:bg-gray-900 py-12 transition-colors duration-300">
+    <section 
+      className="bg-white dark:bg-gray-900 py-12 transition-colors duration-300"
+      aria-label="Latest news articles"
+      role="region"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <SectionHeader
@@ -31,20 +35,25 @@ export default function LatestGrid({ articles }: LatestGridProps) {
         />
 
         {/* Articles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+          role="group"
+          aria-label="Latest articles grid"
+        >
           {articles.map((article, index) => (
-            <ArticleCard
-              key={index}
-              title={article.title}
-              category={article.category}
-              author={article.author}
-              date={article.date}
-              imageUrl={article.imageUrl}
-              slug={article.slug || `article-${index + 1}`}
-              snippet={article.snippet}
-              tags={article.tags}
-              variant="default"
-            />
+            <article key={index} aria-label={`Article: ${article.title}`}>
+              <ArticleCard
+                title={article.title}
+                category={article.category}
+                author={article.author}
+                date={article.date}
+                imageUrl={article.imageUrl}
+                slug={article.slug || `article-${index + 1}`}
+                snippet={article.snippet}
+                tags={article.tags}
+                variant="default"
+              />
+            </article>
           ))}
         </div>
 

@@ -107,7 +107,7 @@ export default function CategoryNavigation({
                      hover:shadow-xl hover:scale-105
                      transition-all duration-200 ease-out
                      opacity-0 group-hover:opacity-100
-                     focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                     focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           aria-label="Scroll categories left"
         >
           <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
@@ -186,7 +186,7 @@ export default function CategoryNavigation({
                      hover:shadow-xl hover:scale-105
                      transition-all duration-200 ease-out
                      opacity-0 group-hover:opacity-100
-                     focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                     focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
           aria-label="Scroll categories right"
         >
           <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-300" />

@@ -87,7 +87,7 @@
 
 /* Focus and hover utilities */
 .focus-ring {
-  @apply focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none;
+  @apply focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:outline-none;
 }
 
 .hover-lift {
@@ -174,7 +174,7 @@
 
 /* Loading state utilities */
 .skeleton {
-  @apply animate-pulse bg-muted rounded;
+  @apply animate-pulse bg-gray-200 dark:bg-gray-700 rounded;
 }
 
 .skeleton-text {

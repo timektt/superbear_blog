@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(total / limit);
 
     const response = {
-      podcasts: podcasts.map((podcast) => ({
+      podcasts: podcasts.map((podcast: any) => ({
         id: podcast.id,
         title: podcast.title,
         slug: podcast.slug,

@@ -86,9 +86,7 @@ export async function rateLimit(
     }
 
     const cacheKey = `${CACHE_KEYS.RATE_LIMIT}${ip}:${pathname}`;
-    const entry = await cacheInstance.get<{ count: number; resetTime: number }>(
-      cacheKey
-    );
+    const entry = await cacheInstance.get(cacheKey) as { count: number; resetTime: number } | null;
 
     if (!entry || entry.resetTime < now) {
       // First request in window or window expired
@@ -129,7 +127,7 @@ export async function rateLimit(
       reset: entry.resetTime,
     };
   } catch (error) {
-    logger.error('Redis rate limiting failed, falling back to memory:', error);
+    logger.error('Redis rate limiting failed, falling back to memory:', error as any);
     return fallbackRateLimit(ip, pathname, limits, now, resetTime);
   }
 }
