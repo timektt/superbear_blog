@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
-import { Editor } from '@/components/editor/Editor';
+import { Editor } from '@/components/editor';
 import { useToast } from '@/lib/hooks/useToast';
 import { z } from 'zod';
 

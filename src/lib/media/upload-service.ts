@@ -485,7 +485,7 @@ export class UploadService {
       UPLOAD_ERROR_CODES.INVALID_FILE_TYPE,
       UPLOAD_ERROR_CODES.INVALID_FILE_FORMAT,
       UPLOAD_ERROR_CODES.CANCELLED
-    ].includes(code);
+    ].includes(code as any);
   }
 
   private isRetryableError(error: any): boolean {
@@ -493,7 +493,7 @@ export class UploadService {
     return [
       UPLOAD_ERROR_CODES.NETWORK_ERROR,
       UPLOAD_ERROR_CODES.UPLOAD_FAILED
-    ].includes(code) && !error?.message?.includes('cancelled');
+    ].includes(code as unknown) && !error?.message?.includes('cancelled');
   }
 }
 

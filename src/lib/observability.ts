@@ -202,7 +202,7 @@ async function getSendRateByDomain(
 
     const domainCounts: Record<string, number> = {};
 
-    deliveries.forEach((delivery) => {
+    deliveries.forEach((delivery: { recipientEmail: string }) => {
       const domain = delivery.recipientEmail.split('@')[1]?.toLowerCase();
       if (domain) {
         domainCounts[domain] = (domainCounts[domain] || 0) + 1;
@@ -239,7 +239,7 @@ async function getDeliveryStats(
     let successful = 0;
     let failed = 0;
 
-    stats.forEach((stat) => {
+    stats.forEach((stat: unknown) => {
       const count = stat._count.status;
       total += count;
 

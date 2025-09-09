@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 
 import { Editor } from '@tiptap/react';
@@ -116,7 +116,7 @@ export function EditorToolbar({
     <div className="border-b border-gray-300 p-2 flex flex-wrap gap-1">
       {/* Text Formatting */}
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBold().run()}
+        onClick={() => (editor.chain().focus() as any).toggleBold().run()}
         isActive={editor.isActive('bold')}
         title="Bold"
       >
@@ -124,7 +124,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleItalic().run()}
+        onClick={() => (editor.chain().focus() as any).toggleItalic().run()}
         isActive={editor.isActive('italic')}
         title="Italic"
       >
@@ -132,7 +132,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleStrike().run()}
+        onClick={() => (editor.chain().focus() as any).toggleStrike().run()}
         isActive={editor.isActive('strike')}
         title="Strikethrough"
       >
@@ -140,7 +140,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleCode().run()}
+        onClick={() => (editor.chain().focus() as any).toggleCode().run()}
         isActive={editor.isActive('code')}
         title="Inline Code"
       >
@@ -151,7 +151,7 @@ export function EditorToolbar({
 
       {/* Headings */}
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
+        onClick={() => (editor.chain().focus() as any).toggleHeading({ level: 1 }).run()}
         isActive={editor.isActive('heading', { level: 1 })}
         title="Heading 1"
       >
@@ -159,7 +159,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        onClick={() => (editor.chain().focus() as any).toggleHeading({ level: 2 }).run()}
         isActive={editor.isActive('heading', { level: 2 })}
         title="Heading 2"
       >
@@ -167,7 +167,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        onClick={() => (editor.chain().focus() as any).toggleHeading({ level: 3 }).run()}
         isActive={editor.isActive('heading', { level: 3 })}
         title="Heading 3"
       >
@@ -178,7 +178,7 @@ export function EditorToolbar({
 
       {/* Lists */}
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        onClick={() => (editor.chain().focus() as any).toggleBulletList().run()}
         isActive={editor.isActive('bulletList')}
         title="Bullet List"
       >
@@ -186,7 +186,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        onClick={() => (editor.chain().focus() as any).toggleOrderedList().run()}
         isActive={editor.isActive('orderedList')}
         title="Numbered List"
       >
@@ -194,7 +194,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        onClick={() => (editor.chain().focus() as any).toggleBlockquote().run()}
         isActive={editor.isActive('blockquote')}
         title="Quote"
       >
@@ -213,7 +213,7 @@ export function EditorToolbar({
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().unsetLink().run()}
+        onClick={() => (editor.chain().focus() as any).unsetLink().run()}
         disabled={!editor.isActive('link')}
         title="Remove Link"
       >
@@ -260,16 +260,16 @@ export function EditorToolbar({
 
       {/* Undo/Redo */}
       <ToolbarButton
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
+        onClick={() => (editor.chain().focus() as any).undo().run()}
+        disabled={!(editor.can() as any).undo()}
         title="Undo"
       >
         <Undo size={16} />
       </ToolbarButton>
 
       <ToolbarButton
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
+        onClick={() => (editor.chain().focus() as any).redo().run()}
+        disabled={!(editor.can() as any).redo()}
         title="Redo"
       >
         <Redo size={16} />

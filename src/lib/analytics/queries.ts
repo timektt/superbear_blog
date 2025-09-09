@@ -143,8 +143,8 @@ export async function getCampaignPerformance(
         campaignName: campaign.title,
         status: campaign.status,
         createdAt: campaign.createdAt,
-        scheduledAt: campaign.scheduledAt,
-        sentAt: campaign.sentAt,
+        scheduledAt: campaign.scheduledAt ?? undefined,
+        sentAt: campaign.sentAt ?? undefined,
         metrics,
         rates,
       };

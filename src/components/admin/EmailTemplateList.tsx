@@ -44,7 +44,7 @@ export default function EmailTemplateList({
   });
 
   const router = useRouter();
-  const { toast } = useToast();
+  const { success, error: showError } = useToast();
 
   // Fetch templates
   const fetchTemplates = async () => {
@@ -65,11 +65,11 @@ export default function EmailTemplateList({
         setTemplates(data.templates);
         setPagination(data.pagination);
       } else {
-        showToast('Failed to fetch templates', 'error');
+        showError('Failed to fetch templates');
       }
     } catch (error) {
       console.error('Error fetching templates:', error);
-      showToast('Failed to fetch templates', 'error');
+      showError('Failed to fetch templates');
     } finally {
       setLoading(false);
     }
@@ -82,9 +82,8 @@ export default function EmailTemplateList({
   // Delete template
   const handleDelete = async (template: EmailTemplate) => {
     if (template._count.campaigns > 0) {
-      showToast(
-        'Cannot delete template that is being used in campaigns',
-        'error'
+      showError(
+        'Cannot delete template that is being used in campaigns'
       );
       return;
     }
@@ -102,15 +101,15 @@ export default function EmailTemplateList({
       );
 
       if (response.ok) {
-        showToast('Template deleted successfully', 'success');
+        success('Template deleted successfully');
         fetchTemplates();
       } else {
         const data = await response.json();
-        showToast(data.error || 'Failed to delete template', 'error');
+        showError(data.error || 'Failed to delete template');
       }
     } catch (error) {
       console.error('Error deleting template:', error);
-      showToast('Failed to delete template', 'error');
+      showError('Failed to delete template');
     }
   };
 
@@ -129,15 +128,15 @@ export default function EmailTemplateList({
       );
 
       if (response.ok) {
-        showToast('Template duplicated successfully', 'success');
+        success('Template duplicated successfully');
         fetchTemplates();
       } else {
         const data = await response.json();
-        showToast(data.error || 'Failed to duplicate template', 'error');
+        showError(data.error || 'Failed to duplicate template');
       }
     } catch (error) {
       console.error('Error duplicating template:', error);
-      showToast('Failed to duplicate template', 'error');
+      showError('Failed to duplicate template');
     }
   };
 

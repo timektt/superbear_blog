@@ -2,6 +2,7 @@ import { prisma } from '../prisma';
 import { ArticleCache } from './article-cache';
 import { SearchCache } from './search-cache';
 import { logger } from '../logger';
+import type { Article } from '@prisma/client';
 
 /**
  * Cache warming utilities
@@ -48,7 +49,7 @@ export class CacheWarming {
       });
 
       // Cache individual articles
-      const cachePromises = recentArticles.map((article) =>
+      const cachePromises = recentArticles.map((article: Article) =>
         ArticleCache.setArticle(article.slug, article as any)
       );
 
@@ -79,7 +80,7 @@ export class CacheWarming {
         `Warmed up article cache with ${recentArticles.length} articles`
       );
     } catch (error) {
-      logger.error('Failed to warm up article cache:', error);
+      logger.error('Failed to warm up article cache:', error instanceof Error ? error : undefined);
     }
   }
 
@@ -114,7 +115,7 @@ export class CacheWarming {
         `Warmed up search cache with ${popularQueries.length} popular queries`
       );
     } catch (error) {
-      logger.error('Failed to warm up search cache:', error);
+      logger.error('Failed to warm up search cache:', error instanceof Error ? error : undefined);
     }
   }
 
@@ -218,7 +219,7 @@ export class CacheWarming {
         `Warmed up taxonomy cache with ${categories.length} categories and ${tags.length} tags`
       );
     } catch (error) {
-      logger.error('Failed to warm up taxonomy cache:', error);
+      logger.error('Failed to warm up taxonomy cache:', error instanceof Error ? error : undefined);
     }
   }
 
@@ -235,7 +236,7 @@ export class CacheWarming {
 
       logger.info('Completed full cache warmup');
     } catch (error) {
-      logger.error('Failed to complete full cache warmup:', error);
+      logger.error('Failed to complete full cache warmup:', error instanceof Error ? error : undefined);
     }
   }
 
@@ -249,7 +250,7 @@ export class CacheWarming {
 
       logger.info('Completed scheduled cache warmup');
     } catch (error) {
-      logger.error('Failed to complete scheduled cache warmup:', error);
+      logger.error('Failed to complete scheduled cache warmup:', error instanceof Error ? error : undefined);
     }
   }
 }

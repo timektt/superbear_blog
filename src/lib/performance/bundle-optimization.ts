@@ -72,7 +72,7 @@ export const routeComponents = {
   PodcastManagement: () => import('@/components/admin/PodcastManagement'),
   
   // Heavy UI components
-  RichTextEditor: () => import('@/components/editor/Editor'),
+  RichTextEditor: () => import('@/components/editor/Editor').then(m => ({ default: m.Editor })),
 };
 
 /**

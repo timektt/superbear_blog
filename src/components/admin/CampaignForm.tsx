@@ -25,7 +25,7 @@ interface CampaignFormData {
 
 export default function CampaignForm() {
   const router = useRouter();
-  const { toast } = useToast();
+  const { success, error: showError } = useToast();
 
   const [formData, setFormData] = useState<CampaignFormData>({
     title: '',
@@ -56,14 +56,14 @@ export default function CampaignForm() {
         setTemplates(data.templates || []);
       } catch (error) {
         console.error('Error fetching templates:', error);
-        showToast('Failed to load email templates', 'error');
+        showError('Failed to load email templates');
       } finally {
         setTemplatesLoading(false);
       }
     };
 
     fetchTemplates();
-  }, [showToast]);
+  }, [showError]);
 
   // Update recipient count when filter changes
   useEffect(() => {
@@ -144,12 +144,12 @@ export default function CampaignForm() {
     e.preventDefault();
 
     if (!formData.title || !formData.subject || !formData.templateId) {
-      showToast('Please fill in all required fields', 'error');
+      showError('Please fill in all required fields');
       return;
     }
 
     if (!sendNow && isScheduled && !formData.scheduledAt) {
-      showToast('Please select a scheduled date and time', 'error');
+      showError('Please select a scheduled date and time');
       return;
     }
 
@@ -158,7 +158,7 @@ export default function CampaignForm() {
       formData.scheduledAt &&
       new Date(formData.scheduledAt) <= new Date()
     ) {
-      showToast('Scheduled time must be in the future', 'error');
+      showError('Scheduled time must be in the future');
       return;
     }
 
@@ -210,22 +210,20 @@ export default function CampaignForm() {
           throw new Error(error.error || 'Failed to send campaign');
         }
 
-        showToast('Campaign created and sent successfully!', 'success');
+        success('Campaign created and sent successfully!');
       } else {
-        showToast(
+        success(
           isScheduled
             ? 'Campaign created and scheduled successfully!'
-            : 'Campaign created successfully!',
-          'success'
+            : 'Campaign created successfully!'
         );
       }
 
       router.push('/admin/campaigns');
     } catch (error) {
       console.error('Error creating campaign:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to create campaign',
-        'error'
+      showError(
+        error instanceof Error ? error.message : 'Failed to create campaign'
       );
     } finally {
       setLoading(false);

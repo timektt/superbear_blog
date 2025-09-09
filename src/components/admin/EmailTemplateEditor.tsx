@@ -44,7 +44,7 @@ export default function EmailTemplateEditor({
   const [previewSize, setPreviewSize] = useState<number>(0);
 
   const router = useRouter();
-  const { toast } = useToast();
+  const { success, error: showError, info } = useToast();
 
   // Load template data if editing
   useEffect(() => {
@@ -71,11 +71,11 @@ export default function EmailTemplateEditor({
           designConfig: data.designConfig || DEFAULT_DESIGN_CONFIG,
         });
       } else {
-        showToast('Failed to load template', 'error');
+        showError('Failed to load template');
       }
     } catch (error) {
       console.error('Error loading template:', error);
-      showToast('Failed to load template', 'error');
+      showError('Failed to load template');
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function EmailTemplateEditor({
       !template.subject.trim() ||
       !template.htmlContent.trim()
     ) {
-      showToast('Please fill in all required fields', 'error');
+      showError('Please fill in all required fields');
       return;
     }
 
@@ -107,11 +107,10 @@ export default function EmailTemplateEditor({
       });
 
       if (response.ok) {
-        showToast(
+        success(
           templateId
             ? 'Template updated successfully'
-            : 'Template created successfully',
-          'success'
+            : 'Template created successfully'
         );
         onSave?.();
         if (!templateId) {
@@ -119,11 +118,11 @@ export default function EmailTemplateEditor({
         }
       } else {
         const data = await response.json();
-        showToast(data.error || 'Failed to save template', 'error');
+        showError(data.error || 'Failed to save template');
       }
     } catch (error) {
       console.error('Error saving template:', error);
-      showToast('Failed to save template', 'error');
+      showError('Failed to save template');
     } finally {
       setSaving(false);
     }
@@ -132,14 +131,14 @@ export default function EmailTemplateEditor({
   // Generate preview
   const handlePreview = async () => {
     if (!templateId && !template.htmlContent.trim()) {
-      showToast('Please add HTML content first', 'error');
+      showError('Please add HTML content first');
       return;
     }
 
     try {
       // For new templates, we need to save first to generate preview
       if (!templateId) {
-        showToast('Please save the template first to generate preview', 'info');
+        info('Please save the template first to generate preview');
         return;
       }
 
@@ -165,11 +164,11 @@ export default function EmailTemplateEditor({
         setPreviewWarnings(data.warnings || []);
         setPreviewSize(data.size || 0);
       } else {
-        showToast('Failed to generate preview', 'error');
+        showError('Failed to generate preview');
       }
     } catch (error) {
       console.error('Error generating preview:', error);
-      showToast('Failed to generate preview', 'error');
+      showError('Failed to generate preview');
     }
   };
 

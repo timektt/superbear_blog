@@ -201,7 +201,7 @@ export function applyBrowserOptimizations(): void {
     });
 
     // Improve Safari scroll performance
-    document.body.style.webkitOverflowScrolling = 'touch';
+    (document.body.style as any).webkitOverflowScrolling = 'touch';
   }
 
   // Firefox-specific optimizations
@@ -537,7 +537,7 @@ export class PerformanceTester {
           let clsValue = 0;
           const clsObserver = new PerformanceObserver((list) => {
             const entries = list.getEntries();
-            entries.forEach((entry: any) => {
+            entries.forEach((entry: unknown) => {
               if (!entry.hadRecentInput) {
                 clsValue += entry.value;
               }

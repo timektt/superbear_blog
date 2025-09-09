@@ -434,7 +434,7 @@ export async function invalidateArticleCache(articleId?: string): Promise<void> 
     
     logger.info('Article cache invalidated successfully');
   } catch (error) {
-    logger.error('Failed to invalidate article cache:', error as any);
+    logger.error('Failed to invalidate article cache:', error as unknown);
   }
 }
 
@@ -447,7 +447,7 @@ export async function warmMagazineCache(): Promise<void> {
     
     logger.info('Magazine cache warmed successfully');
   } catch (error) {
-    logger.error('Failed to warm magazine cache:', error as unknown);
+    logger.error('Failed to warm magazine cache:', error instanceof Error ? error : undefined);
   }
 }
 
