@@ -79,7 +79,7 @@ export async function GET(): Promise<NextResponse<HealthResponse>> {
   } catch (error) {
     dbStatus = 'down';
     dbError = error instanceof Error ? error.message : 'Database check failed';
-    logger.warn('Database health check failed', error as Error);
+    logger.warn('Database health check failed', { error: error instanceof Error ? error.message : String(error) });
   }
 
   // Get circuit breaker stats

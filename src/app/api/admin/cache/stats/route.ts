@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
       data: stats,
     });
   } catch (error) {
-    logger.error('Failed to get cache statistics:', error);
+    logger.error('Failed to get cache statistics:', error as Error);
 
     return NextResponse.json(
       { error: 'Failed to get cache statistics' },
@@ -111,7 +111,7 @@ export async function DELETE(request: NextRequest) {
       message: `Cache cleared${type ? ` for type: ${type}` : ''}`,
     });
   } catch (error) {
-    logger.error('Failed to clear cache:', error);
+    logger.error('Failed to clear cache:', error as Error);
 
     return NextResponse.json(
       { error: 'Failed to clear cache' },

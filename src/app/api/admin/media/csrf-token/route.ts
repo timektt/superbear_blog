@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const userRole = session.user.role as UserRole
     const userId = session.user.id
-    const sessionId = session.user.sessionId || 'no-session'
+    const sessionId = (session.user as any).sessionId || 'no-session'
 
     // Check if user has any media permissions
     const hasAnyMediaPermission = 
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = session.user.id
-    const sessionId = session.user.sessionId || 'no-session'
+    const sessionId = (session.user as any).sessionId || 'no-session'
 
     // Validate the token from request
     const validation = await mediaCSRFProtection.validateToken(request, userId, sessionId)

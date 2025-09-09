@@ -50,7 +50,7 @@ export async function GET(
 
     // Get detailed usage information by fetching actual content
     const usageDetails = await Promise.all(
-      mediaFile.references.map(async (ref) => {
+      mediaFile.references.map(async (ref: any) => {
         let contentDetails = null
 
         try {

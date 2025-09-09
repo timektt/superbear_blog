@@ -249,8 +249,8 @@ export default async function PodcastsPage({
       <Suspense fallback={<div>Loading filters...</div>}>
         <PodcastFilters
           categories={categories}
-          currentCategory={searchParams.category}
-          currentSearch={searchParams.search}
+          currentCategory={(await searchParams).category}
+          currentSearch={(await searchParams).search}
         />
       </Suspense>
 

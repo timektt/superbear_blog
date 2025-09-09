@@ -51,7 +51,7 @@ export async function GET() {
       ARCHIVED: 0,
     };
 
-    articleStats.forEach((stat) => {
+    articleStats.forEach((stat: any) => {
       statusCounts[stat.status as keyof typeof statusCounts] = stat._count.id;
     });
 
@@ -104,13 +104,13 @@ export async function GET() {
         recentlyCreated: recentArticles,
         recentlyPublished: recentlyPublished,
       },
-      categories: categoryStats.map((category) => ({
+      categories: categoryStats.map((category: any) => ({
         id: category.id,
         name: category.name,
         slug: category.slug,
         articleCount: category._count.articles,
       })),
-      authors: authorStats.map((author) => ({
+      authors: authorStats.map((author: any) => ({
         id: author.id,
         name: author.name,
         articleCount: author._count.articles,

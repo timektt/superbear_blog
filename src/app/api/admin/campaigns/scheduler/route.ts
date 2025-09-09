@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.info('Manual scheduler run triggered by admin', {
-      userId: session.user.email,
+      userId: session.user.email || undefined,
     });
 
     const status = await runCampaignScheduler();

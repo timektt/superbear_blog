@@ -875,8 +875,17 @@ export const mockArticles = [
     featured: false,
     featureRank: null,
     tags: ['JavaScript', 'Build Tools', 'Turbopack', 'Performance']
-  }
-];01-08T10:20:00Z'),
+  },
+  {
+    id: '8',
+    title: 'Rust Foundation Launches Security Audit Program',
+    excerpt: 'New initiative provides free security audits for critical Rust crates in the ecosystem.',
+    content: 'The Rust Foundation has announced a comprehensive security audit program for critical crates in the Rust ecosystem. The initiative will provide free security audits for the top 100 most-downloaded crates, focusing on memory safety, cryptographic implementations, and supply chain security. Trail of Bits and other security firms will conduct the audits, with results published publicly. The program aims to strengthen the overall security posture of the Rust ecosystem and establish best practices for crate maintainers.',
+    slug: 'rust-foundation-security-audit-program',
+    coverUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800',
+    category: { id: '6', name: 'Open Source', slug: 'open-source' },
+    author: { id: '8', name: 'Alex Kim', slug: 'alex-kim' },
+    publishedAt: new Date('2025-01-08T10:20:00Z'),
     readingTime: 4,
     featured: false,
     featureRank: null,

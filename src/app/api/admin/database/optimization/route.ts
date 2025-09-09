@@ -21,10 +21,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   // Apply rate limiting for admin endpoints
-  const rateLimitResult = await rateLimit(request, {
-    max: 10,
-    windowMs: 60000,
-  });
+  const rateLimitResult = await rateLimit(request);
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: 'Too many requests' },
@@ -109,10 +106,7 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   // Apply rate limiting for admin endpoints
-  const rateLimitResult = await rateLimit(request, {
-    max: 5,
-    windowMs: 300000,
-  }); // 5 requests per 5 minutes
+  const rateLimitResult = await rateLimit(request);
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: 'Too many requests' },

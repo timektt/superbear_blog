@@ -19,7 +19,7 @@ export async function POST(
 
     const { id } = await params;
     const { reason } = await request.json();
-    const campaignId = params.id;
+    const campaignId = (await params).id;
 
     const result = await cancelCampaign(
       campaignId,

@@ -20,7 +20,13 @@ export interface UploadProgress {
   uploadId: string;
   filename: string;
   progress: number;
-  status: 'pending' | 'uploading' | 'processing' | 'completed' | 'failed' | 'cancelled';
+  status:
+    | 'pending'
+    | 'uploading'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
   bytesUploaded: number;
   totalBytes: number;
   error?: string;
@@ -28,7 +34,10 @@ export interface UploadProgress {
   endTime?: Date;
 }
 import { mediaTracker } from '@/lib/media/media-tracker';
-import { useMediaTracking, useMediaUploadTracking } from '@/lib/hooks/useMediaTracking';
+import {
+  useMediaTracking,
+  useMediaUploadTracking,
+} from '@/lib/hooks/useMediaTracking';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface Author {
@@ -108,11 +117,19 @@ function EnhancedImageUploader({
 
   const handleFileUpload = (file: File) => {
     setImageError(null);
-    
+
     // Validate file type and size
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    const allowedTypes = [
+      'image/jpeg',
+      'image/jpg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+    ];
     if (!allowedTypes.includes(file.type)) {
-      setImageError('Please select a valid image file (JPEG, PNG, GIF, or WebP)');
+      setImageError(
+        'Please select a valid image file (JPEG, PNG, GIF, or WebP)'
+      );
       return;
     }
 
@@ -142,7 +159,7 @@ function EnhancedImageUploader({
 
   const getProgressStatus = () => {
     if (!uploadProgress) return '';
-    
+
     switch (uploadProgress.status) {
       case 'pending':
         return 'Preparing upload...';
@@ -233,7 +250,9 @@ function EnhancedImageUploader({
             {isUploading ? (
               <div className="flex flex-col items-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="text-sm text-gray-600 mt-2">{getProgressStatus()}</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  {getProgressStatus()}
+                </p>
                 {uploadProgress && (
                   <div className="w-48 bg-gray-200 rounded-full h-2 mt-2">
                     <div
@@ -292,7 +311,8 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
   const { toasts, removeToast, success, error } = useToast();
 
   // Media tracking hooks
-  const { validateImageReferences, updateCoverImageReference } = useMediaTracking();
+  const { validateImageReferences, updateCoverImageReference } =
+    useMediaTracking();
   const { trackUpload } = useMediaUploadTracking();
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -316,7 +336,9 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
 
   // Media tracking state
   const [imagePublicId, setImagePublicId] = useState<string>('');
-  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress | null>(
+    null
+  );
   const [isImageUploading, setIsImageUploading] = useState(false);
 
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
@@ -357,8 +379,8 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
           const tagsData = await tagsRes.json();
           setTags(tagsData.tags || []);
         }
-      } catch (error) {
-        console.error('Failed to fetch form options:', error);
+      } catch (err) {
+        console.error('Failed to fetch form options:', err);
         error(
           'Failed to load form options',
           'Please refresh the page and try again.'
@@ -367,7 +389,7 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     };
 
     fetchFormOptions();
-  }, [showError]);
+  }, [error]);
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -420,19 +442,19 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
       // Use API endpoint for upload instead of direct service
       const formData = new FormData();
       formData.append('file', file);
-      
+
       const response = await fetch('/api/upload-image', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Upload failed');
       }
-      
+
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Upload failed');
       }
@@ -449,9 +471,13 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
         uploadedBy: 'current_user', // TODO: Get actual user ID from auth
       });
 
-      success('Image uploaded successfully', 'Cover image has been uploaded and is ready to use.');
+      success(
+        'Image uploaded successfully',
+        'Cover image has been uploaded and is ready to use.'
+      );
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to upload image';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to upload image';
       error('Upload failed', errorMessage);
     } finally {
       setIsImageUploading(false);
@@ -478,7 +504,9 @@ function ArticleFormContent({ initialData, mode }: ArticleFormProps) {
     try {
       const validation = await validateImageReferences(formData.content);
       if (!validation.valid) {
-        setSubmitError(`Missing images detected: ${validation.missingImages.join(', ')}`);
+        setSubmitError(
+          `Missing images detected: ${validation.missingImages.join(', ')}`
+        );
         return false;
       }
       return true;

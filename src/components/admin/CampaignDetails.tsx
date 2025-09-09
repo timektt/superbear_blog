@@ -43,7 +43,7 @@ export default function CampaignDetails({
   campaign: initialCampaign,
 }: CampaignDetailsProps) {
   const router = useRouter();
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const [campaign, setCampaign] = useState<Campaign>(initialCampaign);
   const [stats, setStats] = useState<CampaignStats | null>(null);
@@ -90,7 +90,7 @@ export default function CampaignDetails({
         throw new Error(error.error || 'Failed to send campaign');
       }
 
-      showToast('Campaign sent successfully!', 'success');
+      toast({ title: 'Campaign sent successfully!', variant: 'success' });
 
       // Refresh campaign data
       const updatedResponse = await fetch(
@@ -103,10 +103,11 @@ export default function CampaignDetails({
       }
     } catch (error) {
       console.error('Error sending campaign:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to send campaign',
-        'error'
-      );
+      toast({ 
+        title: 'Failed to send campaign',
+        description: error instanceof Error ? error.message : 'Failed to send campaign',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
@@ -131,14 +132,15 @@ export default function CampaignDetails({
         throw new Error(error.error || 'Failed to delete campaign');
       }
 
-      showToast('Campaign deleted successfully!', 'success');
+      toast({ title: 'Campaign deleted successfully!', variant: 'success' });
       router.push('/admin/campaigns');
     } catch (error) {
       console.error('Error deleting campaign:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to delete campaign',
-        'error'
-      );
+      toast({ 
+        title: 'Failed to delete campaign',
+        description: error instanceof Error ? error.message : 'Failed to delete campaign',
+        variant: 'destructive'
+      });
     }
   };
 

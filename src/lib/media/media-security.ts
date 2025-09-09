@@ -3,6 +3,9 @@ import { rateLimit } from '../rate-limit'
 import { hasPermission, type UserRole, type Permission } from '../rbac'
 import { logger } from '../logger'
 
+// Re-export UserRole for convenience
+export type { UserRole } from '../rbac'
+
 // Media-specific permissions
 export type MediaPermission = 
   | 'media:upload'

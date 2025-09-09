@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
       )
     );
   } catch (error) {
-    logger.error('Newsletter verification error', error);
+    logger.error('Newsletter verification error', error as Error);
 
     return NextResponse.json(
       { success: false, message: 'Failed to verify subscription' },

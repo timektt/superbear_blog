@@ -342,7 +342,7 @@ export function NewsletterIssueForm({
                 <div className="border rounded-md">
                   <Editor
                     content={formData.content}
-                    onChange={(content) =>
+                    onChange={(content: string) =>
                       setFormData((prev) => ({ ...prev, content }))
                     }
                     placeholder="Write your newsletter content here..."

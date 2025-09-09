@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle media IDs that weren't found
-    const foundIds = mediaFiles.map(f => f.id)
+    const foundIds = mediaFiles.map((f: any) => f.id)
     const notFoundIds = mediaIds.filter(id => !foundIds.includes(id))
     
     for (const id of notFoundIds) {
@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Invalid request data',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       )

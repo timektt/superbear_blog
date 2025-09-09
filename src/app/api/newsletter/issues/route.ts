@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(total / limit);
 
     const response: NewsletterArchiveResponse = {
-      issues: issues.map((issue) => ({
+      issues: issues.map((issue: any) => ({
         id: issue.id,
         title: issue.title,
         slug: issue.slug,

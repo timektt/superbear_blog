@@ -52,7 +52,7 @@ async function handler(request: NextRequest) {
     });
 
     // Transform articles to include expected fields for magazine layout
-    const transformedArticles = latestArticles.map((article) => ({
+    const transformedArticles = latestArticles.map((article: any) => ({
       ...article,
       // Use summary as excerpt, or create from title if no summary
       excerpt: article.summary || `${article.title.substring(0, 150)}...`,
@@ -68,7 +68,7 @@ async function handler(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Error fetching latest articles:', error);
+    logger.error('Error fetching latest articles:', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch latest articles' },
       { status: 500 }

@@ -33,7 +33,7 @@ async function handler() {
     });
 
     // Transform to include articleCount field as expected by magazine layout
-    const categoriesWithCount = categories.map((category) => ({
+    const categoriesWithCount = categories.map((category: any) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,
@@ -42,7 +42,7 @@ async function handler() {
 
     // Filter to only include categories with articles (optional - can be removed if you want to show all categories)
     const categoriesWithArticles = categoriesWithCount.filter(
-      (category) => category.articleCount > 0
+      (category: any) => category.articleCount > 0
     );
 
     return NextResponse.json(categoriesWithArticles, {
@@ -51,7 +51,7 @@ async function handler() {
       },
     });
   } catch (error) {
-    logger.error('Error fetching categories with count:', error);
+    logger.error('Error fetching categories with count:', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch categories' },
       { status: 500 }

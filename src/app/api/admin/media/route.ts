@@ -149,13 +149,13 @@ export async function GET(request: NextRequest) {
     // Filter by usage status if specified
     let filteredMediaFiles = mediaFiles
     if (query.usageStatus === 'used') {
-      filteredMediaFiles = mediaFiles.filter(file => file._count.references > 0)
+      filteredMediaFiles = mediaFiles.filter((file: any) => file._count.references > 0)
     } else if (query.usageStatus === 'orphaned') {
-      filteredMediaFiles = mediaFiles.filter(file => file._count.references === 0)
+      filteredMediaFiles = mediaFiles.filter((file: any) => file._count.references === 0)
     }
 
     // Format response for media gallery
-    const formattedFiles = filteredMediaFiles.map(file => ({
+    const formattedFiles = filteredMediaFiles.map((file: any) => ({
       id: file.id,
       publicId: file.publicId,
       url: file.url,
@@ -210,7 +210,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         { 
           error: 'Invalid query parameters',
-          details: error.errors
+          details: error.issues
         },
         { status: 400 }
       )

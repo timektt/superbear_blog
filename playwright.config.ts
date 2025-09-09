@@ -30,12 +30,11 @@ export default defineConfig({
   /* Visual testing configuration */
   expect: {
     /* Threshold for visual comparisons */
-    toHaveScreenshot: { 
+    toHaveScreenshot: {
       threshold: 0.2,
-      mode: 'strict'
     },
-    toMatchSnapshot: { 
-      threshold: 0.2 
+    toMatchSnapshot: {
+      threshold: 0.2,
     },
   },
 

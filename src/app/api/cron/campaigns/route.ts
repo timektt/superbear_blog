@@ -183,9 +183,9 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
     const weekStart = new Date(now);
     weekStart.setDate(now.getDate() - 7);
 
-    const existingDigest = await prisma.emailCampaign.findFirst({
+    const existingDigest = await prisma.newsletterCampaign.findFirst({
       where: {
-        name: {
+        title: {
           contains: 'Weekly Digest',
         },
         createdAt: {
@@ -244,7 +244,9 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
         data: {
           name: 'Weekly Digest Template',
           subject: 'Weekly Tech Digest - {{week_date}}',
-          content: generateWeeklyDigestTemplate(),
+          htmlContent: generateWeeklyDigestTemplate(),
+          category: 'NEWSLETTER',
+          createdBy: 'system',
           variables: {
             week_date: 'Week of {{date}}',
             articles: '{{articles}}',
@@ -259,11 +261,11 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
     const scheduledAt = new Date(now);
     scheduledAt.setHours(10, 0, 0, 0); // Schedule for 10 AM same day
 
-    const campaign = await prisma.emailCampaign.create({
+    const campaign = await prisma.newsletterCampaign.create({
       data: {
-        name: digestName,
+        title: digestName,
         templateId: template.id,
-        status: 'scheduled',
+        status: 'SCHEDULED',
         scheduledAt,
         metadata: {
           type: 'weekly_digest',
@@ -285,7 +287,7 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
 
     return {
       campaignId: campaign.id,
-      name: campaign.name,
+      name: campaign.title,
       status: 'scheduled',
       type: 'weekly_digest',
       scheduledAt: campaign.scheduledAt,

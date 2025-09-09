@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(total / limit);
 
     const response: PodcastListResponse = {
-      podcasts: podcasts.map((podcast) => ({
+      podcasts: podcasts.map((podcast: any) => ({
         id: podcast.id,
         title: podcast.title,
         slug: podcast.slug,
@@ -132,8 +132,8 @@ export async function GET(request: NextRequest) {
         totalPages,
       },
       filters: {
-        category,
-        author,
+        category: category || undefined,
+        author: author || undefined,
       },
     };
 

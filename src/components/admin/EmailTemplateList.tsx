@@ -44,7 +44,7 @@ export default function EmailTemplateList({
   });
 
   const router = useRouter();
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   // Fetch templates
   const fetchTemplates = async () => {

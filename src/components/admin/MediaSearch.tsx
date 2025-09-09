@@ -18,7 +18,7 @@ import {
   SortDescIcon,
   RefreshCwIcon
 } from 'lucide-react'
-import { DateRange } from 'react-day-picker'
+import { DateRange } from '@/components/ui/date-range-picker'
 
 interface MediaSearchFilters {
   search: string
@@ -410,7 +410,7 @@ export function MediaSearch({
               {filters.search && (
                 <div className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                   <SearchIcon className="w-3 h-3 mr-1" />
-                  Search: "{filters.search}"
+                  Search: "{filters.search}&quot;
                   <button
                     onClick={() => handleSearchChange('')}
                     className="ml-1 hover:bg-blue-200 rounded-full p-0.5"

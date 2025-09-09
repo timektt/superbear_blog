@@ -1,6 +1,10 @@
 import * as React from 'react';
 import { Calendar } from 'lucide-react';
-import { DateRange } from 'react-day-picker';
+// Fallback DateRange type since react-day-picker is not installed
+export interface DateRange {
+  from?: Date;
+  to?: Date;
+}
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 

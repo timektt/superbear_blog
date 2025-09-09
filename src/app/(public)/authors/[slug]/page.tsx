@@ -13,7 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!prisma) return { title: 'Author Not Found' };
 
   try {
-    const author = await prisma.user.findUnique({
+    const author = await prisma.author.findUnique({
       where: { id: resolvedParams.slug }, // Using ID as slug for now
     });
 
@@ -34,7 +34,7 @@ export default async function AuthorPage({ params }: Props) {
   if (!prisma) notFound();
 
   try {
-    const author = await prisma.user.findUnique({
+    const author = await prisma.author.findUnique({
       where: { id: resolvedParams.slug },
     });
 

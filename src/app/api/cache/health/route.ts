@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       } catch (error) {
         health.redis.error =
           error instanceof Error ? error.message : 'Unknown error';
-        logger.error('Redis health check failed:', error);
+        logger.error('Redis health check failed:', error as Error);
       }
     } else {
       health.redis.error = 'Redis not configured';
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    logger.error('Cache health check error:', error);
+    logger.error('Cache health check error:', error as Error);
 
     return NextResponse.json(
       {

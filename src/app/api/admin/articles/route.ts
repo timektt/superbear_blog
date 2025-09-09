@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
         select: { id: true },
       });
 
-      const existingTagIds = existingTags.map((tag) => tag.id);
+      const existingTagIds = existingTags.map((tag: any) => tag.id);
       const missingTagIds = validatedData.tagIds.filter(
         (id) => !existingTagIds.includes(id)
       );

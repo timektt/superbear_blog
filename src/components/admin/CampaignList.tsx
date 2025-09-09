@@ -30,7 +30,7 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sendingCampaign, setSendingCampaign] = useState<string | null>(null);
-  const { showToast } = useToast();
+  const { toast } = useToast();
 
   const fetchCampaigns = async (page = 1) => {
     try {
