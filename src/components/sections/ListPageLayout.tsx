@@ -83,7 +83,10 @@ export default function ListPageLayout({
               {/* Articles List - Left 8 cols */}
               <div className="lg:col-span-8">
                 <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm border border-gray-200 dark:border-gray-700">
-                  <LatestList articles={items} />
+                  <LatestList articles={items.filter(item => item.imageUrl).map(item => ({
+                    ...item,
+                    imageUrl: item.imageUrl!
+                  }))} />
                 </div>
 
                 {/* Pagination */}

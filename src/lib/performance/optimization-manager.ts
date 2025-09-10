@@ -31,7 +31,7 @@ export interface OptimizationReport {
 export class OptimizationManager {
   private config: OptimizationConfig;
   private performanceMonitor?: PerformanceMonitor;
-  private accessibilityResults: any[] = [];
+  public accessibilityResults: any[] = [];
   private isInitialized = false;
 
   constructor(config: Partial<OptimizationConfig> = {}) {

@@ -434,7 +434,7 @@ export async function invalidateArticleCache(articleId?: string): Promise<void> 
     
     logger.info('Article cache invalidated successfully');
   } catch (error) {
-    logger.error('Failed to invalidate article cache:', error as unknown);
+    logger.error('Failed to invalidate article cache:', error instanceof Error ? error : new Error(String(error)));
   }
 }
 

@@ -287,7 +287,7 @@ export class MediaSecurityManager {
       const csrfToken = request.headers.get('x-csrf-token')
       
       if (!csrfToken) {
-        logger.warn('Missing CSRF token for media operation:', operation as unknown)
+        logger.warn('Missing CSRF token for media operation:', { operation })
         return false
       }
       

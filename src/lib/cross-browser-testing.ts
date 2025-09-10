@@ -537,9 +537,10 @@ export class PerformanceTester {
           let clsValue = 0;
           const clsObserver = new PerformanceObserver((list) => {
             const entries = list.getEntries();
-            entries.forEach((entry: unknown) => {
-              if (!entry.hadRecentInput) {
-                clsValue += entry.value;
+            entries.forEach((entry) => {
+              const layoutShiftEntry = entry as any;
+              if (!layoutShiftEntry.hadRecentInput) {
+                clsValue += layoutShiftEntry.value;
               }
             });
             vitals.cls = clsValue;

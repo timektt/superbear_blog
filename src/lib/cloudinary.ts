@@ -393,7 +393,7 @@ export async function getFolderStructure(rootFolder: string = 'superbear_blog'):
 }> {
   try {
     const result = await cloudinary.api.sub_folders(rootFolder);
-    const folders = result.folders.map((f: unknown) => f.name);
+    const folders = result.folders.map((f: { name: string }) => f.name);
     
     const folderStats: Record<string, { count: number; totalBytes: number }> = {};
     let totalImages = 0;
@@ -409,7 +409,7 @@ export async function getFolderStructure(rootFolder: string = 'superbear_blog'):
         
         const count = folderResult.resources.length;
         const totalBytes = folderResult.resources.reduce(
-          (sum: number, resource: unknown) => sum + (resource.bytes || 0), 
+          (sum: number, resource: { bytes?: number }) => sum + (resource.bytes || 0), 
           0
         );
         

@@ -8,7 +8,7 @@ import { logger } from '@/lib/logger';
 // GET /api/admin/campaigns/[id] - Get campaign details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -17,8 +17,9 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const resolvedParams = await params;
     const campaign = await prisma.newsletterCampaign.findUnique({
-      where: { id: params.id },
+      where: { id: resolvedParams.id },
       include: {
         template: {
           select: { name: true, category: true },
@@ -34,15 +35,16 @@ export async function GET(
     }
 
     // Get campaign statistics
-    const stats = await getCampaignStats(params.id);
+    const stats = await getCampaignStats(resolvedParams.id);
 
     return NextResponse.json({
       campaign,
       stats,
     });
   } catch (error) {
+    const resolvedParams = await params;
     logger.error('Failed to fetch campaign', error as Error, {
-      campaignId: params.id,
+      campaignId: resolvedParams.id,
     });
     return NextResponse.json(
       { error: 'Failed to fetch campaign' },
@@ -54,7 +56,7 @@ export async function GET(
 // DELETE /api/admin/campaigns/[id] - Delete campaign
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -63,15 +65,17 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    await deleteCampaign(params.id);
+    const resolvedParams = await params;
+    await deleteCampaign(resolvedParams.id);
 
     return NextResponse.json({
       success: true,
       message: 'Campaign deleted successfully',
     });
   } catch (error) {
+    const resolvedParams = await params;
     logger.error('Failed to delete campaign', error as Error, {
-      campaignId: params.id,
+      campaignId: resolvedParams.id,
     });
 
     if (error instanceof Error && error.message === 'Campaign not found') {

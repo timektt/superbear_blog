@@ -264,10 +264,11 @@ async function processWeeklyDigest(now: Date): Promise<any | null> {
     const campaign = await prisma.newsletterCampaign.create({
       data: {
         title: digestName,
+        subject: digestName,
         templateId: template.id,
         status: 'SCHEDULED',
         scheduledAt,
-        metadata: {
+        content: {
           type: 'weekly_digest',
           articles: topArticles.map((article) => ({
             id: article.id,

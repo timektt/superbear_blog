@@ -83,7 +83,8 @@ export function EditorToolbar({
   ];
 
   const setCodeBlock = (language: string) => {
-    editor.chain().focus().toggleCodeBlock({ language }).run();
+    // Toggle code block without language parameter since it's not supported
+    editor.chain().focus().toggleCodeBlock().run();
     setShowLanguageDropdown(false);
   };
   const ToolbarButton = ({

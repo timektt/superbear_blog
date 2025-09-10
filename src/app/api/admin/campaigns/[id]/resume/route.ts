@@ -8,7 +8,7 @@ export const runtime = 'nodejs';
 // POST /api/admin/campaigns/[id]/resume - Resume campaign
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authentication
@@ -17,7 +17,8 @@ export async function POST(
       return NextResponse.json({ error: authResult.error }, { status: 401 });
     }
 
-    const campaignId = params.id;
+    const resolvedParams = await params;
+    const campaignId = resolvedParams.id;
 
     const result = await resumeCampaign(campaignId, authResult.user?.email);
 

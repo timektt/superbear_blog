@@ -258,7 +258,14 @@ export default function CampaignAnalyticsPage() {
             </SelectContent>
           </Select>
 
-          <DatePickerWithRange date={dateRange} onDateChange={setDateRange} />
+          <DatePickerWithRange 
+            date={dateRange} 
+            onDateChange={(date) => {
+              if (date?.from && date?.to) {
+                setDateRange({ from: date.from, to: date.to });
+              }
+            }} 
+          />
 
           <select
             value={timeRange}

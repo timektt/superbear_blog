@@ -240,12 +240,13 @@ async function getDeliveryStats(
     let failed = 0;
 
     stats.forEach((stat: unknown) => {
-      const count = stat._count.status;
+      const statData = stat as any;
+      const count = statData._count.status;
       total += count;
 
-      if (['DELIVERED', 'OPENED', 'CLICKED'].includes(stat.status)) {
+      if (['DELIVERED', 'OPENED', 'CLICKED'].includes(statData.status)) {
         successful += count;
-      } else if (['FAILED', 'BOUNCED', 'COMPLAINED'].includes(stat.status)) {
+      } else if (['FAILED', 'BOUNCED', 'COMPLAINED'].includes(statData.status)) {
         failed += count;
       }
     });

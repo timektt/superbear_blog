@@ -14,6 +14,12 @@ import {
 } from '@/lib/performance/core-web-vitals';
 import { cn } from '@/lib/utils';
 
+interface PerformanceMetrics {
+  ariaAttributeCount?: number;
+  focusableElementCount?: number;
+  performanceImpact?: 'low' | 'medium' | 'high';
+}
+
 interface AccessibilityPerformancePanelProps {
   enabled?: boolean;
   showDebugInfo?: boolean;
@@ -191,7 +197,7 @@ export default function AccessibilityPerformancePanel({
 
       {/* Content */}
       <div className="p-3 overflow-y-auto max-h-80">
-        {activeTab === 'performance' && (
+        {activeTab === 'performance' && performanceMetrics && (
           <PerformanceTab 
             webVitals={webVitals} 
             performanceMetrics={performanceMetrics}
@@ -228,7 +234,7 @@ function PerformanceTab({
   performanceMetrics 
 }: { 
   webVitals: WebVitalMetric[];
-  performanceMetrics: unknown;
+  performanceMetrics: PerformanceMetrics;
 }) {
   return (
     <div className="space-y-4">
