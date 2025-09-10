@@ -210,7 +210,7 @@ export function withPerformanceMonitoring<T extends PrismaClient>(
   const originalDelete = prisma.article.delete;
 
   // Wrap article operations
-  prisma.article.findMany = async function (args?: any) {
+  (prisma.article.findMany as any) = async function (this: any, args?: any) {
     const startTime = Date.now();
     try {
       const result = await originalFindMany.call(this, args);

@@ -341,7 +341,7 @@ export function validateEnvironment(): { valid: boolean; errors?: string[] } {
       return {
         valid: false,
         errors: (error as any).errors.map(
-          (err: unknown) => `${err.path.join('.')}: ${err.message}`
+          (err: any) => `${err.path.join('.')}: ${err.message}`
         ),
       };
     }

@@ -224,7 +224,7 @@ export function validateEnvironment(): {
 
     if (!result.success) {
       const errors = (result.error as any).errors.map(
-        (err: unknown) => `${err.path.join('.')}: ${err.message}`
+        (err: any) => `${err.path.join('.')}: ${err.message}`
       );
 
       return {

@@ -66,7 +66,7 @@ class CircuitBreaker {
       return result;
     } catch (error) {
       this.onFailure();
-      if (fallback && this.state === 'open') {
+      if (fallback && (this.state as CircuitState) === 'open') {
         logger.debug('Operation failed, circuit open, using fallback');
         return fallback();
       }

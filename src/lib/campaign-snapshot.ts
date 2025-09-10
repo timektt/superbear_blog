@@ -108,7 +108,7 @@ export async function createCampaignSnapshot(
     htmlContent: compiledEmail.html,
     textContent: compiledEmail.text,
     preheader: compiledEmail.preheader,
-    templateId: campaign.templateId,
+    templateId: campaign.templateId ?? undefined,
     templateVersion,
     articleIds,
     contentHash,

@@ -173,7 +173,7 @@ export function animate(
     // Apply final state immediately
     const finalFrame = keyframes[keyframes.length - 1];
     if (finalFrame && typeof finalFrame === 'object') {
-      Object.assign(element.style, finalFrame);
+      Object.assign((element as HTMLElement).style, finalFrame);
     }
     return null;
   }
@@ -189,7 +189,7 @@ export function animate(
     delay: options.delay || 0,
     easing: options.easing || easings.smooth,
     fill: options.fill || 'forwards',
-    iterations: options.iterations || 1,
+    iterations: typeof options.iterations === 'number' ? options.iterations : (options.iterations === 'infinite' ? Infinity : 1),
   };
   
   try {
@@ -215,7 +215,7 @@ export function applyAnimation(
   }
   
   const options = { ...animation.options, ...customOptions };
-  return animate(element, animation.keyframes, options);
+  return animate(element, [...animation.keyframes], options);
 }
 
 /**

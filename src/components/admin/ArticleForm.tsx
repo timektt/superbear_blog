@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Editor } from '@/components/editor/Editor';
+import { Editor } from '@/components/editor';
 import { useEditorState } from '@/components/editor/useEditor';
 import ImageUploader from '@/components/admin/ImageUploader';
 import { ToastContainer } from '@/components/ui/ToastContainer';

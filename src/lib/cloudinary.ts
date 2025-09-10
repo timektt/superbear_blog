@@ -133,7 +133,7 @@ export async function uploadImage(
       folder: result.folder,
       original_filename: result.original_filename,
       tags: result.tags,
-      context: result.context,
+      context: (result.context || {}) as Record<string, string>,
     };
   } catch (error) {
     console.error('Cloudinary upload error:', error);
@@ -302,7 +302,10 @@ export async function updateImageMetadata(
       updateOptions.context = context;
     }
 
-    await cloudinary.uploader.add_context(context || {}, [publicId]);
+    if (context) {
+      const contextString = Object.entries(context).map(([key, value]) => `${key}=${value}`).join('|');
+      await cloudinary.uploader.add_context(contextString, [publicId]);
+    }
     
     if (tags) {
       await cloudinary.uploader.add_tag(tags.join(','), [publicId]);
@@ -390,7 +393,7 @@ export async function getFolderStructure(rootFolder: string = 'superbear_blog'):
 }> {
   try {
     const result = await cloudinary.api.sub_folders(rootFolder);
-    const folders = result.folders.map((f: any) => f.name);
+    const folders = result.folders.map((f: { name: string }) => f.name);
     
     const folderStats: Record<string, { count: number; totalBytes: number }> = {};
     let totalImages = 0;
@@ -406,7 +409,7 @@ export async function getFolderStructure(rootFolder: string = 'superbear_blog'):
         
         const count = folderResult.resources.length;
         const totalBytes = folderResult.resources.reduce(
-          (sum: number, resource: any) => sum + (resource.bytes || 0), 
+          (sum: number, resource: { bytes?: number }) => sum + (resource.bytes || 0), 
           0
         );
         

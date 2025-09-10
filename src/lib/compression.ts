@@ -163,7 +163,7 @@ export function withCompression(
       newHeaders.set('x-compressed-size', compressedBody.length.toString());
     }
 
-    return new NextResponse(compressedBody, {
+    return new NextResponse(compressedBody as BodyInit, {
       status: response.status,
       statusText: response.statusText,
       headers: newHeaders,

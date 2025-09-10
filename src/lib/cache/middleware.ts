@@ -39,7 +39,10 @@ export class CacheMiddleware {
           break;
       }
     } catch (error) {
-      logger.error('Cache middleware error:', error);
+      logger.error(
+        'Cache middleware error:',
+        error instanceof Error ? error : undefined
+      );
       // Don't fail the request if cache invalidation fails
     }
   }
@@ -55,7 +58,10 @@ export class CacheMiddleware {
     try {
       await CacheHooks.afterTaxonomyChange();
     } catch (error) {
-      logger.error('Cache taxonomy middleware error:', error);
+      logger.error(
+        'Cache taxonomy middleware error:',
+        error instanceof Error ? error : undefined
+      );
       // Don't fail the request if cache invalidation fails
     }
   }

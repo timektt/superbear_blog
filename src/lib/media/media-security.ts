@@ -287,7 +287,7 @@ export class MediaSecurityManager {
       const csrfToken = request.headers.get('x-csrf-token')
       
       if (!csrfToken) {
-        logger.warn('Missing CSRF token for media operation:', operation as any)
+        logger.warn('Missing CSRF token for media operation:', { operation })
         return false
       }
       
@@ -296,7 +296,7 @@ export class MediaSecurityManager {
       return this.isValidCSRFToken(csrfToken)
       
     } catch (error) {
-      logger.error('CSRF validation failed:', error as unknown)
+      logger.error('CSRF validation failed:', error instanceof Error ? error : undefined)
       return false
     }
   }

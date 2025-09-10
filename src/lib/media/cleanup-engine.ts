@@ -218,8 +218,7 @@ export class CleanupEngine {
       const articlesWithImage = await this.prisma.article.findMany({
         where: {
           OR: [
-            { content: { contains: publicId } as any },
-            { image: publicId }
+            { content: { contains: publicId } as any }
           ]
         },
         select: { id: true, title: true }
@@ -233,8 +232,7 @@ export class CleanupEngine {
       const newslettersWithImage = await this.prisma.newsletterIssue.findMany({
         where: {
           OR: [
-            { content: { contains: publicId } as any },
-            { image: publicId }
+            { content: { contains: publicId } as any }
           ]
         },
         select: { id: true, title: true }

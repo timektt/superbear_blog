@@ -30,7 +30,7 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [sendingCampaign, setSendingCampaign] = useState<string | null>(null);
-  const { toast } = useToast();
+  const { success, error: showError } = useToast();
 
   const fetchCampaigns = async (page = 1) => {
     try {
@@ -49,7 +49,7 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
       setCurrentPage(page);
     } catch (error) {
       console.error('Error fetching campaigns:', error);
-      showToast('Failed to load campaigns', 'error');
+      showError('Failed to load campaigns');
     } finally {
       setLoading(false);
     }
@@ -85,13 +85,12 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
         throw new Error(error.error || 'Failed to send campaign');
       }
 
-      showToast('Campaign sent successfully!', 'success');
+      success('Campaign sent successfully!');
       fetchCampaigns(currentPage);
     } catch (error) {
       console.error('Error sending campaign:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to send campaign',
-        'error'
+      showError(
+        error instanceof Error ? error.message : 'Failed to send campaign'
       );
     } finally {
       setSendingCampaign(null);
@@ -117,13 +116,12 @@ export default function CampaignList({ onRefresh }: CampaignListProps) {
         throw new Error(error.error || 'Failed to delete campaign');
       }
 
-      showToast('Campaign deleted successfully!', 'success');
+      success('Campaign deleted successfully!');
       fetchCampaigns(currentPage);
     } catch (error) {
       console.error('Error deleting campaign:', error);
-      showToast(
-        error instanceof Error ? error.message : 'Failed to delete campaign',
-        'error'
+      showError(
+        error instanceof Error ? error.message : 'Failed to delete campaign'
       );
     }
   };

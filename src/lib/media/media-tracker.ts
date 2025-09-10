@@ -275,16 +275,19 @@ export class MediaTracker {
         //   where: { publicId },
         // });
 
-        const mediaRecord = null; // Placeholder
+        // TODO: Implement media record lookup
+        // const mediaRecord = await this.prisma.media.findUnique({
+        //   where: { publicId },
+        // });
         
-        if (mediaRecord) {
-          await this.createReference(mediaRecord.id, {
-            contentType,
-            contentId,
-            referenceContext,
-          });
-          addedCount++;
-        }
+        // if (mediaRecord) {
+        //   await this.createReference(mediaRecord.id, {
+        //     contentType,
+        //     contentId,
+        //     referenceContext,
+        //   });
+        //   addedCount++;
+        // }
       }
 
       return {
